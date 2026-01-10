@@ -30,11 +30,16 @@ jobs:
 
       - name: Create Artifact Registry repository
         run: |
-          gcloud artifacts repositories create $REPOSITORY \
-            --repository-format=docker \
-            --location=$REGION \
-            --description="Docker repository for Cost Tracker" \
-            --project=$PROJECT_ID || echo "Repository already exists"
+          if ! gcloud artifacts repositories describe $REPOSITORY --location=$REGION --project=$PROJECT_ID &>/dev/null; then
+            echo "Creating Artifact Registry repository..."
+            gcloud artifacts repositories create $REPOSITORY \
+              --repository-format=docker \
+              --location=$REGION \
+              --description="Docker repository for Cost Tracker" \
+              --project=$PROJECT_ID
+          else
+            echo "Repository already exists"
+          fi
 
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker $REGION-docker.pkg.dev
