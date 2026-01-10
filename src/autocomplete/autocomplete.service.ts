@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { FirebaseService } from '../firebase/firebase.service';
 import * as admin from 'firebase-admin';
 
-interface SuggestionItem {
+export interface SuggestionItem {
   value: string;
   count: number;
 }
