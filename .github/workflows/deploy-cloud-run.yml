@@ -9,8 +9,8 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   SERVICE_NAME: cost-tracker
   REGION: europe-west1
-  REPOSITORY: cost-tracker
-  IMAGE: europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cost-tracker/cost-tracker
+  REPOSITORY: costtracker
+  IMAGE: europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/costtracker/cost-tracker
 
 jobs:
   deploy:
