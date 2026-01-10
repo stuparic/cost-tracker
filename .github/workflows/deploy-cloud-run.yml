@@ -61,6 +61,12 @@ jobs:
           gcloud secrets versions add firebase-service-account --data-file=/tmp/service-account.json
           rm /tmp/service-account.json
 
+      - name: Grant secret access to Cloud Run service account
+        run: |
+          gcloud secrets add-iam-policy-binding firebase-service-account \
+            --member=serviceAccount:${PROJECT_ID}-compute@developer.gserviceaccount.com \
+            --role=roles/secretmanager.secretAccessor
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy $SERVICE_NAME \
@@ -77,16 +83,6 @@ jobs:
             --memory 512Mi \
             --cpu 1 \
             --timeout 300
-
-      - name: Grant Cloud Run access to secret
-        run: |
-          SERVICE_ACCOUNT=$(gcloud run services describe $SERVICE_NAME --region $REGION --format='value(spec.template.spec.serviceAccountName)')
-          if [ -z "$SERVICE_ACCOUNT" ]; then
-            SERVICE_ACCOUNT="${PROJECT_ID}@appspot.gserviceaccount.com"
-          fi
-          gcloud secrets add-iam-policy-binding firebase-service-account \
-            --member=serviceAccount:${SERVICE_ACCOUNT} \
-            --role=roles/secretmanager.secretAccessor || true
 
       - name: Get service URL
         run: |
