@@ -39,4 +39,4 @@ RUN ls -la /app && ls -la /app/dist && cat /app/dist/main.js | head -5
 EXPOSE 8080
 
 # Start the application
-CMD ["node", "dist/main.js"]
+CMD ["node", "/app/dist/main.js"]
