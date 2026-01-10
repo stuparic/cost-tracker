@@ -1,258 +1,279 @@
-# Deployment to Google Cloud Run
+# Quick Deployment Guide
 
-This guide will help you deploy your Cost Tracker API to Google Cloud Run for **FREE** with automatic deployments via GitHub Actions.
+This guide helps you deploy the Cost Tracker API to Google Cloud Run with automatic CI/CD.
 
-## 🔒 Zero-Cost Protection
-
-**This deployment is configured to NEVER charge you:**
-- ✅ **max-instances: 1** - Only 1 instance can run (prevents scaling costs)
-- ✅ **min-instances: 0** - Scales to zero when not in use (no idle costs)
-- ✅ **No billing account required** - Works with Google Cloud free tier without credit card
-
-**Result: Impossible to get charged. Service simply stops if you exceed free tier.**
+**For detailed architecture and how everything works, see [ARCHITECTURE.md](./ARCHITECTURE.md)**
 
 ---
 
-## Prerequisites
+## 🎯 What You'll Get
 
-- Google Cloud account (free tier - **no credit card needed**)
-- GitHub repository
-- Firebase project already set up (✅ you have this)
-
-## Free Tier Limits
-
-**With max-instances=1 and no billing:**
-- Sufficient for pet projects and testing
-- Handles moderate traffic
-- Automatically stops if limits reached
-- **Zero risk of charges**
+- ✅ Automatic deployments on `git push`
+- ✅ **Zero cost** - Free tier with strict limits (max 1 instance)
+- ✅ HTTPS endpoint with custom domain support
+- ✅ Secrets managed securely (Google Secret Manager)
+- ✅ Production-ready Docker container
+- ✅ Live in ~5 minutes per deployment
 
 ---
 
-## Step 1: Set Up Google Cloud Project
+## 📋 Prerequisites
 
-1. **Go to Google Cloud Console**: https://console.cloud.google.com/
+Before starting, you need:
 
-2. **Create a new project or use existing**:
-   - Click on the project dropdown at the top
-   - Click "New Project"
-   - Name it: `cost-tracker` (or any name you prefer)
-   - Note: You can use the same project as your Firebase project
-
-3. **Enable Required APIs**:
-   - Go to: https://console.cloud.google.com/apis/library
-   - Enable these APIs:
-     - **Cloud Run API**
-     - **Cloud Build API**
-     - **Container Registry API**
-     - **Secret Manager API**
-
-4. **Get your Project ID**:
-   - Go to: https://console.cloud.google.com/home/dashboard
-   - Copy your **Project ID** (not the name, the ID)
-   - Example: `moneyflow-832f4`
+1. **Google Cloud Account** (free tier, no credit card required)
+2. **GitHub Repository** (this repo)
+3. **Firebase Project** with Firestore enabled
+4. **Firebase Service Account Key** (`serviceAccountKey.json`)
 
 ---
 
-## Step 2: Create Service Account for GitHub Actions
+## 🚀 Deployment Steps
 
-1. **Go to IAM & Admin > Service Accounts**:
-   - https://console.cloud.google.com/iam-admin/serviceaccounts
+### Step 1: Create Google Cloud Project
 
-2. **Create Service Account**:
-   - Click "Create Service Account"
-   - Name: `github-actions-deployer`
-   - Description: "Service account for GitHub Actions to deploy to Cloud Run"
-   - Click "Create and Continue"
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. **Note your Project ID** (e.g., `moneyflow-832f4`)
 
-3. **Grant Roles** (add these roles one by one):
+### Step 2: Enable Required APIs
+
+Go to [APIs Library](https://console.cloud.google.com/apis/library) and enable:
+
+- ✅ Cloud Run API
+- ✅ Cloud Build API
+- ✅ Artifact Registry API
+- ✅ Secret Manager API
+
+### Step 3: Create Service Account
+
+1. Go to [IAM & Admin > Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts)
+2. Click **"Create Service Account"**
+3. Name: `github-actions-deployer`
+4. Grant these roles:
    - `Cloud Run Admin`
    - `Service Account User`
    - `Storage Admin`
    - `Secret Manager Admin`
-   - Click "Continue" then "Done"
+   - `Artifact Registry Administrator`
+5. Click **"Keys" tab > "Add Key" > "Create new key" > "JSON"**
+6. **Save the downloaded JSON file** (you'll need it for GitHub)
 
-4. **Create JSON Key**:
-   - Click on the service account you just created
-   - Go to "Keys" tab
-   - Click "Add Key" > "Create new key"
-   - Choose "JSON"
-   - Click "Create" - a JSON file will download
-   - **Keep this file secure!** You'll use it in the next step
+### Step 4: Create Artifact Registry Repository
 
----
-
-## Step 3: Configure GitHub Secrets
-
-1. **Go to your GitHub repository**: https://github.com/stuparic/cost-tracker
-
-2. **Navigate to Settings > Secrets and variables > Actions**
-
-3. **Add the following Repository Secrets** (click "New repository secret"):
-
-   **a) `GCP_PROJECT_ID`**
-   - Value: Your Google Cloud Project ID (e.g., `moneyflow-832f4`)
-
-   **b) `GCP_SA_KEY`**
-   - Value: Entire contents of the JSON key file you downloaded in Step 2
-   - Open the JSON file in a text editor, copy ALL the content
-   - Paste it as the secret value
-
-   **c) `FIREBASE_PROJECT_ID`**
-   - Value: Your Firebase project ID (e.g., `moneyflow-832f4`)
-
-   **d) `FIREBASE_SERVICE_ACCOUNT`**
-   - Value: Contents of your `serviceAccountKey.json` file
-   - This is the same file currently in your project root
-   - Open it in a text editor, copy ALL the content
-   - Paste it as the secret value
-
----
-
-## Step 4: Update Firebase Service Configuration
-
-Your app currently uses a local file path for Firebase credentials. For Cloud Run, we'll use Google Secret Manager.
-
-**Update `src/config/firebase.config.ts`**:
-
-```typescript
-import { registerAs } from '@nestjs/config';
-
-export default registerAs('firebase', () => ({
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  // In production, Cloud Run will mount the secret as a file
-  // In development, use the local file
-  credentialsPath:
-    process.env.NODE_ENV === 'production'
-      ? '/app/serviceAccountKey.json'
-      : process.env.GOOGLE_APPLICATION_CREDENTIALS || './serviceAccountKey.json',
-}));
-```
-
----
-
-## Step 5: Deploy!
-
-Once you've completed steps 1-4:
-
-1. **Commit and push your changes**:
-   ```bash
-   git add .
-   git commit -m "Add Cloud Run deployment configuration"
-   git push origin master
-   ```
-
-2. **Watch the deployment**:
-   - Go to: https://github.com/stuparic/cost-tracker/actions
-   - You'll see the "Deploy to Cloud Run" workflow running
-   - It takes about 5-10 minutes for the first deployment
-
-3. **Get your deployed URL**:
-   - When the workflow completes, check the logs
-   - Look for the line: "Service deployed to: https://cost-tracker-xxx.run.app"
-   - Copy this URL!
-
-4. **Test your API**:
-   - Visit: `https://your-service-url.run.app/api` for Swagger UI
-   - Try creating an expense via the API
-
----
-
-## Step 6: Verify Everything Works
-
-1. **Check Cloud Run Console**:
-   - Go to: https://console.cloud.google.com/run
-   - You should see your `cost-tracker` service
-   - Click on it to see metrics, logs, etc.
-
-2. **View Logs**:
-   - In the Cloud Run console, click on "Logs"
-   - You'll see all your application logs, including Firebase initialization
-
-3. **Test the API**:
-   ```bash
-   # Replace with your actual URL
-   curl https://cost-tracker-xxx.run.app/expenses
-   ```
-
----
-
-## Automatic Deployments
-
-Every time you push to the `master` branch, GitHub Actions will automatically:
-
-1. Build a new Docker image
-2. Push it to Google Container Registry
-3. Deploy it to Cloud Run
-4. Your app will be live in ~5 minutes
-
----
-
-## Monitoring and Costs
-
-**View your usage**:
-- Go to: https://console.cloud.google.com/run
-- Click on your service
-- See metrics: requests, latency, memory usage
-
-**Stay within free tier**:
-- Cloud Run scales to zero when not in use (no cost)
-- 2 million requests/month is very generous
-- If you exceed, you'll be notified before charges
-
----
-
-## Troubleshooting
-
-### Deployment fails with authentication error
-- Double-check your `GCP_SA_KEY` secret in GitHub
-- Make sure the service account has all required roles
-
-### Firebase connection fails
-- Verify `FIREBASE_SERVICE_ACCOUNT` secret is correctly set
-- Check Cloud Run logs for error messages
-
-### Service URL not working
-- Wait a few minutes for DNS propagation
-- Check if the service is set to "allow unauthenticated"
-
-### View detailed logs
 ```bash
-gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=cost-tracker" --limit 50 --format json
+gcloud artifacts repositories create costtracker \
+  --repository-format=docker \
+  --location=europe-west1 \
+  --description="Docker repository for Cost Tracker" \
+  --project=YOUR_PROJECT_ID
+```
+
+Or create manually in the [Artifact Registry Console](https://console.cloud.google.com/artifacts).
+
+### Step 5: Configure GitHub Secrets
+
+1. Go to your GitHub repo: **Settings > Secrets and variables > Actions**
+2. Click **"New repository secret"** and add:
+
+| Secret Name | Value | Where to Find |
+|-------------|-------|---------------|
+| `GCP_PROJECT_ID` | Your project ID | Google Cloud Console |
+| `GCP_SA_KEY` | Service account JSON | File from Step 3 (entire contents) |
+| `FIREBASE_PROJECT_ID` | Firebase project ID | Firebase Console |
+| `FIREBASE_SERVICE_ACCOUNT` | Firebase credentials | `serviceAccountKey.json` (entire contents) |
+
+**Example for `GCP_SA_KEY`:**
+```json
+{
+  "type": "service_account",
+  "project_id": "moneyflow-832f4",
+  "private_key_id": "...",
+  "private_key": "...",
+  ...
+}
+```
+
+### Step 6: Deploy!
+
+```bash
+git add .
+git commit -m "Initial deployment"
+git push origin master
+```
+
+**That's it!** GitHub Actions will:
+1. Build Docker image
+2. Push to Artifact Registry
+3. Deploy to Cloud Run
+4. Take ~5 minutes
+
+Watch deployment: https://github.com/YOUR_USERNAME/cost-tracker/actions
+
+---
+
+## 🌐 Access Your API
+
+After deployment completes:
+
+**Service URL:**
+```
+https://cost-tracker-xxx.run.app
+```
+
+**Swagger Documentation:**
+```
+https://cost-tracker-xxx.run.app/api
+```
+
+Find your URL in:
+- GitHub Actions logs (last step)
+- [Cloud Run Console](https://console.cloud.google.com/run)
+
+---
+
+## 🔧 Common Tasks
+
+### View Logs
+
+```bash
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=cost-tracker" \
+  --limit 50 \
+  --project=YOUR_PROJECT_ID
+```
+
+Or in [Cloud Run Console](https://console.cloud.google.com/run) > Select service > Logs
+
+### Update Environment Variable
+
+```bash
+gcloud run services update cost-tracker \
+  --region europe-west1 \
+  --set-env-vars NEW_VAR=value \
+  --project=YOUR_PROJECT_ID
+```
+
+### Redeploy
+
+Just push to master:
+```bash
+git push origin master
+```
+
+### Pause Service (Scale to Zero)
+
+```bash
+gcloud run services update cost-tracker \
+  --region europe-west1 \
+  --max-instances 0 \
+  --project=YOUR_PROJECT_ID
+```
+
+### Resume Service
+
+```bash
+gcloud run services update cost-tracker \
+  --region europe-west1 \
+  --max-instances 1 \
+  --project=YOUR_PROJECT_ID
 ```
 
 ---
 
-## Custom Domain (Optional)
+## ⚠️ Troubleshooting
 
-To use your own domain:
+### Deployment Fails with "Permission Denied"
 
-1. Go to Cloud Run console
-2. Click on your service
-3. Click "Manage Custom Domains"
-4. Follow the instructions to add your domain
+**Issue:** Service account doesn't have required permissions
+
+**Fix:** Re-check roles in Step 3, ensure all 5 roles are added
+
+### "Repository not found" Error
+
+**Issue:** Artifact Registry repository doesn't exist
+
+**Fix:** Run Step 4 to create the repository
+
+### Firebase Connection Fails
+
+**Issue:** `FIREBASE_SERVICE_ACCOUNT` secret is incorrect
+
+**Fix:**
+1. Verify the secret contains the entire JSON file
+2. No extra quotes or formatting
+3. Check in Cloud Run logs for specific error
+
+### Can't Find Service URL
+
+**Issue:** Deployment succeeded but can't access
+
+**Fix:**
+1. Check GitHub Actions logs for URL
+2. Go to [Cloud Run Console](https://console.cloud.google.com/run)
+3. Click on `cost-tracker` service
+4. URL is at the top
 
 ---
 
-## Environment Variables
+## 📚 Next Steps
 
-The following environment variables are automatically set:
+**Learn more about the architecture:**
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - How everything works together
+- [README.md](./README.md) - API usage and examples
 
-- `FIREBASE_PROJECT_ID` - From GitHub secrets
-- `FIXED_EUR_TO_RSD_RATE` - Set to 117.0
-- `NODE_ENV` - Set to production
-- `PORT` - Automatically set by Cloud Run (8080)
+**Customize your deployment:**
+- Change region: Edit `.github/workflows/deploy-cloud-run.yml`
+- Update resources: Change `--memory` and `--cpu` flags
+- Add custom domain: Cloud Run Console > Manage Custom Domains
 
-To add more environment variables, edit `.github/workflows/deploy-cloud-run.yml` in the "Deploy to Cloud Run" step.
+**Monitor your service:**
+- [Cloud Run Console](https://console.cloud.google.com/run) - Service metrics
+- [Logs Explorer](https://console.cloud.google.com/logs) - Application logs
+- [GitHub Actions](https://github.com/YOUR_USERNAME/cost-tracker/actions) - Deployment history
 
 ---
 
-## Support
+## 💰 Cost Guarantee
 
-If you encounter issues:
+**This deployment is configured to NEVER charge you:**
 
-1. Check GitHub Actions logs
-2. Check Cloud Run logs in Google Cloud Console
-3. Verify all secrets are correctly set in GitHub
+```yaml
+--min-instances 0  # Scales to zero when idle
+--max-instances 1  # Only 1 instance maximum
+```
 
-Your app will automatically redeploy on every push to master! 🚀
+**What this means:**
+- Service stops when not in use (0 cost)
+- Cannot scale beyond 1 instance (prevents charges)
+- If you exceed free tier, service simply stops
+- **Impossible to get billed**
+
+**Free Tier Limits:**
+- 2 million requests/month
+- 360,000 GB-seconds/month
+- 180,000 vCPU-seconds/month
+
+---
+
+## 🎉 You're Done!
+
+Your API is now:
+- ✅ Live and accessible
+- ✅ Automatically deployed on push
+- ✅ Cost-protected (free tier)
+- ✅ Documented with Swagger
+- ✅ Production-ready
+
+**Test it:**
+```bash
+curl https://YOUR_SERVICE_URL/health
+```
+
+**Explore the API:**
+```
+https://YOUR_SERVICE_URL/api
+```
+
+---
+
+**Questions?** Check [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed explanations.
