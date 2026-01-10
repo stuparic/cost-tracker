@@ -49,10 +49,14 @@ jobs:
             --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
             --set-env-vars FIXED_EUR_TO_RSD_RATE=117.0 \
             --set-env-vars NODE_ENV=production \
-            --max-instances 10 \
-            --memory 512Mi \
+            --min-instances 0 \
+            --max-instances 3 \
+            --concurrency 80 \
+            --memory 256Mi \
             --cpu 1 \
-            --timeout 300
+            --cpu-throttling \
+            --timeout 60 \
+            --max-scale-down-rate 100
 
       - name: Create Firebase service account secret
         run: |

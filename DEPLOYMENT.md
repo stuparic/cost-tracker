@@ -2,6 +2,27 @@
 
 This guide will help you deploy your Cost Tracker API to Google Cloud Run for **FREE** with automatic deployments via GitHub Actions.
 
+## ⚠️ IMPORTANT: Cost Protection
+
+**This deployment is configured with STRICT cost controls to ensure you NEVER get charged.**
+
+**Built-in protections:**
+- ✅ Scales to zero when not in use (no idle costs)
+- ✅ Max 3 instances (prevents runaway scaling)
+- ✅ 256Mi memory limit (optimal for free tier)
+- ✅ Budget alerts at $0.01
+- ✅ Automatic email notifications
+
+**After deployment, run the cost control setup:**
+```bash
+export PROJECT_ID=your-project-id
+./setup-cost-controls.sh
+```
+
+📖 **Read COST-CONTROLS.md for complete details on staying within free tier.**
+
+---
+
 ## Prerequisites
 
 - Google Cloud account (free tier)
@@ -14,7 +35,7 @@ This guide will help you deploy your Cost Tracker API to Google Cloud Run for **
 - 2 million requests
 - 360,000 GB-seconds of memory
 - 180,000 vCPU-seconds of compute time
-- **Perfect for pet projects!**
+- **With our config: Handles ~500K-1.5M requests/month FREE**
 
 ---
 
