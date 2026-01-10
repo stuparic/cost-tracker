@@ -6,7 +6,7 @@ export default registerAs('firebase', () => ({
   // In development, use the local file
   credentialsPath:
     process.env.NODE_ENV === 'production'
-      ? '/app/serviceAccountKey.json'
+      ? '/secrets/serviceAccountKey.json'
       : process.env.GOOGLE_APPLICATION_CREDENTIALS ||
         './serviceAccountKey.json',
 }));

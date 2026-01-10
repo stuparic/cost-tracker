@@ -21,7 +21,7 @@ RUN ls -la /app && ls -la /app/dist || echo "dist folder not found"
 # Production stage
 FROM node:18-alpine
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
 # Copy package files
 COPY package*.json ./
@@ -33,14 +33,14 @@ RUN npm ci --only=production
 COPY --from=builder /app/dist ./dist
 
 # Copy startup script
-COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+COPY start.sh ./start.sh
+RUN chmod +x ./start.sh
 
 # Debug: Verify dist folder was copied
-RUN ls -la /app && ls -la /app/dist && cat /app/dist/main.js | head -5
+RUN ls -la /usr/src/app && ls -la /usr/src/app/dist && cat /usr/src/app/dist/main.js | head -5
 
 # Expose port (Cloud Run will set PORT env variable)
 EXPOSE 8080
 
 # Start the application
-CMD ["/bin/sh", "/app/start.sh"]
+CMD ["/bin/sh", "/usr/src/app/start.sh"]
