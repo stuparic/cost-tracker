@@ -54,6 +54,13 @@ jobs:
           docker push $IMAGE:${{ github.sha }}
           docker push $IMAGE:latest
 
+      - name: Create Firebase service account secret
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/service-account.json
+          gcloud secrets create firebase-service-account --data-file=/tmp/service-account.json --replication-policy="automatic" || true
+          gcloud secrets versions add firebase-service-account --data-file=/tmp/service-account.json
+          rm /tmp/service-account.json
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy $SERVICE_NAME \
@@ -64,30 +71,22 @@ jobs:
             --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
             --set-env-vars FIXED_EUR_TO_RSD_RATE=117.0 \
             --set-env-vars NODE_ENV=production \
+            --update-secrets=/app/serviceAccountKey.json=firebase-service-account:latest \
             --min-instances 0 \
             --max-instances 1 \
             --memory 512Mi \
             --cpu 1 \
             --timeout 300
 
-      - name: Create Firebase service account secret
-        run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/service-account.json
-          gcloud secrets create firebase-service-account --data-file=/tmp/service-account.json --replication-policy="automatic" || true
-          gcloud secrets versions add firebase-service-account --data-file=/tmp/service-account.json
-          rm /tmp/service-account.json
-
       - name: Grant Cloud Run access to secret
         run: |
+          SERVICE_ACCOUNT=$(gcloud run services describe $SERVICE_NAME --region $REGION --format='value(spec.template.spec.serviceAccountName)')
+          if [ -z "$SERVICE_ACCOUNT" ]; then
+            SERVICE_ACCOUNT="${PROJECT_ID}@appspot.gserviceaccount.com"
+          fi
           gcloud secrets add-iam-policy-binding firebase-service-account \
-            --member=serviceAccount:$(gcloud run services describe $SERVICE_NAME --region $REGION --format='value(spec.template.spec.serviceAccountName)') \
-            --role=roles/secretmanager.secretAccessor
-
-      - name: Update Cloud Run with secret
-        run: |
-          gcloud run services update $SERVICE_NAME \
-            --region $REGION \
-            --update-secrets=/app/serviceAccountKey.json=firebase-service-account:latest
+            --member=serviceAccount:${SERVICE_ACCOUNT} \
+            --role=roles/secretmanager.secretAccessor || true
 
       - name: Get service URL
         run: |
