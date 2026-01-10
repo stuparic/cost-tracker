@@ -15,6 +15,9 @@ COPY . .
 # Build the application
 RUN npm run build
 
+# Debug: List contents to verify build output
+RUN ls -la /app && ls -la /app/dist || echo "dist folder not found"
+
 # Production stage
 FROM node:18-alpine
 
