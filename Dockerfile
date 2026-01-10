@@ -32,6 +32,9 @@ RUN npm ci --only=production
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
+# Debug: Verify dist folder was copied
+RUN ls -la /app && ls -la /app/dist && cat /app/dist/main.js | head -5
+
 # Expose port (Cloud Run will set PORT env variable)
 EXPOSE 8080
 
