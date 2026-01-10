@@ -63,8 +63,9 @@ jobs:
 
       - name: Grant secret access to Cloud Run service account
         run: |
+          PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
           gcloud secrets add-iam-policy-binding firebase-service-account \
-            --member=serviceAccount:${PROJECT_ID}-compute@developer.gserviceaccount.com \
+            --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
             --role=roles/secretmanager.secretAccessor
 
       - name: Deploy to Cloud Run
