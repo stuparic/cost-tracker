@@ -49,7 +49,8 @@ jobs:
             --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
             --set-env-vars FIXED_EUR_TO_RSD_RATE=117.0 \
             --set-env-vars NODE_ENV=production \
-            --max-instances 10 \
+            --min-instances 0 \
+            --max-instances 1 \
             --memory 512Mi \
             --cpu 1 \
             --timeout 300

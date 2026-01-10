@@ -2,19 +2,30 @@
 
 This guide will help you deploy your Cost Tracker API to Google Cloud Run for **FREE** with automatic deployments via GitHub Actions.
 
+## 🔒 Zero-Cost Protection
+
+**This deployment is configured to NEVER charge you:**
+- ✅ **max-instances: 1** - Only 1 instance can run (prevents scaling costs)
+- ✅ **min-instances: 0** - Scales to zero when not in use (no idle costs)
+- ✅ **No billing account required** - Works with Google Cloud free tier without credit card
+
+**Result: Impossible to get charged. Service simply stops if you exceed free tier.**
+
+---
+
 ## Prerequisites
 
-- Google Cloud account (free tier)
+- Google Cloud account (free tier - **no credit card needed**)
 - GitHub repository
 - Firebase project already set up (✅ you have this)
 
-## Cost Overview
+## Free Tier Limits
 
-**Google Cloud Run Free Tier (per month):**
-- 2 million requests
-- 360,000 GB-seconds of memory
-- 180,000 vCPU-seconds of compute time
-- **Perfect for pet projects!**
+**With max-instances=1 and no billing:**
+- Sufficient for pet projects and testing
+- Handles moderate traffic
+- Automatically stops if limits reached
+- **Zero risk of charges**
 
 ---
 
