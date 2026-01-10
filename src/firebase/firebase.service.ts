@@ -15,25 +15,15 @@ export class FirebaseService implements OnModuleInit {
     );
     const projectId = this.configService.get<string>('firebase.projectId');
 
-    console.log('Initializing Firebase...');
-    console.log('Credentials path:', credentialsPath);
-    console.log('Project ID:', projectId);
-    console.log('NODE_ENV:', process.env.NODE_ENV);
-
-    try {
-      if (!admin.apps.length) {
-        admin.initializeApp({
-          credential: admin.credential.cert(credentialsPath),
-          projectId: projectId,
-        });
-      }
-
-      this.firestore = admin.firestore();
-      console.log('Firebase Admin initialized successfully');
-    } catch (error) {
-      console.error('Firebase initialization failed:', error);
-      throw error;
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(credentialsPath),
+        projectId: projectId,
+      });
     }
+
+    this.firestore = admin.firestore();
+    console.log('Firebase Admin initialized successfully');
   }
 
   getFirestore(): Firestore {
