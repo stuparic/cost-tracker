@@ -28,10 +28,6 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Enable Artifact Registry API
-        run: |
-          gcloud services enable artifactregistry.googleapis.com --project=$PROJECT_ID
-
       - name: Create Artifact Registry repository
         run: |
           gcloud artifacts repositories create $REPOSITORY \
