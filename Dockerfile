@@ -43,4 +43,4 @@ RUN ls -la /app && ls -la /app/dist && cat /app/dist/main.js | head -5
 EXPOSE 8080
 
 # Start the application
-CMD ["/app/start.sh"]
+CMD ["/bin/sh", "/app/start.sh"]
