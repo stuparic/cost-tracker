@@ -32,6 +32,10 @@ RUN npm ci --only=production
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
+# Copy startup script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Debug: Verify dist folder was copied
 RUN ls -la /app && ls -la /app/dist && cat /app/dist/main.js | head -5
 
@@ -39,4 +43,4 @@ RUN ls -la /app && ls -la /app/dist && cat /app/dist/main.js | head -5
 EXPOSE 8080
 
 # Start the application
-CMD ["node", "/app/dist/main.js"]
+CMD ["/app/start.sh"]
