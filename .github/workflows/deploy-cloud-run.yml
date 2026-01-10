@@ -9,6 +9,8 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   SERVICE_NAME: cost-tracker
   REGION: europe-west1
+  REPOSITORY: cost-tracker
+  IMAGE: europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cost-tracker/cost-tracker
 
 jobs:
   deploy:
@@ -26,23 +28,35 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Configure Docker to use gcloud
-        run: gcloud auth configure-docker
+      - name: Enable Artifact Registry API
+        run: |
+          gcloud services enable artifactregistry.googleapis.com --project=$PROJECT_ID
+
+      - name: Create Artifact Registry repository
+        run: |
+          gcloud artifacts repositories create $REPOSITORY \
+            --repository-format=docker \
+            --location=$REGION \
+            --description="Docker repository for Cost Tracker" \
+            --project=$PROJECT_ID || echo "Repository already exists"
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker $REGION-docker.pkg.dev
 
       - name: Build Docker image
         run: |
-          docker build -t gcr.io/$PROJECT_ID/$SERVICE_NAME:${{ github.sha }} .
-          docker tag gcr.io/$PROJECT_ID/$SERVICE_NAME:${{ github.sha }} gcr.io/$PROJECT_ID/$SERVICE_NAME:latest
+          docker build -t $IMAGE:${{ github.sha }} .
+          docker tag $IMAGE:${{ github.sha }} $IMAGE:latest
 
-      - name: Push Docker image to GCR
+      - name: Push Docker image to Artifact Registry
         run: |
-          docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:${{ github.sha }}
-          docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:latest
+          docker push $IMAGE:${{ github.sha }}
+          docker push $IMAGE:latest
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy $SERVICE_NAME \
-            --image gcr.io/$PROJECT_ID/$SERVICE_NAME:${{ github.sha }} \
+            --image $IMAGE:${{ github.sha }} \
             --platform managed \
             --region $REGION \
             --allow-unauthenticated \
