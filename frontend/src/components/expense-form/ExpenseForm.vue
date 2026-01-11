@@ -174,7 +174,6 @@ import DatePicker from 'primevue/datepicker';
 import { useExpensesStore } from '@/stores/expenses';
 import { autocompleteApi } from '@/api/autocomplete';
 import { inferCategory, getConfidenceIcon } from '@/utils/category-inference';
-import { getCurrentDateTimeISO } from '@/utils/formatters';
 import type { CreateExpenseDto, Currency } from '@/types/expense';
 import type { CategoryInference } from '@/utils/category-inference';
 
