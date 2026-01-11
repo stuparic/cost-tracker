@@ -1,0 +1,54 @@
+name: Deploy Frontend to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+
+env:
+  NODE_VERSION: '18'
+  FRONTEND_DIR: ./frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npm ci
+
+      - name: Build Vue app
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: https://cost-tracker-1082828995983.europe-west1.run.app/api/v1
+          VITE_APP_TITLE: Cost Tracker
+          VITE_ENABLE_LOGS: false
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: moneyflow-832f4
+          channelId: live
+          entryPoint: ${{ env.FRONTEND_DIR }}
+
+      - name: Get deployment URL
+        run: |
+          echo "Frontend deployed to: https://moneyflow-832f4.web.app"
+          echo "Firebase Console: https://console.firebase.google.com/project/moneyflow-832f4/hosting"
