@@ -68,6 +68,13 @@ jobs:
             --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
             --role=roles/secretmanager.secretAccessor
 
+      - name: Grant Cloud Logging permissions to Cloud Run service account
+        run: |
+          PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
+          gcloud projects add-iam-policy-binding $PROJECT_ID \
+            --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
+            --role=roles/logging.logWriter
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy $SERVICE_NAME \
