@@ -35,7 +35,7 @@ jobs:
         working-directory: ${{ env.FRONTEND_DIR }}
         run: npm run build
         env:
-          VITE_API_BASE_URL: https://cost-tracker-1082828995983.europe-west1.run.app/api/v1
+          VITE_API_BASE_URL: https://cost-tracker-utmayd66ga-ew.a.run.app/api/v1
           VITE_APP_TITLE: Cost Tracker
           VITE_ENABLE_LOGS: false
 
