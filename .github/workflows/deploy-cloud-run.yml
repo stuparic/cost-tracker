@@ -1,9 +1,12 @@
-name: Deploy to Cloud Run
+name: Deploy Backend to Cloud Run
 
 on:
   push:
     branches:
       - master
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-cloud-run.yml'
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -46,7 +49,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t $IMAGE:${{ github.sha }} .
+          docker build -t $IMAGE:${{ github.sha }} ./backend
           docker tag $IMAGE:${{ github.sha }} $IMAGE:latest
 
       - name: Push Docker image to Artifact Registry
