@@ -33,10 +33,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? message
         : (message as any).message || 'Internal server error';
 
-    // Log the error
+    // Log the error with structured data for Cloud Logging
+    const errorLog = {
+      method: request.method,
+      url: request.url,
+      statusCode: status,
+      message: errorMessage,
+      userAgent: request.get('user-agent'),
+      ip: request.ip,
+    };
+
     this.logger.error(
-      `${request.method} ${request.url}`,
-      exception instanceof Error ? exception.stack : JSON.stringify(exception),
+      `${request.method} ${request.url} - ${status} - ${errorMessage}`,
+      exception instanceof Error ? exception.stack : JSON.stringify(errorLog),
     );
 
     // Send consistent error response

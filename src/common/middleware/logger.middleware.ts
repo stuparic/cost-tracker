@@ -10,17 +10,25 @@ export class LoggerMiddleware implements NestMiddleware {
     const userAgent = req.get('user-agent') || '';
     const startTime = Date.now();
 
-    // Log request
-    this.logger.log(`→ ${method} ${originalUrl} - ${ip} - ${userAgent}`);
-
-    // Log response when finished
+    // Log response when finished with structured data
     res.on('finish', () => {
       const { statusCode } = res;
       const duration = Date.now() - startTime;
       const logLevel = statusCode >= 400 ? 'error' : 'log';
 
+      // Structured log message for Cloud Logging
+      const logMessage = {
+        method,
+        url: originalUrl,
+        statusCode,
+        duration: `${duration}ms`,
+        ip,
+        userAgent,
+      };
+
       this.logger[logLevel](
-        `← ${method} ${originalUrl} ${statusCode} - ${duration}ms`,
+        `${method} ${originalUrl} ${statusCode} ${duration}ms`,
+        JSON.stringify(logMessage),
       );
     });
 
