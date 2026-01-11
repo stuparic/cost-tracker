@@ -16,7 +16,7 @@
           </button>
           <div class="app-title">
             <i class="pi pi-wallet"></i>
-            <h1>Cost Tracker</h1>
+            <h1>Troškić</h1>
           </div>
           <p class="app-subtitle">Pratite troškove domaćinstva</p>
         </div>

@@ -222,7 +222,7 @@ const inferredCategory = ref<CategoryInference>({
 watch(() => form.shopName, (newShop) => {
   if (newShop && newShop.trim().length > 0) {
     inferredCategory.value = inferCategory(newShop);
-    // Auto-fill category if not already set by user
+    // ikona Auto-fill category if not already set by user
     if (!form.category) {
       form.category = inferredCategory.value.category;
     }

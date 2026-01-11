@@ -11,9 +11,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'Cost Tracker',
-        short_name: 'Cost Tracker',
-        description: 'Pratite troškove domacinstva',
+        name: 'Troškić',
+        short_name: 'Troškić',
+        description: 'Pratite troškove domaćinstva',
         theme_color: '#10b981',
         background_color: '#ffffff',
         display: 'standalone',
