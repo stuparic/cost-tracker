@@ -1,24 +1,83 @@
 
-# Cost Tracker - Deployment Architecture
+# Cost Tracker - Architecture & Deployment
 
 ## Overview
 
-This document explains how the Cost Tracker API is deployed to Google Cloud Run using GitHub Actions and Docker.
+Cost Tracker is a full-stack expense tracking application with a NestJS backend and Vue.js frontend.
+
+**Backend:** NestJS API deployed to Google Cloud Run (serverless)
+**Frontend:** Vue.js SPA deployed to Firebase Hosting
+**Database:** Firebase Firestore
+**CI/CD:** GitHub Actions (automated deployments)
 
 ---
 
 ## Table of Contents
 
-- [Deployment Flow](#deployment-flow)
-- [GitHub Actions CI/CD](#github-actions-cicd)
-- [Docker Multi-Stage Build](#docker-multi-stage-build)
-- [Critical Architecture Decision](#critical-architecture-decision)
-- [Security & Secrets](#security--secrets)
-- [Cost Controls](#cost-controls)
+- [Project Structure](#project-structure)
+- [Backend Architecture](#backend-architecture)
+  - [Deployment Flow](#backend-deployment-flow)
+  - [GitHub Actions CI/CD](#backend-github-actions-cicd)
+  - [Docker Multi-Stage Build](#docker-multi-stage-build)
+  - [Critical Architecture Decision](#critical-architecture-decision)
+  - [Security & Secrets](#security--secrets)
+  - [Cost Controls](#cost-controls)
+- [Frontend Architecture](#frontend-architecture)
+  - [Deployment Flow](#frontend-deployment-flow)
+  - [GitHub Actions CI/CD](#frontend-github-actions-cicd)
+  - [Firebase Hosting Configuration](#firebase-hosting-configuration)
+- [Technology Stack](#technology-stack)
+- [Service URLs](#service-urls)
+- [Monitoring](#monitoring)
 
 ---
 
-## Deployment Flow
+## Project Structure
+
+```
+cost-tracker/
+├── backend/                    # NestJS API
+│   ├── src/
+│   │   ├── expenses/          # Expense management
+│   │   ├── autocomplete/      # Autocomplete suggestions
+│   │   ├── currency/          # Currency conversion
+│   │   ├── firebase/          # Firebase service
+│   │   ├── health/            # Health check
+│   │   └── main.ts            # Application entry
+│   ├── test/
+│   ├── dist/                  # Compiled JavaScript
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── Dockerfile             # Multi-stage build
+│   └── .env
+│
+├── frontend/                   # Vue.js SPA
+│   ├── src/
+│   │   ├── components/
+│   │   │   └── expense-form/  # Expense entry form
+│   │   ├── api/               # API client layer
+│   │   ├── stores/            # Pinia state management
+│   │   ├── types/             # TypeScript types
+│   │   ├── utils/             # Helper functions
+│   │   ├── App.vue
+│   │   └── main.ts
+│   ├── dist/                  # Build output
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── firebase.json          # Hosting config
+│   └── .firebaserc
+│
+└── .github/
+    └── workflows/
+        ├── deploy-cloud-run.yml    # Backend CI/CD
+        └── deploy-frontend.yml     # Frontend CI/CD
+```
+
+---
+
+## Backend Architecture
+
+### Backend Deployment Flow
 
 ```
 ┌─────────────────┐
@@ -65,9 +124,9 @@ This document explains how the Cost Tracker API is deployed to Google Cloud Run 
 
 ---
 
-## GitHub Actions CI/CD
+### Backend GitHub Actions CI/CD
 
-### Authentication
+#### Authentication
 
 **Service Account Setup:**
 ```
@@ -95,17 +154,17 @@ github-actions-deployer@moneyflow-832f4.iam.gserviceaccount.com
 
 ---
 
-### Workflow Steps
+#### Workflow Steps
 
 **File:** `.github/workflows/deploy-cloud-run.yml`
 
-#### 1. Checkout Code
+##### 1. Checkout Code
 ```yaml
 - name: Checkout code
   uses: actions/checkout@v4
 ```
 
-#### 2. Authenticate to Google Cloud
+##### 2. Authenticate to Google Cloud
 ```yaml
 - name: Authenticate to Google Cloud
   uses: google-github-actions/auth@v2
@@ -113,7 +172,7 @@ github-actions-deployer@moneyflow-832f4.iam.gserviceaccount.com
     credentials_json: ${{ secrets.GCP_SA_KEY }}
 ```
 
-#### 3. Create Artifact Registry Repository
+##### 3. Create Artifact Registry Repository
 ```yaml
 - name: Create Artifact Registry repository
   run: |
@@ -125,7 +184,7 @@ github-actions-deployer@moneyflow-832f4.iam.gserviceaccount.com
     fi
 ```
 
-#### 4. Build and Push Docker Image
+##### 4. Build and Push Docker Image
 ```yaml
 - name: Build Docker image
   run: |
@@ -143,7 +202,7 @@ github-actions-deployer@moneyflow-832f4.iam.gserviceaccount.com
 europe-west1-docker.pkg.dev/moneyflow-832f4/costtracker/cost-tracker:latest
 ```
 
-#### 5. Manage Firebase Secret
+##### 5. Manage Firebase Secret
 ```yaml
 - name: Create Firebase service account secret
   run: |
@@ -153,7 +212,7 @@ europe-west1-docker.pkg.dev/moneyflow-832f4/costtracker/cost-tracker:latest
     rm /tmp/service-account.json
 ```
 
-#### 6. Grant Secret Access
+##### 6. Grant Secret Access
 ```yaml
 - name: Grant secret access to Cloud Run service account
   run: |
@@ -163,7 +222,7 @@ europe-west1-docker.pkg.dev/moneyflow-832f4/costtracker/cost-tracker:latest
       --role=roles/secretmanager.secretAccessor
 ```
 
-#### 7. Deploy to Cloud Run
+##### 7. Deploy to Cloud Run
 ```yaml
 - name: Deploy to Cloud Run
   run: |
@@ -462,26 +521,31 @@ export default registerAs('firebase', () => ({
 
 ## Service URLs
 
-**Main Service:**
+**Frontend Application:**
 ```
-https://cost-tracker-utmayd66ga-ew.a.run.app
+https://moneyflow-832f4.web.app
+```
+
+**Backend API:**
+```
+https://cost-tracker-1082828995983.europe-west1.run.app
 ```
 
 **Swagger UI:**
 ```
-https://cost-tracker-utmayd66ga-ew.a.run.app/api
+https://cost-tracker-1082828995983.europe-west1.run.app/api
 ```
 
 **Example API Calls:**
 ```bash
 # Get all expenses
-curl https://cost-tracker-utmayd66ga-ew.a.run.app/expenses
+curl https://cost-tracker-1082828995983.europe-west1.run.app/api/v1/expenses
 
 # Get expenses by category
-curl https://cost-tracker-utmayd66ga-ew.a.run.app/expenses?category=Groceries
+curl https://cost-tracker-1082828995983.europe-west1.run.app/api/v1/expenses?category=Groceries
 
 # Create expense
-curl -X POST https://cost-tracker-utmayd66ga-ew.a.run.app/expenses \
+curl -X POST https://cost-tracker-1082828995983.europe-west1.run.app/api/v1/expenses \
   -H "Content-Type: application/json" \
   -d '{
     "amount": 50.00,
@@ -499,31 +563,367 @@ curl -X POST https://cost-tracker-utmayd66ga-ew.a.run.app/expenses \
 
 ## Monitoring
 
-**View Logs:**
+**Backend Monitoring:**
+
+View Backend Logs:
 ```
 https://console.cloud.google.com/logs/query?project=moneyflow-832f4
 ```
 
-**View Service:**
+View Cloud Run Service:
 ```
 https://console.cloud.google.com/run/detail/europe-west1/cost-tracker?project=moneyflow-832f4
 ```
 
-**View Deployments:**
+**Frontend Monitoring:**
+
+View Firebase Hosting:
+```
+https://console.firebase.google.com/project/moneyflow-832f4/hosting
+```
+
+View Usage & Analytics:
+```
+https://console.firebase.google.com/project/moneyflow-832f4/analytics
+```
+
+**CI/CD Monitoring:**
+
+View GitHub Actions (All Deployments):
 ```
 https://github.com/stuparic/cost-tracker/actions
 ```
 
 ---
 
+## Frontend Architecture
+
+### Frontend Deployment Flow
+
+```
+┌─────────────────────────┐
+│  Push to Master         │
+│  (frontend/** changes)  │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  GitHub Actions         │
+│  Triggered              │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Install Dependencies   │
+│  npm ci                 │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Build Vue App          │
+│  vite build             │
+│  - TypeScript compile   │
+│  - Production mode      │
+│  - Minification         │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Deploy to Firebase     │
+│  Hosting                │
+│  - Upload dist/         │
+│  - Update config        │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Live! 🚀               │
+│  moneyflow-832f4        │
+│  .web.app               │
+└─────────────────────────┘
+```
+
+---
+
+### Frontend GitHub Actions CI/CD
+
+**File:** `.github/workflows/deploy-frontend.yml`
+
+#### Workflow Configuration
+
+**Trigger:**
+```yaml
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+```
+
+**What it does:**
+- Only deploys when frontend files change
+- Skips deployment if only backend changes
+- Efficient use of CI/CD minutes
+
+---
+
+#### Workflow Steps
+
+##### 1. Checkout Code
+```yaml
+- name: Checkout code
+  uses: actions/checkout@v4
+```
+
+##### 2. Setup Node.js
+```yaml
+- name: Setup Node.js
+  uses: actions/setup-node@v4
+  with:
+    node-version: '18'
+    cache: 'npm'
+    cache-dependency-path: frontend/package-lock.json
+```
+
+**Benefits:**
+- Caches npm packages for faster builds
+- Consistent Node.js version
+
+##### 3. Install Dependencies
+```yaml
+- name: Install dependencies
+  working-directory: ./frontend
+  run: npm ci
+```
+
+**Why `npm ci`?**
+- Faster than `npm install`
+- Uses exact versions from package-lock.json
+- Clean install (removes node_modules first)
+
+##### 4. Build Vue Application
+```yaml
+- name: Build Vue app
+  working-directory: ./frontend
+  run: npm run build
+  env:
+    VITE_API_BASE_URL: https://cost-tracker-1082828995983.europe-west1.run.app/api/v1
+    VITE_APP_TITLE: Cost Tracker
+    VITE_ENABLE_LOGS: false
+```
+
+**Build Process:**
+1. TypeScript compilation (`vue-tsc -b`)
+2. Vite production build
+3. Tree-shaking unused code
+4. Minification and optimization
+5. Output to `dist/` folder
+
+**Environment Variables:**
+- Production API URL (Cloud Run endpoint)
+- App title
+- Logging disabled in production
+
+##### 5. Deploy to Firebase Hosting
+```yaml
+- name: Deploy to Firebase Hosting
+  uses: FirebaseExtended/action-hosting-deploy@v0
+  with:
+    repoToken: ${{ secrets.GITHUB_TOKEN }}
+    firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+    projectId: moneyflow-832f4
+    channelId: live
+    entryPoint: ./frontend
+```
+
+**What happens:**
+1. Uploads `dist/` folder to Firebase
+2. Updates hosting configuration
+3. Invalidates CDN cache
+4. Deploys to production
+
+---
+
+### Firebase Hosting Configuration
+
+#### firebase.json
+
+**File:** `frontend/firebase.json`
+
+```json
+{
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=31536000"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Key Configuration:**
+
+1. **`"public": "dist"`**
+   - Serves files from the build output directory
+
+2. **Rewrites (SPA Routing):**
+   - All routes redirect to `index.html`
+   - Enables client-side routing (Vue Router)
+   - No 404 errors on page refresh
+
+3. **Cache Headers:**
+   - JS/CSS files cached for 1 year
+   - Vite uses content hashes in filenames
+   - New builds automatically bust cache
+
+4. **Ignore Files:**
+   - Doesn't upload source files
+   - Only uploads compiled assets
+
+---
+
+#### .firebaserc
+
+**File:** `frontend/.firebaserc`
+
+```json
+{
+  "projects": {
+    "default": "moneyflow-832f4"
+  }
+}
+```
+
+**Purpose:**
+- Links local project to Firebase project
+- Used by Firebase CLI for deployments
+
+---
+
+### Frontend Technology Stack
+
+**Framework:**
+- Vue 3 (Composition API)
+- TypeScript
+- Vite (build tool)
+
+**UI Library:**
+- PrimeVue 4.x (component library)
+- PrimeIcons (icon set)
+- Aura theme (modern design)
+
+**State Management:**
+- Pinia (Vue store)
+
+**HTTP Client:**
+- Axios (with interceptors)
+
+**Utilities:**
+- date-fns (date formatting)
+
+**Development:**
+- Vite dev server (hot reload)
+- Vue DevTools support
+- TypeScript strict mode
+
+---
+
+### Frontend Features
+
+#### 1. Minimal Input Form
+- Only amount and shop name required
+- Default currency: RSD
+- Smart category inference from shop name
+- Default payment method: Card
+
+#### 2. Serbian Language
+- All UI text in Serbian
+- Labels: "Iznos", "Prodavnica", "Sačuvaj"
+- Error messages in Serbian
+
+#### 3. Category Inference
+- Client-side pattern matching
+- Real-time feedback as user types
+- Confidence indicators (high/medium/low)
+- Editable by user
+
+#### 4. Quick Amount Buttons
+- Preset amounts: 500, 1000, 2000, 5000 RSD
+- One-click entry for common purchases
+
+#### 5. Autocomplete
+- Shop names from previous expenses
+- Category suggestions
+- Reduces typos and duplicates
+
+#### 6. Mobile-First Design
+- Responsive layout
+- Touch-friendly buttons
+- Works on phones and tablets
+
+---
+
+### Manual Deployment
+
+**From Local Machine:**
+
+```bash
+cd frontend
+
+# Build and deploy to production
+npm run deploy
+
+# Deploy to preview channel
+npm run deploy:preview
+```
+
+**Requirements:**
+- Firebase CLI installed (`npm install -g firebase-tools`)
+- Authenticated (`firebase login`)
+- Service account with Hosting permissions
+
+---
+
 ## Technology Stack
 
+**Backend:**
 - **Runtime:** Node.js 18 (Alpine Linux)
 - **Framework:** NestJS 9.x
 - **Language:** TypeScript → JavaScript
 - **Container:** Docker (multi-stage build)
 - **Registry:** Google Artifact Registry
 - **Hosting:** Google Cloud Run (serverless)
+
+**Frontend:**
+- **Framework:** Vue 3 + Composition API
+- **Language:** TypeScript
+- **UI Library:** PrimeVue 4.x
+- **Build Tool:** Vite
+- **Hosting:** Firebase Hosting
+- **State:** Pinia
+
+**Shared:**
 - **Database:** Firebase Firestore
 - **CI/CD:** GitHub Actions
 - **Secrets:** Google Secret Manager
@@ -591,5 +991,9 @@ gcloud run services update cost-tracker \
 
 ---
 
-**Last Updated:** 2026-01-10
-**Deployed Version:** https://cost-tracker-utmayd66ga-ew.a.run.app
+**Last Updated:** 2026-01-11
+
+**Live Application:**
+- Frontend: https://moneyflow-832f4.web.app
+- Backend API: https://cost-tracker-1082828995983.europe-west1.run.app
+- Swagger: https://cost-tracker-1082828995983.europe-west1.run.app/api
