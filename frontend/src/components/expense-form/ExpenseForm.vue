@@ -415,8 +415,8 @@ function resetForm() {
 }
 
 .amount-input-large :deep(input):focus {
-  border-color: #10b981 !important;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px var(--primary-shadow) !important;
 }
 
 .amount-input-large.p-invalid :deep(input) {
@@ -443,15 +443,15 @@ function resetForm() {
 }
 
 .currency-pill:hover {
-  border-color: #10b981;
+  border-color: var(--primary-color);
   background: #f0fdf4;
 }
 
 .currency-pill.active {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-color: #10b981;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  border-color: var(--primary-color);
   color: white;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 4px 12px var(--primary-shadow);
 }
 
 /* Quick Amount Pills */
@@ -474,10 +474,10 @@ function resetForm() {
 }
 
 .quick-pill:hover {
-  border-color: #10b981;
+  border-color: var(--primary-color);
   background: #f0fdf4;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 4px 12px var(--primary-shadow);
 }
 
 .quick-pill:active {
@@ -495,7 +495,7 @@ function resetForm() {
   gap: 0.625rem;
   margin-top: 0.75rem;
   padding: 0.625rem 1rem;
-  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  background: linear-gradient(135deg, var(--primary-light) 0%, #d1fae5 100%);
   border: 1px solid #a7f3d0;
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -505,7 +505,7 @@ function resetForm() {
 
 .category-badge i {
   font-size: 1.125rem;
-  color: #10b981;
+  color: var(--primary-color);
 }
 
 .editable-hint {
@@ -521,15 +521,15 @@ function resetForm() {
   padding: 1rem;
   font-size: 1.125rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
   border: none;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 4px 12px var(--primary-shadow);
   transition: all 0.2s ease;
 }
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+  box-shadow: 0 6px 16px var(--primary-shadow);
 }
 
 .submit-btn:active:not(:disabled) {
@@ -603,7 +603,7 @@ function resetForm() {
     font-size: 1.0625rem;
     position: sticky;
     bottom: 0;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     border-radius: 0;
     margin: 0 -1rem -1.25rem -1rem;
     width: calc(100% + 2rem);

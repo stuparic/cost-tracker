@@ -1,9 +1,19 @@
 <template>
   <div id="app">
     <Toast />
+    <Sidebar v-model:visible="sidebarVisible" position="left" class="theme-sidebar">
+      <template #header>
+        <h2 class="sidebar-title">Podešavanja</h2>
+      </template>
+      <ThemeSelector />
+    </Sidebar>
+
     <div class="app-container">
       <header class="app-header">
         <div class="header-content">
+          <button class="hamburger-btn" @click="sidebarVisible = true" aria-label="Open menu">
+            <i class="pi pi-bars"></i>
+          </button>
           <div class="app-title">
             <i class="pi pi-wallet"></i>
             <h1>Cost Tracker</h1>
@@ -19,11 +29,42 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import Toast from 'primevue/toast';
+import Sidebar from 'primevue/sidebar';
 import ExpenseForm from './components/expense-form/ExpenseForm.vue';
+import ThemeSelector from './components/ThemeSelector.vue';
+
+const sidebarVisible = ref(false);
+
+// Initialize theme store on app load
+import { useThemeStore } from './stores/theme';
+useThemeStore();
 </script>
 
 <style>
+/* CSS Variables for Themes */
+:root[data-theme="green"] {
+  --primary-color: #10b981;
+  --primary-dark: #059669;
+  --primary-light: #ecfdf5;
+  --primary-shadow: rgba(16, 185, 129, 0.25);
+}
+
+:root[data-theme="purple"] {
+  --primary-color: #a855f7;
+  --primary-dark: #7c3aed;
+  --primary-light: #faf5ff;
+  --primary-shadow: rgba(168, 85, 247, 0.25);
+}
+
+:root {
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --background: #f8fafb;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -37,8 +78,8 @@ html, body {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: #f8fafb;
-  color: #1f2937;
+  background: var(--background);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -57,10 +98,10 @@ body {
 }
 
 .app-header {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
   color: white;
   padding: 1.5rem 1rem;
-  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 2px 12px var(--primary-shadow);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -69,6 +110,40 @@ body {
 .header-content {
   max-width: 600px;
   margin: 0 auto;
+  position: relative;
+}
+
+.hamburger-btn {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hamburger-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.hamburger-btn i {
+  font-size: 1.25rem;
+}
+
+.sidebar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
 }
 
 .app-title {
@@ -103,7 +178,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: 0;
-  background: #f8fafb;
+  background: var(--background);
 }
 
 /* Mobile-first: Full-screen experience */
