@@ -3,15 +3,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
-import { WinstonLogger } from './config/logger.config';
 
 async function bootstrap() {
-  // Create custom logger
-  const logger = new WinstonLogger();
-
-  const app = await NestFactory.create(AppModule, {
-    logger,
-  });
+  const app = await NestFactory.create(AppModule);
 
   // Enable API versioning
   app.setGlobalPrefix('api/v1', {
@@ -43,6 +37,6 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
-  logger.log(`Application is running on port ${port}`, 'Bootstrap');
+  console.log(`Application is running on: http://localhost:${port}`);
 }
 bootstrap();
