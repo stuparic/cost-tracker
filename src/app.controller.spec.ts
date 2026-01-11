@@ -21,16 +21,7 @@ describe('AppController', () => {
       expect(result).toHaveProperty('version');
       expect(result).toHaveProperty('docs', '/api');
       expect(result.endpoints).toHaveProperty('expenses');
-    });
-  });
-
-  describe('getHealth', () => {
-    it('should return health status', () => {
-      const result = appController.getHealth();
-      expect(result).toHaveProperty('status', 'healthy');
-      expect(result).toHaveProperty('timestamp');
-      expect(result).toHaveProperty('uptime');
-      expect(result.uptime).toBeGreaterThanOrEqual(0);
+      expect(result.endpoints).toHaveProperty('health');
     });
   });
 });

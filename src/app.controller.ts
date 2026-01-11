@@ -7,13 +7,13 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get('health')
-  @ApiOperation({ summary: 'Health check endpoint' })
+  @Get()
+  @ApiOperation({ summary: 'Get API information' })
   @ApiResponse({
     status: 200,
-    description: 'Service health status',
+    description: 'API information and available endpoints',
   })
-  getHealth() {
-    return this.appService.getHealth();
+  getApiInfo() {
+    return this.appService.getApiInfo();
   }
 }

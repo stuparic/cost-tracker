@@ -2,12 +2,23 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-  getHealth() {
+  getApiInfo() {
     return {
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: process.env.NODE_ENV || 'development',
+      name: 'Cost Tracker API',
+      version: '1.0.0',
+      description: 'Track home expenses with dual currency support (EUR/RSD)',
+      docs: '/api',
+      endpoints: {
+        expenses: '/expenses',
+        autocomplete: '/autocomplete',
+        health: '/health',
+      },
+      features: [
+        'Dual currency support (EUR/RSD)',
+        'Intelligent autocomplete',
+        'Firebase Firestore integration',
+        'Automatic currency conversion',
+      ],
     };
   }
 }
