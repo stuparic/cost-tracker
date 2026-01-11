@@ -28,6 +28,18 @@ export class ExpensesService {
       eurAmount = this.currencyService.convertRsdToEur(rsdAmount);
     }
 
+    // Apply defaults for optional fields
+    const productDescription = createExpenseDto.productDescription ||
+      `Purchase at ${createExpenseDto.shopName}`;
+
+    const category = createExpenseDto.category ||
+      this.inferCategory(createExpenseDto.shopName) ||
+      'General';
+
+    const paymentMethod = createExpenseDto.paymentMethod || 'Card';
+
+    const tags = createExpenseDto.tags || [];
+
     const expenseData = {
       amount: createExpenseDto.amount,
       originalCurrency: createExpenseDto.currency,
@@ -35,10 +47,10 @@ export class ExpensesService {
       rsdAmount,
       exchangeRate,
       shopName: createExpenseDto.shopName,
-      productDescription: createExpenseDto.productDescription,
-      category: createExpenseDto.category,
-      paymentMethod: createExpenseDto.paymentMethod,
-      tags: createExpenseDto.tags,
+      productDescription,
+      category,
+      paymentMethod,
+      tags,
       purchaseDate: createExpenseDto.purchaseDate,
     };
 
@@ -122,5 +134,46 @@ export class ExpensesService {
 
   async remove(id: string): Promise<void> {
     return this.expensesRepository.delete(id);
+  }
+
+  private inferCategory(shopName: string): string | null {
+    const shopLower = shopName.toLowerCase();
+
+    // Supermarkets & Grocery Stores
+    if (/(maxi|lidl|mercator|idea|tempo|aman|dis)/i.test(shopLower)) {
+      return 'Groceries';
+    }
+
+    // Furniture & Home Improvement
+    if (/(ikea|jysk|emezeta)/i.test(shopLower)) {
+      return 'Home';
+    }
+
+    // Gas Stations & Transport
+    if (/(nis|petrol|mol|lukoil|omv|parking|taxi|bolt|car)/i.test(shopLower)) {
+      return 'Transport';
+    }
+
+    // Pharmacies & Health
+    if (/(apoteka|pharmacy|lilly|benu|zegin)/i.test(shopLower)) {
+      return 'Health';
+    }
+
+    // Electronics & Technology
+    if (/(gigatron|tehnomanija|comtrade|mediamarkt|tech)/i.test(shopLower)) {
+      return 'Electronics';
+    }
+
+    // Restaurants & Dining
+    if (/(restoran|restaurant|cafe|kafana|pizza|burger|mcdon)/i.test(shopLower)) {
+      return 'Dining';
+    }
+
+    // Clothing & Fashion
+    if (/(zara|h&m|mango|new\s*yorker|fashion|clothes)/i.test(shopLower)) {
+      return 'Clothing';
+    }
+
+    return null; // Will default to 'General' in calling code
   }
 }

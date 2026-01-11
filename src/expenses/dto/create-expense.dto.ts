@@ -7,6 +7,7 @@ import {
   IsArray,
   IsDateString,
   Min,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateExpenseDto {
@@ -26,30 +27,41 @@ export class CreateExpenseDto {
 
   @ApiProperty({
     example: 'Groceries - milk, bread, eggs',
-    description: 'Description of the product(s) purchased',
+    description: 'Description of the product(s) purchased. Defaults to "Purchase at {shopName}" if not provided.',
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @MinLength(1, { message: 'Product description cannot be empty' })
-  productDescription: string;
+  productDescription?: string;
 
-  @ApiProperty({ example: 'Groceries', description: 'Category of the expense' })
+  @ApiProperty({
+    example: 'Groceries',
+    description: 'Category of the expense. Auto-inferred from shop name if not provided, defaults to "General".',
+    required: false,
+  })
+  @IsOptional()
   @IsString()
-  @MinLength(1, { message: 'Category cannot be empty' })
-  category: string;
+  category?: string;
 
-  @ApiProperty({ example: 'Cash', description: 'Payment method used' })
+  @ApiProperty({
+    example: 'Card',
+    description: 'Payment method used. Defaults to "Card" if not provided.',
+    required: false,
+  })
+  @IsOptional()
   @IsString()
-  @MinLength(1, { message: 'Payment method cannot be empty' })
-  paymentMethod: string;
+  paymentMethod?: string;
 
   @ApiProperty({
     example: ['food', 'weekly-shopping'],
-    description: 'Tags for organizing expenses',
+    description: 'Tags for organizing expenses. Defaults to empty array if not provided.',
+    required: false,
     type: [String],
   })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  tags: string[];
+  tags?: string[];
 
   @ApiProperty({
     example: '2026-01-10T10:30:00Z',
