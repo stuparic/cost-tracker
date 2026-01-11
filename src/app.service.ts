@@ -5,7 +5,7 @@ export class AppService {
   getApiInfo() {
     return {
       name: 'Cost Tracker API',
-      version: '1.0.0',
+      version: '1.0.1',
       description: 'Track home expenses with dual currency support (EUR/RSD)',
       docs: '/api',
       endpoints: {
