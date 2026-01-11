@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Monochrome version for Safari pinned tab -->
+  <g>
+    <!-- Wallet body -->
+    <rect x="136" y="176" width="240" height="160" rx="20" fill="currentColor"/>
+
+    <!-- Wallet fold -->
+    <path d="M 136 216 Q 136 196, 156 196 L 356 196 Q 376 196, 376 216 Z" fill="currentColor"/>
+
+    <!-- Card slot -->
+    <rect x="166" y="236" width="180" height="80" rx="10" fill="none" stroke="currentColor" stroke-width="4"/>
+
+    <!-- Currency symbol -->
+    <text x="256" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="currentColor">€</text>
+  </g>
+</svg>
