@@ -30,7 +30,6 @@ async function bootstrap() {
       'API for tracking home expenses with dual currency support (EUR/RSD). Automatically calculates amounts in both currencies.',
     )
     .setVersion('1.0')
-    .addServer('/api/v1', 'Version 1 API')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
