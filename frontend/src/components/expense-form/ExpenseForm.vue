@@ -3,46 +3,55 @@
     <h2 class="form-title">Brzi unos troška</h2>
 
     <form @submit.prevent="handleSubmit">
-      <!-- Amount Input -->
-      <div class="form-field">
+      <!-- Amount Input - Big and Beautiful -->
+      <div class="form-field amount-field">
         <label for="amount" class="field-label">Iznos *</label>
-        <div class="amount-input-group">
-          <InputNumber
-            id="amount"
-            v-model="form.amount"
-            mode="decimal"
-            :minFractionDigits="2"
-            :maxFractionDigits="2"
-            :min="0.01"
-            placeholder="0.00"
-            class="amount-input"
-            :class="{ 'p-invalid': errors.amount }"
-            @input="errors.amount = ''"
-          />
-          <Select
-            v-model="form.currency"
-            :options="currencies"
-            optionLabel="label"
-            optionValue="value"
-            class="currency-select"
-          />
-        </div>
+        <InputNumber
+          id="amount"
+          v-model="form.amount"
+          mode="decimal"
+          :minFractionDigits="2"
+          :maxFractionDigits="2"
+          :min="0.01"
+          placeholder="0.00"
+          class="amount-input-large"
+          :class="{ 'p-invalid': errors.amount }"
+          @input="errors.amount = ''"
+        />
         <small v-if="errors.amount" class="error-message">{{ errors.amount }}</small>
       </div>
 
-      <!-- Quick Amount Buttons -->
-      <div class="quick-amounts">
-        <span class="quick-label">Brzo:</span>
-        <Button
-          v-for="amount in quickAmounts"
-          :key="amount"
-          :label="amount.toString()"
-          @click="form.amount = amount"
-          outlined
-          size="small"
-          class="quick-btn"
-          type="button"
-        />
+      <!-- Currency Pills -->
+      <div class="form-field">
+        <label class="field-label">Valuta</label>
+        <div class="currency-pills">
+          <button
+            v-for="curr in currencies"
+            :key="curr.value"
+            type="button"
+            class="currency-pill"
+            :class="{ active: form.currency === curr.value }"
+            @click="form.currency = curr.value as Currency"
+          >
+            {{ curr.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Amount Pills -->
+      <div class="form-field">
+        <label class="field-label">Brzi iznosi</label>
+        <div class="quick-amounts-pills">
+          <button
+            v-for="amount in quickAmounts"
+            :key="amount"
+            type="button"
+            class="quick-pill"
+            @click="form.amount = amount"
+          >
+            {{ formatAmount(amount) }}
+          </button>
+        </div>
       </div>
 
       <!-- Shop Name Input -->
@@ -72,80 +81,66 @@
         </div>
       </div>
 
-      <!-- Collapsible Details Section -->
-      <div class="details-section">
-        <Button
-          :label="showDetails ? 'Sakrij detalje' : '+ Više detalja'"
-          @click="showDetails = !showDetails"
-          text
-          size="small"
-          class="toggle-details-btn"
-          type="button"
+      <!-- Product Description -->
+      <div class="form-field">
+        <label for="productDescription" class="field-label">Opis</label>
+        <Textarea
+          id="productDescription"
+          v-model="form.productDescription"
+          rows="2"
+          placeholder="Šta ste kupili..."
+          class="w-full"
         />
+      </div>
 
-        <div v-show="showDetails" class="details-content">
-          <!-- Product Description -->
-          <div class="form-field">
-            <label for="productDescription" class="field-label">Opis</label>
-            <Textarea
-              id="productDescription"
-              v-model="form.productDescription"
-              rows="2"
-              placeholder="Šta ste kupili..."
-              class="w-full"
-            />
-          </div>
+      <!-- Category -->
+      <div class="form-field">
+        <label for="category" class="field-label">Kategorija</label>
+        <AutoComplete
+          id="category"
+          v-model="form.category"
+          :suggestions="categorySuggestions"
+          @complete="searchCategories"
+          placeholder="Odaberi kategoriju..."
+          class="w-full"
+        />
+      </div>
 
-          <!-- Category -->
-          <div class="form-field">
-            <label for="category" class="field-label">Kategorija</label>
-            <AutoComplete
-              id="category"
-              v-model="form.category"
-              :suggestions="categorySuggestions"
-              @complete="searchCategories"
-              placeholder="Odaberi kategoriju..."
-              class="w-full"
-            />
-          </div>
+      <!-- Payment Method -->
+      <div class="form-field">
+        <label for="paymentMethod" class="field-label">Način plaćanja</label>
+        <Select
+          id="paymentMethod"
+          v-model="form.paymentMethod"
+          :options="paymentMethods"
+          placeholder="Odaberi..."
+          class="w-full"
+        />
+      </div>
 
-          <!-- Payment Method -->
-          <div class="form-field">
-            <label for="paymentMethod" class="field-label">Način plaćanja</label>
-            <Select
-              id="paymentMethod"
-              v-model="form.paymentMethod"
-              :options="paymentMethods"
-              placeholder="Odaberi..."
-              class="w-full"
-            />
-          </div>
+      <!-- Tags -->
+      <div class="form-field">
+        <label for="tags" class="field-label">Tagovi</label>
+        <Chips
+          id="tags"
+          v-model="form.tags"
+          placeholder="Dodaj tag..."
+          class="w-full"
+        />
+      </div>
 
-          <!-- Tags -->
-          <div class="form-field">
-            <label for="tags" class="field-label">Tagovi</label>
-            <Chips
-              id="tags"
-              v-model="form.tags"
-              placeholder="Dodaj tag..."
-              class="w-full"
-            />
-          </div>
-
-          <!-- Purchase Date -->
-          <div class="form-field">
-            <label for="purchaseDate" class="field-label">Datum kupovine</label>
-            <DatePicker
-              id="purchaseDate"
-              v-model="purchaseDate"
-              showTime
-              hourFormat="24"
-              dateFormat="dd.mm.yy"
-              placeholder="Odaberi datum..."
-              class="w-full"
-            />
-          </div>
-        </div>
+      <!-- Purchase Date -->
+      <div class="form-field">
+        <label for="purchaseDate" class="field-label">Datum kupovine</label>
+        <DatePicker
+          id="purchaseDate"
+          v-model="purchaseDate"
+          showTime
+          hourFormat="24"
+          dateFormat="dd.mm.yy"
+          placeholder="Odaberi datum..."
+          class="w-full"
+        />
       </div>
 
       <!-- Submit Button -->
@@ -192,7 +187,6 @@ const form = reactive({
 });
 
 const purchaseDate = ref<Date>(new Date());
-const showDetails = ref(false);
 const loading = ref(false);
 
 // Errors
@@ -279,6 +273,11 @@ function onShopInput() {
   errors.shopName = '';
 }
 
+// Format amount for display
+function formatAmount(amount: number): string {
+  return amount.toLocaleString('sr-RS');
+}
+
 // Form submission
 async function handleSubmit() {
   // Validate
@@ -351,7 +350,6 @@ function resetForm() {
   form.paymentMethod = 'Kartica';
   form.tags = [];
   purchaseDate.value = new Date();
-  showDetails.value = false;
   inferredCategory.value = {
     category: 'General',
     confidence: 'low',
@@ -390,39 +388,91 @@ function resetForm() {
   font-size: 0.9375rem;
 }
 
-.amount-input-group {
+/* Big Amount Input */
+.amount-field {
+  margin-bottom: 2rem;
+}
+
+.amount-input-large :deep(input) {
+  font-size: 2.5rem !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  padding: 1.25rem !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 1rem !important;
+  transition: all 0.2s !important;
+}
+
+.amount-input-large :deep(input):focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+.amount-input-large.p-invalid :deep(input) {
+  border-color: #dc2626 !important;
+}
+
+/* Currency Pills */
+.currency-pills {
   display: flex;
-  gap: 0.625rem;
+  gap: 0.75rem;
 }
 
-.amount-input {
+.currency-pill {
   flex: 1;
-}
-
-.currency-select {
-  width: 100px;
-  flex-shrink: 0;
-}
-
-.quick-amounts {
-  display: grid;
-  grid-template-columns: auto repeat(4, 1fr);
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.quick-label {
-  font-size: 0.875rem;
+  padding: 0.875rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
   color: #6b7280;
-  font-weight: 600;
-  padding-right: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.quick-btn {
-  min-width: 0;
-  font-weight: 600;
+.currency-pill:hover {
+  border-color: #10b981;
+  background: #f0fdf4;
 }
+
+.currency-pill.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-color: #10b981;
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+/* Quick Amount Pills */
+.quick-amounts-pills {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.quick-pill {
+  padding: 1rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-pill:hover {
+  border-color: #10b981;
+  background: #f0fdf4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.quick-pill:active {
+  transform: translateY(0);
+}
+
 
 .shop-input {
   width: 100%;
@@ -454,21 +504,6 @@ function resetForm() {
   font-weight: 400;
 }
 
-.details-section {
-  margin: 2rem 0 1.5rem 0;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.toggle-details-btn {
-  margin-bottom: 1.25rem;
-  font-weight: 600;
-  color: #10b981;
-}
-
-.details-content {
-  padding-top: 0.5rem;
-}
 
 .submit-btn {
   width: 100%;
@@ -533,25 +568,23 @@ function resetForm() {
     margin-bottom: 0.5rem;
   }
 
-  .quick-amounts {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
+  .amount-field {
+    margin-bottom: 1.75rem;
   }
 
-  .quick-label {
-    display: none;
+  .amount-input-large :deep(input) {
+    font-size: 2rem !important;
+    padding: 1rem !important;
   }
 
-  .quick-btn {
-    width: 100%;
+  .currency-pill {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
   }
 
-  .amount-input-group {
-    gap: 0.5rem;
-  }
-
-  .currency-select {
-    width: 90px;
+  .quick-pill {
+    padding: 0.875rem 1.25rem;
+    font-size: 1.125rem;
   }
 
   .submit-btn {
@@ -563,11 +596,6 @@ function resetForm() {
     border-radius: 0;
     margin: 0 -1rem -1.25rem -1rem;
     width: calc(100% + 2rem);
-  }
-
-  .details-section {
-    margin: 1.5rem 0 1.25rem 0;
-    padding-top: 1.25rem;
   }
 }
 
