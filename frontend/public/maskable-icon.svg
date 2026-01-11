@@ -1,27 +1,64 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
     </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="silverGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f3f4f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#d1d5db;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9ca3af;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="coinShine">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+    </radialGradient>
   </defs>
 
   <!-- Background -->
-  <rect width="512" height="512" fill="url(#grad)"/>
+  <rect width="512" height="512" fill="url(#bgGrad)"/>
 
-  <!-- Wallet icon with safe zone padding (10% on all sides) -->
-  <g transform="translate(256, 256) scale(0.7)">
-    <!-- Wallet body -->
-    <rect x="-120" y="-80" width="240" height="160" rx="20" fill="#ffffff" opacity="0.95"/>
+  <!-- Coin stack with safe zone (scaled for safe area) -->
+  <g transform="translate(256, 320) scale(0.9)">
+    <!-- Shadow -->
+    <ellipse cx="0" cy="50" rx="100" ry="15" fill="#000000" opacity="0.15"/>
 
-    <!-- Wallet fold -->
-    <path d="M -120 -40 Q -120 -60, -100 -60 L 100 -60 Q 120 -60, 120 -40 Z" fill="#ffffff" opacity="0.7"/>
+    <!-- Bottom silver coin -->
+    <ellipse cx="-30" cy="20" rx="70" ry="20" fill="url(#silverGrad)"/>
+    <ellipse cx="-30" cy="20" rx="70" ry="20" fill="url(#coinShine)" opacity="0.3"/>
+    <ellipse cx="-30" cy="15" rx="55" ry="15" fill="none" stroke="#9ca3af" stroke-width="2"/>
+    <text x="-30" y="24" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#6b7280">€</text>
 
-    <!-- Card slot -->
-    <rect x="-90" y="-20" width="180" height="80" rx="10" fill="none" stroke="#10b981" stroke-width="4"/>
+    <!-- Middle gold coin (slightly offset) -->
+    <ellipse cx="10" cy="-10" rx="75" ry="22" fill="url(#goldGrad)"/>
+    <ellipse cx="10" cy="-10" rx="75" ry="22" fill="url(#coinShine)" opacity="0.4"/>
+    <ellipse cx="10" cy="-15" rx="60" ry="17" fill="none" stroke="#d97706" stroke-width="2"/>
+    <circle cx="10" cy="-10" r="30" fill="none" stroke="#b45309" stroke-width="3"/>
+    <text x="10" y="-3" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#78350f">$</text>
 
-    <!-- Currency symbols -->
-    <text x="0" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#10b981">€</text>
-    <text x="-50" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#059669" opacity="0.6">RSD</text>
+    <!-- Top silver coin -->
+    <ellipse cx="25" cy="-45" rx="65" ry="18" fill="url(#silverGrad)"/>
+    <ellipse cx="25" cy="-45" rx="65" ry="18" fill="url(#coinShine)" opacity="0.3"/>
+    <ellipse cx="25" cy="-50" rx="50" ry="13" fill="none" stroke="#9ca3af" stroke-width="2"/>
+    <text x="25" y="-40" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#6b7280">₽</text>
+
+    <!-- Small gold coin on top -->
+    <ellipse cx="-10" cy="-75" rx="55" ry="16" fill="url(#goldGrad)"/>
+    <ellipse cx="-10" cy="-75" rx="55" ry="16" fill="url(#coinShine)" opacity="0.4"/>
+    <ellipse cx="-10" cy="-80" rx="40" ry="12" fill="none" stroke="#d97706" stroke-width="2"/>
+    <text x="-10" y="-69" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#78350f">¥</text>
+  </g>
+
+  <!-- Sparkles -->
+  <g opacity="0.8">
+    <circle cx="140" cy="140" r="4" fill="#fbbf24"/>
+    <circle cx="372" cy="160" r="3" fill="#f3f4f6"/>
+    <circle cx="350" cy="320" r="4" fill="#fbbf24"/>
+    <circle cx="150" cy="340" r="3" fill="#f3f4f6"/>
   </g>
 </svg>
