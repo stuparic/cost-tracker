@@ -393,14 +393,25 @@ function resetForm() {
   margin-bottom: 2rem;
 }
 
+.amount-input-large {
+  width: 100%;
+}
+
 .amount-input-large :deep(input) {
   font-size: 2.5rem !important;
   font-weight: 700 !important;
   text-align: center !important;
-  padding: 1.25rem !important;
+  padding: 1.25rem 0.5rem !important;
   border: 2px solid #e5e7eb !important;
   border-radius: 1rem !important;
   transition: all 0.2s !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.amount-input-large :deep(input::placeholder) {
+  text-align: center !important;
+  opacity: 0.5 !important;
 }
 
 .amount-input-large :deep(input):focus {
