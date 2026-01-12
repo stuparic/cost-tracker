@@ -126,6 +126,7 @@
         currentPageReportTemplate="Prikazano {first} do {last} od {totalRecords} troškova"
         class="expenses-table"
         stripedRows
+        :rowClass="getRowClass"
       >
       <template #empty>
         <div class="empty-state">
@@ -323,6 +324,11 @@ function clearAdvancedFilters() {
   filters.shopName = '';
   filters.category = '';
   advancedFiltersVisible.value = false;
+}
+
+function getRowClass(data: Expense) {
+  if (!data.createdBy) return 'row-unknown';
+  return `row-${data.createdBy.toLowerCase()}`;
 }
 
 async function searchShops(event: any) {
@@ -722,6 +728,18 @@ onMounted(() => {
 .expenses-table :deep(.p-datatable-wrapper) {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.expenses-table :deep(.row-svetla td:first-child) {
+  border-left: 4px solid #a855f7 !important;
+}
+
+.expenses-table :deep(.row-dejan td:first-child) {
+  border-left: 4px solid #10b981 !important;
+}
+
+.expenses-table :deep(.row-unknown td:first-child) {
+  border-left: 4px solid #9ca3af !important;
 }
 
 .empty-state {
