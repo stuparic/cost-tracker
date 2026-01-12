@@ -11,7 +11,8 @@
         :class="{ 'loading': loadingSummaries }"
       >
         <div class="summary-month">{{ summary.monthName }}</div>
-        <div class="summary-amount">{{ formatAmount(summary.totalRsd) }} RSD</div>
+        <div class="summary-amount">{{ formatAmount(summary.totalRsd) }}</div>
+        <div class="summary-currency">RSD</div>
         <div class="summary-amount-secondary">{{ formatAmount(summary.totalEur) }} EUR</div>
       </div>
     </div>
@@ -466,6 +467,12 @@ onMounted(() => {
 .summary-amount {
   font-size: 1.5rem;
   font-weight: 700;
+  margin-bottom: 0;
+}
+
+.summary-currency {
+  font-size: 0.875rem;
+  font-weight: 600;
   margin-bottom: 0.25rem;
 }
 
@@ -509,22 +516,25 @@ onMounted(() => {
 }
 
 .table-wrapper {
-  overflow-x: auto;
-  overflow-y: visible;
-  -webkit-overflow-scrolling: touch;
   background: white;
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   width: 100%;
+  overflow: hidden;
 }
 
 .expenses-table {
-  min-width: 900px;
   width: 100%;
 }
 
 .expenses-table :deep(table) {
+  min-width: 900px;
   width: 100%;
+}
+
+.expenses-table :deep(.p-datatable-wrapper) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .empty-state {
@@ -604,25 +614,39 @@ onMounted(() => {
 
   .monthly-summaries {
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+    gap: 0.375rem;
+    margin-bottom: 1rem;
   }
 
   .summary-card {
-    padding: 0.75rem;
+    padding: 0.5rem 0.375rem;
+    box-shadow: 0 2px 8px var(--primary-shadow);
+  }
+
+  .summary-card:hover {
+    transform: none;
   }
 
   .summary-month {
-    font-size: 0.75rem;
-    margin-bottom: 0.25rem;
+    font-size: 0.625rem;
+    margin-bottom: 0.125rem;
+    line-height: 1.2;
   }
 
   .summary-amount {
-    font-size: 1rem;
+    font-size: 0.875rem;
+    margin-bottom: 0;
+    line-height: 1.2;
+  }
+
+  .summary-currency {
+    font-size: 0.625rem;
     margin-bottom: 0.125rem;
   }
 
   .summary-amount-secondary {
-    font-size: 0.75rem;
+    font-size: 0.625rem;
+    line-height: 1.2;
   }
 
   .filters-section {
@@ -638,10 +662,15 @@ onMounted(() => {
   .table-wrapper {
     margin: 0 -0.5rem;
     border-radius: 0;
+    max-width: 100vw;
   }
 
   .expenses-table {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+  }
+
+  .expenses-table :deep(.p-datatable-wrapper) {
+    overflow-x: auto !important;
   }
 
   .amount-cell {
