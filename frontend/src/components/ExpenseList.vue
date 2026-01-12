@@ -11,70 +11,106 @@
         :class="{ 'loading': loadingSummaries }"
       >
         <div class="summary-month">{{ summary.monthName }}</div>
-        <div class="summary-amount">{{ formatAmount(summary.totalRsd) }}</div>
+        <div class="summary-amount">{{ formatAmount(summary.totalRsd, false) }}</div>
         <div class="summary-currency">RSD</div>
-        <div class="summary-amount-secondary">{{ formatAmount(summary.totalEur) }} EUR</div>
+        <div class="summary-amount-secondary">{{ formatAmount(summary.totalEur, true) }} EUR</div>
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="filters-section">
-      <div class="filter-field">
-        <label class="filter-label">Osoba</label>
-        <Select
-          v-model="filters.createdBy"
-          :options="personOptions"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Sve"
-          class="filter-select"
-        />
-      </div>
-
-      <div class="filter-field">
-        <label class="filter-label">Prodavnica</label>
-        <AutoComplete
-          v-model="filters.shopName"
-          :suggestions="shopSuggestions"
-          @complete="searchShops"
-          placeholder="Pretraži prodavnicu"
-          class="filter-input"
-        />
-      </div>
-
-      <div class="filter-field">
-        <label class="filter-label">Kategorija</label>
-        <AutoComplete
-          v-model="filters.category"
-          :suggestions="categorySuggestions"
-          @complete="searchCategories"
-          placeholder="Pretraži kategoriju"
-          class="filter-input"
-        />
-      </div>
-
-      <div class="filter-field">
-        <label class="filter-label">Period</label>
-        <DatePicker
-          v-model="dateRange"
-          selectionMode="range"
-          :manualInput="false"
-          placeholder="Od - Do"
-          dateFormat="dd.mm.yy"
-          class="filter-date"
-        />
-      </div>
-
-      <div class="filter-actions">
+    <!-- Quick Filters -->
+    <div class="quick-filters">
+      <!-- Month Navigation -->
+      <div class="month-navigation">
         <Button
-          label="Očisti filtere"
-          icon="pi pi-filter-slash"
-          @click="clearFilters"
-          severity="secondary"
+          icon="pi pi-chevron-left"
+          @click="navigateMonth(-1)"
           text
+          rounded
+          class="month-nav-btn"
+        />
+        <span class="current-month">{{ currentMonthLabel }}</span>
+        <Button
+          icon="pi pi-chevron-right"
+          @click="navigateMonth(1)"
+          text
+          rounded
+          class="month-nav-btn"
         />
       </div>
+
+      <!-- Person Pills -->
+      <div class="person-pills">
+        <button
+          v-for="option in personOptions"
+          :key="option.value"
+          @click="filters.createdBy = option.value"
+          class="person-pill"
+          :class="{ active: filters.createdBy === option.value }"
+        >
+          {{ option.label }}
+        </button>
+      </div>
+
+      <!-- More Filters Button -->
+      <Button
+        icon="pi pi-filter"
+        @click="advancedFiltersVisible = true"
+        text
+        rounded
+        class="more-filters-btn"
+        v-tooltip.top="'Dodatni filteri'"
+      >
+        <span v-if="advancedFiltersCount > 0" class="filter-count-badge">
+          {{ advancedFiltersCount }}
+        </span>
+      </Button>
     </div>
+
+    <!-- Advanced Filters Sidebar -->
+    <Sidebar
+      v-model:visible="advancedFiltersVisible"
+      position="right"
+      class="advanced-filters-sidebar"
+    >
+      <template #header>
+        <h3>Dodatni filteri</h3>
+      </template>
+
+      <div class="advanced-filters-content">
+        <div class="filter-field">
+          <label class="filter-label">Prodavnica</label>
+          <AutoComplete
+            v-model="filters.shopName"
+            :suggestions="shopSuggestions"
+            @complete="searchShops"
+            placeholder="Pretraži prodavnicu"
+            class="filter-input"
+          />
+        </div>
+
+        <div class="filter-field">
+          <label class="filter-label">Kategorija</label>
+          <AutoComplete
+            v-model="filters.category"
+            :suggestions="categorySuggestions"
+            @complete="searchCategories"
+            placeholder="Pretraži kategoriju"
+            class="filter-input"
+          />
+        </div>
+
+        <div class="filter-actions">
+          <Button
+            label="Očisti dodatne filtere"
+            icon="pi pi-filter-slash"
+            @click="clearAdvancedFilters"
+            severity="secondary"
+            outlined
+            class="w-full"
+          />
+        </div>
+      </div>
+    </Sidebar>
 
     <!-- Data Table -->
     <div class="table-wrapper">
@@ -106,6 +142,15 @@
 
       <Column field="shopName" header="Prodavnica" :sortable="true" />
 
+      <Column field="amount" header="Iznos" :sortable="true">
+        <template #body="{ data }">
+          <div class="amount-cell">
+            <span class="amount-primary">{{ formatAmount(data.rsdAmount, false) }} RSD</span>
+            <span class="amount-secondary">{{ formatAmount(data.eurAmount, true) }} EUR</span>
+          </div>
+        </template>
+      </Column>
+
       <Column field="category" header="Kategorija" :sortable="true">
         <template #body="{ data }">
           <span class="category-badge">{{ data.category }}</span>
@@ -113,15 +158,6 @@
       </Column>
 
       <Column field="productDescription" header="Opis" />
-
-      <Column field="amount" header="Iznos" :sortable="true">
-        <template #body="{ data }">
-          <div class="amount-cell">
-            <span class="amount-primary">{{ formatAmount(data.rsdAmount) }} RSD</span>
-            <span class="amount-secondary">{{ formatAmount(data.eurAmount) }} EUR</span>
-          </div>
-        </template>
-      </Column>
 
       <Column field="createdBy" header="Osoba" :sortable="true">
         <template #body="{ data }">
@@ -163,7 +199,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useExpensesStore } from '@/stores/expenses';
 import { useToast } from 'primevue/usetoast';
 import { autocompleteApi } from '@/api/autocomplete';
@@ -176,14 +212,25 @@ import Select from 'primevue/select';
 import DatePicker from 'primevue/datepicker';
 import AutoComplete from 'primevue/autocomplete';
 import Dialog from 'primevue/dialog';
+import Sidebar from 'primevue/sidebar';
 
 const toast = useToast();
 const expensesStore = useExpensesStore();
 
-// Get current month start/end dates
-const now = new Date();
-const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+// Current month tracking
+const currentMonth = ref(new Date());
+
+// Compute date range from current month
+const dateRange = computed(() => {
+  const start = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth(), 1);
+  const end = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth() + 1, 0, 23, 59, 59);
+  return [start, end];
+});
+
+// Current month label
+const currentMonthLabel = computed(() => {
+  return getMonthNameLatin(currentMonth.value);
+});
 
 // Filters
 const filters = reactive({
@@ -191,8 +238,6 @@ const filters = reactive({
   shopName: '',
   category: '',
 });
-
-const dateRange = ref<Date[]>([startOfMonth, endOfMonth]);
 
 // Person filter options
 const personOptions = [
@@ -221,8 +266,19 @@ interface MonthlySummary {
 const monthlySummaries = ref<MonthlySummary[]>([]);
 const loadingSummaries = ref(false);
 
-// Fetch expenses when filters change (but not on initial mount)
-watch([filters, dateRange], () => {
+// Advanced filters sidebar
+const advancedFiltersVisible = ref(false);
+
+// Count advanced filters
+const advancedFiltersCount = computed(() => {
+  let count = 0;
+  if (filters.shopName) count++;
+  if (filters.category) count++;
+  return count;
+});
+
+// Fetch expenses when filters or month change (but not on initial mount)
+watch([filters, currentMonth], () => {
   fetchExpenses();
 }, { deep: true, immediate: false });
 
@@ -232,9 +288,10 @@ async function fetchExpenses(page = 1) {
     limit: 20,
   };
 
-  if (dateRange.value && dateRange.value.length === 2 && dateRange.value[0] && dateRange.value[1]) {
-    params.startDate = dateRange.value[0].toISOString();
-    params.endDate = dateRange.value[1].toISOString();
+  const range = dateRange.value;
+  if (range && range.length === 2 && range[0] && range[1]) {
+    params.startDate = range[0].toISOString();
+    params.endDate = range[1].toISOString();
   }
 
   if (filters.createdBy) {
@@ -256,11 +313,16 @@ function onPageChange(event: any) {
   fetchExpenses(event.page + 1);
 }
 
-function clearFilters() {
-  filters.createdBy = '';
+function navigateMonth(direction: number) {
+  const newMonth = new Date(currentMonth.value);
+  newMonth.setMonth(newMonth.getMonth() + direction);
+  currentMonth.value = newMonth;
+}
+
+function clearAdvancedFilters() {
   filters.shopName = '';
   filters.category = '';
-  dateRange.value = [startOfMonth, endOfMonth];
+  advancedFiltersVisible.value = false;
 }
 
 async function searchShops(event: any) {
@@ -312,10 +374,10 @@ function formatDate(dateString: string): string {
   });
 }
 
-function formatAmount(amount: number): string {
+function formatAmount(amount: number, showDecimals: boolean = true): string {
   return amount.toLocaleString('sr-RS', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: showDecimals ? 2 : 0,
+    maximumFractionDigits: showDecimals ? 2 : 0,
   });
 }
 
@@ -428,7 +490,33 @@ onMounted(() => {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.filters-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.filters-toggle {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.active-filters-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .monthly-summaries {
@@ -490,6 +578,107 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quick-filters {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.month-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.month-nav-btn {
+  color: var(--primary-color);
+}
+
+.current-month {
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 120px;
+  text-align: center;
+  font-size: 0.9375rem;
+}
+
+.person-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.person-pill {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 2rem;
+  background: white;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.person-pill:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.person-pill.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.more-filters-btn {
+  margin-left: auto;
+  position: relative;
+  color: var(--primary-color);
+}
+
+.filter-count-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
+.advanced-filters-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 1rem;
 }
 
 .filter-field {
@@ -504,9 +693,7 @@ onMounted(() => {
   color: var(--text-secondary);
 }
 
-.filter-select,
-.filter-input,
-.filter-date {
+.filter-input {
   width: 100%;
 }
 
@@ -649,9 +836,33 @@ onMounted(() => {
     line-height: 1.2;
   }
 
-  .filters-section {
-    grid-template-columns: 1fr;
-    padding: 1rem;
+  .quick-filters {
+    padding: 0.5rem;
+    gap: 0.75rem;
+  }
+
+  .month-navigation {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .current-month {
+    font-size: 0.875rem;
+    min-width: 100px;
+  }
+
+  .person-pills {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .person-pill {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .more-filters-btn {
+    margin-left: 0;
   }
 
   .list-title {
