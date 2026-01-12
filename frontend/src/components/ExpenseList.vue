@@ -510,14 +510,20 @@ onMounted(() => {
 
 .table-wrapper {
   overflow-x: auto;
+  overflow-y: visible;
   -webkit-overflow-scrolling: touch;
   background: white;
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 .expenses-table {
-  min-width: 800px;
+  min-width: 900px;
+  width: 100%;
+}
+
+.expenses-table :deep(table) {
   width: 100%;
 }
 
@@ -597,7 +603,26 @@ onMounted(() => {
   }
 
   .monthly-summaries {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .summary-card {
+    padding: 0.75rem;
+  }
+
+  .summary-month {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .summary-amount {
+    font-size: 1rem;
+    margin-bottom: 0.125rem;
+  }
+
+  .summary-amount-secondary {
+    font-size: 0.75rem;
   }
 
   .filters-section {
