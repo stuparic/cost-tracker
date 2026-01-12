@@ -13,6 +13,7 @@ export interface Expense {
   paymentMethod: string;
   tags: string[];
   purchaseDate: string;
+  createdBy: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -22,6 +23,7 @@ export interface CreateExpenseDto {
   currency: Currency;
   shopName: string;
   purchaseDate: string;
+  createdBy: string;
   productDescription?: string;
   category?: string;
   paymentMethod?: string;
@@ -44,6 +46,7 @@ export interface QueryExpensesDto {
   limit?: number;
   category?: string;
   shopName?: string;
+  createdBy?: string;
   startDate?: string;
   endDate?: string;
   sortBy?: string;

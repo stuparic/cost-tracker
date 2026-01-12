@@ -40,6 +40,9 @@ export class ExpensesRepository {
     if (query.shopName) {
       firestoreQuery = firestoreQuery.where('shopName', '==', query.shopName) as any;
     }
+    if (query.createdBy) {
+      firestoreQuery = firestoreQuery.where('createdBy', '==', query.createdBy) as any;
+    }
     if (query.startDate) {
       firestoreQuery = firestoreQuery.where('purchaseDate', '>=', admin.firestore.Timestamp.fromDate(new Date(query.startDate))) as any;
     }

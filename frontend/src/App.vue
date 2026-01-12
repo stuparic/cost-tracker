@@ -26,8 +26,18 @@
           </div>
         </div>
       </header>
+      <nav class="tab-nav">
+        <router-link to="/add" class="tab-link">
+          <i class="pi pi-plus-circle"></i>
+          <span>Dodaj trošak</span>
+        </router-link>
+        <router-link to="/list" class="tab-link">
+          <i class="pi pi-list"></i>
+          <span>Lista troškova</span>
+        </router-link>
+      </nav>
       <main class="app-main">
-        <ExpenseForm />
+        <router-view />
       </main>
     </div>
   </div>
@@ -37,7 +47,6 @@
 import { ref, computed } from 'vue';
 import Toast from 'primevue/toast';
 import Sidebar from 'primevue/sidebar';
-import ExpenseForm from './components/expense-form/ExpenseForm.vue';
 import ThemeSelector from './components/ThemeSelector.vue';
 import UserSelectionDialog from './components/UserSelectionDialog.vue';
 
@@ -223,6 +232,46 @@ body {
 
 .user-badge i {
   font-size: 1rem;
+}
+
+.tab-nav {
+  display: flex;
+  background: white;
+  border-bottom: 2px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tab-link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+  position: relative;
+}
+
+.tab-link:hover {
+  color: var(--primary-color);
+  background: var(--primary-light);
+}
+
+.tab-link.router-link-active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.tab-link i {
+  font-size: 1.25rem;
 }
 
 .app-main {

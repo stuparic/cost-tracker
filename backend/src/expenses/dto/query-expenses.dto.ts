@@ -34,6 +34,11 @@ export class QueryExpensesDto {
   @IsString()
   shopName?: string;
 
+  @ApiPropertyOptional({ example: 'Dejan', description: 'Filter by expense creator' })
+  @IsOptional()
+  @IsString()
+  createdBy?: string;
+
   @ApiPropertyOptional({
     example: '2026-01-01T00:00:00Z',
     description: 'Filter expenses from this date',

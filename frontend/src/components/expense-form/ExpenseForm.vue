@@ -314,6 +314,7 @@ async function handleSubmit() {
       currency: form.currency,
       shopName: form.shopName.trim(),
       purchaseDate: purchaseDate.value.toISOString(),
+      createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
     };
 
     // Add optional fields only if provided
