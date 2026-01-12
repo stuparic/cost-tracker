@@ -1,6 +1,6 @@
 <template>
   <div class="expense-form">
-    <h2 class="form-title">Brzi unos troška</h2>
+    <h2 class="form-title">{{ greeting }}</h2>
 
     <form @submit.prevent="handleSubmit">
       <!-- Amount Input - Big and Beautiful -->
@@ -167,6 +167,7 @@ import Textarea from 'primevue/textarea';
 import Chips from 'primevue/chips';
 import DatePicker from 'primevue/datepicker';
 import { useExpensesStore } from '@/stores/expenses';
+import { useUserStore } from '@/stores/user';
 import { autocompleteApi } from '@/api/autocomplete';
 import { inferCategory, getConfidenceIcon } from '@/utils/category-inference';
 import type { CreateExpenseDto, Currency } from '@/types/expense';
@@ -174,6 +175,17 @@ import type { CategoryInference } from '@/utils/category-inference';
 
 const toast = useToast();
 const expensesStore = useExpensesStore();
+const userStore = useUserStore();
+
+// Personalized greeting based on selected user
+const greeting = computed(() => {
+  if (userStore.selectedUser === 'svetla') {
+    return 'Šta si kupila danas, Svetla?';
+  } else if (userStore.selectedUser === 'dejan') {
+    return 'Šta si potrošio danas, Dejane?';
+  }
+  return 'Brzi unos troška';
+});
 
 // Form state
 const form = reactive({

@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <Toast />
+    <UserSelectionDialog v-model:visible="showUserDialog" />
     <Sidebar v-model:visible="sidebarVisible" position="left" class="theme-sidebar">
       <template #header>
         <h2 class="sidebar-title">Podešavanja</h2>
@@ -19,6 +20,10 @@
             <h1>Troškić</h1>
           </div>
           <p class="app-subtitle">Pratite troškove domaćinstva</p>
+          <div v-if="userStore.selectedUser" class="user-badge" @click="switchUser">
+            <i class="pi pi-user"></i>
+            <span>{{ userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan' }}</span>
+          </div>
         </div>
       </header>
       <main class="app-main">
@@ -29,17 +34,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import Toast from 'primevue/toast';
 import Sidebar from 'primevue/sidebar';
 import ExpenseForm from './components/expense-form/ExpenseForm.vue';
 import ThemeSelector from './components/ThemeSelector.vue';
+import UserSelectionDialog from './components/UserSelectionDialog.vue';
 
 const sidebarVisible = ref(false);
+const manualDialogVisible = ref(false);
 
-// Initialize theme store on app load
+// Initialize stores on app load
 import { useThemeStore } from './stores/theme';
-useThemeStore();
+import { useUserStore } from './stores/user';
+
+const themeStore = useThemeStore();
+const userStore = useUserStore();
+
+// Show user selection dialog if no user is selected or manually triggered
+const showUserDialog = computed({
+  get: () => userStore.selectedUser === null || manualDialogVisible.value,
+  set: (value) => {
+    if (!value) {
+      manualDialogVisible.value = false;
+    }
+  }
+});
+
+// Function to allow switching users
+function switchUser() {
+  manualDialogVisible.value = true;
+}
 </script>
 
 <style>
@@ -171,6 +196,33 @@ body {
   opacity: 0.9;
   font-weight: 400;
   margin: 0;
+}
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.user-badge:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.user-badge i {
+  font-size: 1rem;
 }
 
 .app-main {
