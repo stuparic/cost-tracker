@@ -10,9 +10,7 @@ export class FirebaseService implements OnModuleInit {
   constructor(private configService: ConfigService) {}
 
   onModuleInit() {
-    const credentialsPath = this.configService.get<string>(
-      'firebase.credentialsPath',
-    );
+    const credentialsPath = this.configService.get<string>('firebase.credentialsPath');
     const projectId = this.configService.get<string>('firebase.projectId');
 
     if (!admin.apps.length) {

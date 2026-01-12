@@ -8,10 +8,7 @@ import { Expense } from './interfaces/expense.interface';
 
 @Injectable()
 export class ExpensesService {
-  constructor(
-    private currencyService: CurrencyService,
-    private expensesRepository: ExpensesRepository,
-  ) {}
+  constructor(private currencyService: CurrencyService, private expensesRepository: ExpensesRepository) {}
 
   async create(createExpenseDto: CreateExpenseDto): Promise<Expense> {
     const exchangeRate = this.currencyService.getCurrentRate();
@@ -29,12 +26,9 @@ export class ExpensesService {
     }
 
     // Apply defaults for optional fields
-    const productDescription = createExpenseDto.productDescription ||
-      `Purchase at ${createExpenseDto.shopName}`;
+    const productDescription = createExpenseDto.productDescription || `Purchase at ${createExpenseDto.shopName}`;
 
-    const category = createExpenseDto.category ||
-      this.inferCategory(createExpenseDto.shopName) ||
-      'General';
+    const category = createExpenseDto.category || this.inferCategory(createExpenseDto.shopName) || 'General';
 
     const paymentMethod = createExpenseDto.paymentMethod || 'Card';
 
@@ -52,14 +46,13 @@ export class ExpensesService {
       paymentMethod,
       tags,
       purchaseDate: createExpenseDto.purchaseDate,
+      createdBy: createExpenseDto.createdBy,
     };
 
     return this.expensesRepository.create(expenseData);
   }
 
-  async findAll(
-    query: QueryExpensesDto,
-  ): Promise<{ data: Expense[]; pagination: any }> {
+  async findAll(query: QueryExpensesDto): Promise<{ data: Expense[]; pagination: any }> {
     const { data, total } = await this.expensesRepository.findAll(query);
 
     const pagination = {
@@ -82,13 +75,9 @@ export class ExpensesService {
     const updateData: any = {};
 
     // Check if amount or currency changed, recalculate both currencies
-    if (
-      updateExpenseDto.amount !== undefined ||
-      updateExpenseDto.currency !== undefined
-    ) {
+    if (updateExpenseDto.amount !== undefined || updateExpenseDto.currency !== undefined) {
       const newAmount = updateExpenseDto.amount ?? existingExpense.amount;
-      const newCurrency =
-        updateExpenseDto.currency ?? existingExpense.originalCurrency;
+      const newCurrency = updateExpenseDto.currency ?? existingExpense.originalCurrency;
       const exchangeRate = this.currencyService.getCurrentRate();
 
       let eurAmount: number;
@@ -127,6 +116,9 @@ export class ExpensesService {
     }
     if (updateExpenseDto.purchaseDate !== undefined) {
       updateData.purchaseDate = updateExpenseDto.purchaseDate;
+    }
+    if (updateExpenseDto.createdBy !== undefined) {
+      updateData.createdBy = updateExpenseDto.createdBy;
     }
 
     return this.expensesRepository.update(id, updateData);

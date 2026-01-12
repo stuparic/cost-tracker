@@ -6,10 +6,7 @@ export class CurrencyService {
   private readonly exchangeRate: number;
 
   constructor(private configService: ConfigService) {
-    this.exchangeRate = this.configService.get<number>(
-      'FIXED_EUR_TO_RSD_RATE',
-      117.0,
-    );
+    this.exchangeRate = this.configService.get<number>('FIXED_EUR_TO_RSD_RATE', 117.0);
   }
 
   convertEurToRsd(eur: number): number {

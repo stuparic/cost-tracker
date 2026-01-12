@@ -1,22 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsNumber,
-  IsEnum,
-  IsString,
-  MinLength,
-  IsArray,
-  IsDateString,
-  Min,
-  IsOptional,
-} from 'class-validator';
+import { IsNumber, IsEnum, IsString, MinLength, IsArray, IsDateString, Min, IsOptional } from 'class-validator';
 
 export class CreateExpenseDto {
-  @ApiProperty({ example: 1500, description: 'Amount in the specified currency' })
+  @ApiProperty({
+    example: 1500,
+    description: 'Amount in the specified currency',
+  })
   @IsNumber()
   @Min(0.01, { message: 'Amount must be greater than 0' })
   amount: number;
 
-  @ApiProperty({ example: 'RSD', enum: ['EUR', 'RSD'], description: 'Currency of the amount' })
+  @ApiProperty({
+    example: 'RSD',
+    enum: ['EUR', 'RSD'],
+    description: 'Currency of the amount',
+  })
   @IsEnum(['EUR', 'RSD'], { message: 'Currency must be either EUR or RSD' })
   currency: string;
 
@@ -69,4 +67,12 @@ export class CreateExpenseDto {
   })
   @IsDateString()
   purchaseDate: string;
+
+  @ApiProperty({
+    example: 'John Doe',
+    description: 'Name of the person who created the expense',
+  })
+  @IsString()
+  @MinLength(1, { message: 'Created by cannot be empty' })
+  createdBy: string;
 }

@@ -11,6 +11,7 @@ export interface Expense {
   paymentMethod: string;
   tags: string[];
   purchaseDate: string;
+  createdBy: string;
   createdAt: string;
   updatedAt: string;
 }

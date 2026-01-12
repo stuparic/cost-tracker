@@ -1,22 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
@@ -30,8 +13,7 @@ export class ExpensesController {
   @Post()
   @ApiOperation({
     summary: 'Create a new expense',
-    description:
-      'Creates a new expense record. Automatically calculates the amount in both EUR and RSD based on the currency provided.',
+    description: 'Creates a new expense record. Automatically calculates the amount in both EUR and RSD based on the currency provided.',
   })
   @ApiResponse({
     status: 201,
@@ -45,8 +27,7 @@ export class ExpensesController {
   @Get()
   @ApiOperation({
     summary: 'Get all expenses',
-    description:
-      'Retrieves a paginated list of expenses with optional filtering by category, shop, date range, etc.',
+    description: 'Retrieves a paginated list of expenses with optional filtering by category, shop, date range, etc.',
   })
   @ApiResponse({
     status: 200,
@@ -71,8 +52,7 @@ export class ExpensesController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Update expense',
-    description:
-      'Updates an existing expense. If amount or currency is changed, recalculates both currency amounts.',
+    description: 'Updates an existing expense. If amount or currency is changed, recalculates both currency amounts.',
   })
   @ApiParam({ name: 'id', description: 'Expense ID' })
   @ApiResponse({ status: 200, description: 'Expense successfully updated' })

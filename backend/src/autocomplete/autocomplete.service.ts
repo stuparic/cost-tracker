@@ -38,9 +38,7 @@ export class AutocompleteService {
     // Filter by search prefix if provided
     if (search) {
       const searchLower = search.toLowerCase();
-      suggestions = suggestions.filter((item) =>
-        item.value.toLowerCase().includes(searchLower),
-      );
+      suggestions = suggestions.filter((item) => item.value.toLowerCase().includes(searchLower));
     }
 
     // Sort by count (descending), then alphabetically
@@ -63,26 +61,19 @@ export class AutocompleteService {
       const data = doc.data();
       const productDescription = data.productDescription;
       if (productDescription) {
-        productCounts.set(
-          productDescription,
-          (productCounts.get(productDescription) || 0) + 1,
-        );
+        productCounts.set(productDescription, (productCounts.get(productDescription) || 0) + 1);
       }
     });
 
-    let suggestions = Array.from(productCounts.entries()).map(
-      ([value, count]) => ({
-        value,
-        count,
-      }),
-    );
+    let suggestions = Array.from(productCounts.entries()).map(([value, count]) => ({
+      value,
+      count,
+    }));
 
     // Filter by search prefix if provided
     if (search) {
       const searchLower = search.toLowerCase();
-      suggestions = suggestions.filter((item) =>
-        item.value.toLowerCase().includes(searchLower),
-      );
+      suggestions = suggestions.filter((item) => item.value.toLowerCase().includes(searchLower));
     }
 
     // Sort by count (descending), then alphabetically
@@ -109,19 +100,15 @@ export class AutocompleteService {
       }
     });
 
-    let suggestions = Array.from(categoryCounts.entries()).map(
-      ([value, count]) => ({
-        value,
-        count,
-      }),
-    );
+    let suggestions = Array.from(categoryCounts.entries()).map(([value, count]) => ({
+      value,
+      count,
+    }));
 
     // Filter by search prefix if provided
     if (search) {
       const searchLower = search.toLowerCase();
-      suggestions = suggestions.filter((item) =>
-        item.value.toLowerCase().includes(searchLower),
-      );
+      suggestions = suggestions.filter((item) => item.value.toLowerCase().includes(searchLower));
     }
 
     // Sort by count (descending), then alphabetically
@@ -160,9 +147,7 @@ export class AutocompleteService {
     // Filter by search prefix if provided
     if (search) {
       const searchLower = search.toLowerCase();
-      suggestions = suggestions.filter((item) =>
-        item.value.toLowerCase().includes(searchLower),
-      );
+      suggestions = suggestions.filter((item) => item.value.toLowerCase().includes(searchLower));
     }
 
     // Sort by count (descending), then alphabetically

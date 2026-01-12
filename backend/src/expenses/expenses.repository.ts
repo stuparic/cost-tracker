@@ -41,18 +41,10 @@ export class ExpensesRepository {
       firestoreQuery = firestoreQuery.where('shopName', '==', query.shopName) as any;
     }
     if (query.startDate) {
-      firestoreQuery = firestoreQuery.where(
-        'purchaseDate',
-        '>=',
-        admin.firestore.Timestamp.fromDate(new Date(query.startDate)),
-      ) as any;
+      firestoreQuery = firestoreQuery.where('purchaseDate', '>=', admin.firestore.Timestamp.fromDate(new Date(query.startDate))) as any;
     }
     if (query.endDate) {
-      firestoreQuery = firestoreQuery.where(
-        'purchaseDate',
-        '<=',
-        admin.firestore.Timestamp.fromDate(new Date(query.endDate)),
-      ) as any;
+      firestoreQuery = firestoreQuery.where('purchaseDate', '<=', admin.firestore.Timestamp.fromDate(new Date(query.endDate))) as any;
     }
 
     // Apply sorting
@@ -135,6 +127,7 @@ export class ExpensesRepository {
       paymentMethod: data.paymentMethod,
       tags: data.tags,
       purchaseDate: data.purchaseDate?.toDate().toISOString(),
+      createdBy: data.createdBy,
       createdAt: data.createdAt?.toDate().toISOString(),
       updatedAt: data.updatedAt?.toDate().toISOString(),
     };

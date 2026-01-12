@@ -10,14 +10,21 @@ export class QueryExpensesDto {
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ example: 20, description: 'Items per page', minimum: 1 })
+  @ApiPropertyOptional({
+    example: 20,
+    description: 'Items per page',
+    minimum: 1,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
   limit?: number = 20;
 
-  @ApiPropertyOptional({ example: 'Groceries', description: 'Filter by category' })
+  @ApiPropertyOptional({
+    example: 'Groceries',
+    description: 'Filter by category',
+  })
   @IsOptional()
   @IsString()
   category?: string;
