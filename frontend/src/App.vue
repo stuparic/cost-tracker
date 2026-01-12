@@ -57,7 +57,7 @@ const manualDialogVisible = ref(false);
 import { useThemeStore } from './stores/theme';
 import { useUserStore } from './stores/user';
 
-const themeStore = useThemeStore();
+useThemeStore(); // Initialize theme
 const userStore = useUserStore();
 
 // Show user selection dialog if no user is selected or manually triggered

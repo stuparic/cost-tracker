@@ -231,7 +231,7 @@ async function fetchExpenses(page = 1) {
     limit: 20,
   };
 
-  if (dateRange.value && dateRange.value.length === 2) {
+  if (dateRange.value && dateRange.value.length === 2 && dateRange.value[0] && dateRange.value[1]) {
     params.startDate = dateRange.value[0].toISOString();
     params.endDate = dateRange.value[1].toISOString();
   }
