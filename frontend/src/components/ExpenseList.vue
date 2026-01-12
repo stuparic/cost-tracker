@@ -209,8 +209,6 @@ import type { Expense } from '@/types/expense';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-import Select from 'primevue/select';
-import DatePicker from 'primevue/datepicker';
 import AutoComplete from 'primevue/autocomplete';
 import Dialog from 'primevue/dialog';
 import Sidebar from 'primevue/sidebar';
