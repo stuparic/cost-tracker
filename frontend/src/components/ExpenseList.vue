@@ -11,8 +11,10 @@
         :class="{ 'loading': loadingSummaries }"
       >
         <div class="summary-month">{{ summary.monthName }}</div>
-        <div class="summary-amount">{{ formatAmount(summary.totalRsd, false) }}</div>
-        <div class="summary-currency">RSD</div>
+        <div class="summary-amount-row">
+          <span class="summary-amount">{{ formatAmount(summary.totalRsd, false) }}</span>
+          <span class="summary-currency">RSD</span>
+        </div>
         <div class="summary-amount-secondary">{{ formatAmount(summary.totalEur, true) }} EUR</div>
       </div>
     </div>
@@ -556,16 +558,20 @@ onMounted(() => {
   margin-bottom: 0.5rem;
 }
 
+.summary-amount-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
 .summary-amount {
   font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 0;
 }
 
 .summary-currency {
   font-size: 0.875rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
 }
 
 .summary-amount-secondary {
@@ -836,15 +842,17 @@ onMounted(() => {
     line-height: 1.2;
   }
 
+  .summary-amount-row {
+    gap: 0.125rem;
+  }
+
   .summary-amount {
     font-size: 0.875rem;
-    margin-bottom: 0;
     line-height: 1.2;
   }
 
   .summary-currency {
     font-size: 0.625rem;
-    margin-bottom: 0.125rem;
   }
 
   .summary-amount-secondary {
@@ -853,32 +861,41 @@ onMounted(() => {
   }
 
   .quick-filters {
-    padding: 0.5rem;
-    gap: 0.75rem;
+    padding: 0.5rem 0.375rem;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .month-navigation {
-    flex: 1 1 100%;
-    justify-content: center;
+    flex-shrink: 0;
+    gap: 0.25rem;
+  }
+
+  .month-nav-btn {
+    padding: 0.25rem;
   }
 
   .current-month {
-    font-size: 0.875rem;
-    min-width: 100px;
+    font-size: 0.75rem;
+    min-width: 80px;
   }
 
   .person-pills {
-    flex: 1 1 100%;
-    justify-content: center;
+    flex-shrink: 0;
+    gap: 0.375rem;
   }
 
   .person-pill {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.8125rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
   }
 
   .more-filters-btn {
-    margin-left: 0;
+    margin-left: auto;
+    flex-shrink: 0;
   }
 
   .list-title {
