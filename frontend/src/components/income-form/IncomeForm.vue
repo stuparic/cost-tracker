@@ -1,0 +1,482 @@
+<template>
+  <div class="income-form">
+    <h2 class="form-title">{{ greeting }}</h2>
+
+    <form @submit.prevent="handleSubmit">
+      <!-- Amount Input - Big and Beautiful -->
+      <div class="form-field amount-field">
+        <label for="amount" class="field-label">Iznos *</label>
+        <InputNumber
+          id="amount"
+          v-model="form.amount"
+          mode="decimal"
+          :minFractionDigits="2"
+          :maxFractionDigits="2"
+          :min="0.01"
+          placeholder="0.00"
+          class="amount-input-large"
+          :class="{ 'p-invalid': errors.amount }"
+          @input="errors.amount = ''"
+        />
+        <small v-if="errors.amount" class="error-message">{{ errors.amount }}</small>
+      </div>
+
+      <!-- Currency Pills -->
+      <div class="form-field">
+        <label class="field-label">Valuta</label>
+        <div class="currency-pills">
+          <button
+            v-for="curr in currencies"
+            :key="curr.value"
+            type="button"
+            class="currency-pill"
+            :class="{ active: form.currency === curr.value }"
+            @click="form.currency = curr.value as Currency"
+          >
+            {{ curr.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Source Input -->
+      <div class="form-field">
+        <label for="source" class="field-label">Izvor *</label>
+        <InputText
+          id="source"
+          v-model="form.source"
+          placeholder="Npr. Symphony, Dom zdravlja..."
+          class="w-full"
+          :class="{ 'p-invalid': errors.source }"
+          @input="errors.source = ''"
+        />
+        <small v-if="errors.source" class="error-message">{{ errors.source }}</small>
+      </div>
+
+      <!-- Income Type Pills -->
+      <div class="form-field">
+        <label class="field-label">Tip prihoda *</label>
+        <div class="income-type-pills">
+          <button
+            v-for="(label, type) in incomeTypeLabels"
+            :key="type"
+            type="button"
+            class="income-type-pill"
+            :class="{ active: form.incomeType === type }"
+            @click="form.incomeType = type as IncomeType"
+          >
+            {{ label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-field">
+        <label for="description" class="field-label">Opis</label>
+        <Textarea
+          id="description"
+          v-model="form.description"
+          rows="2"
+          placeholder="Dodatne napomene..."
+          class="w-full"
+        />
+      </div>
+
+      <!-- Date Received -->
+      <div class="form-field">
+        <label for="dateReceived" class="field-label">Datum primanja</label>
+        <DatePicker
+          id="dateReceived"
+          v-model="dateReceived"
+          showTime
+          hourFormat="24"
+          dateFormat="dd.mm.yy"
+          placeholder="Odaberi datum..."
+          class="w-full"
+        />
+      </div>
+
+      <!-- Submit Button -->
+      <Button
+        label="Sačuvaj"
+        type="submit"
+        :loading="loading"
+        :disabled="!isFormValid"
+        class="submit-btn"
+        size="large"
+      />
+    </form>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted } from 'vue';
+import { useToast } from 'primevue/usetoast';
+import InputNumber from 'primevue/inputnumber';
+import InputText from 'primevue/inputtext';
+import Button from 'primevue/button';
+import Textarea from 'primevue/textarea';
+import DatePicker from 'primevue/datepicker';
+import { useIncomesStore } from '@/stores/incomes';
+import { useUserStore } from '@/stores/user';
+import type { CreateIncomeDto, Currency, IncomeType } from '@/types/income';
+import { incomeTypeLabels } from '@/types/income';
+
+const toast = useToast();
+const incomesStore = useIncomesStore();
+const userStore = useUserStore();
+
+// Personalized greeting based on selected user
+const greeting = computed(() => {
+  if (userStore.selectedUser === 'svetla') {
+    return 'Šta si zaradila danas, Svetla?';
+  } else if (userStore.selectedUser === 'dejan') {
+    return 'Šta si zaradio danas, Dejane?';
+  }
+  return 'Brzi unos prihoda';
+});
+
+// Smart defaults based on user
+const getDefaultSource = () => {
+  if (userStore.selectedUser === 'svetla') {
+    return 'Dom zdravlja Titel';
+  } else if (userStore.selectedUser === 'dejan') {
+    return 'Symphony';
+  }
+  return '';
+};
+
+// Form state with smart defaults
+const form = reactive({
+  amount: null as number | null,
+  currency: 'RSD' as Currency,
+  source: getDefaultSource(),
+  incomeType: 'Salary' as IncomeType,
+  description: '',
+});
+
+const dateReceived = ref<Date>(new Date());
+const loading = ref(false);
+
+// Errors
+const errors = reactive({
+  amount: '',
+  source: '',
+});
+
+// Currency options
+const currencies = [
+  { label: 'RSD', value: 'RSD' },
+  { label: 'EUR', value: 'EUR' },
+];
+
+// Validation
+const isFormValid = computed(() => {
+  return form.amount && form.amount > 0 && form.source.trim().length > 0;
+});
+
+// Form submission
+async function handleSubmit() {
+  // Validate
+  errors.amount = '';
+  errors.source = '';
+
+  if (!form.amount || form.amount <= 0) {
+    errors.amount = 'Unesite iznos';
+    return;
+  }
+
+  if (!form.source.trim()) {
+    errors.source = 'Unesite izvor prihoda';
+    return;
+  }
+
+  loading.value = true;
+
+  try {
+    const incomeData: CreateIncomeDto = {
+      amount: form.amount,
+      currency: form.currency,
+      source: form.source.trim(),
+      incomeType: form.incomeType,
+      dateReceived: dateReceived.value.toISOString(),
+      createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
+    };
+
+    // Add description if provided
+    if (form.description?.trim()) {
+      incomeData.description = form.description.trim();
+    }
+
+    await incomesStore.createIncome(incomeData);
+
+    toast.add({
+      severity: 'success',
+      summary: 'Uspešno!',
+      detail: 'Prihod je sačuvan',
+      life: 3000,
+    });
+
+    // Reset form
+    resetForm();
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Greška',
+      detail: error.response?.data?.message || 'Nije moguće sačuvati prihod',
+      life: 5000,
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
+function resetForm() {
+  form.amount = null;
+  form.currency = 'RSD';
+  form.source = getDefaultSource();
+  form.incomeType = 'Salary';
+  form.description = '';
+  dateReceived.value = new Date();
+}
+
+// Initialize defaults when component mounts or user changes
+onMounted(() => {
+  form.source = getDefaultSource();
+});
+</script>
+
+<style scoped>
+.income-form {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: white;
+  min-height: 100%;
+}
+
+.form-title {
+  margin: 0 0 1.75rem 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.025em;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.625rem;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9375rem;
+}
+
+/* Big Amount Input */
+.amount-field {
+  margin-bottom: 2rem;
+}
+
+.amount-input-large {
+  width: 100%;
+}
+
+.amount-input-large :deep(input) {
+  font-size: 2.5rem !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  padding: 1.25rem 0.5rem !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 1rem !important;
+  transition: all 0.2s !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.amount-input-large :deep(input::placeholder) {
+  text-align: center !important;
+  opacity: 0.5 !important;
+}
+
+.amount-input-large :deep(input):focus {
+  border-color: var(--income-color) !important;
+  box-shadow: 0 0 0 3px var(--income-shadow) !important;
+}
+
+.amount-input-large.p-invalid :deep(input) {
+  border-color: #dc2626 !important;
+}
+
+/* Currency Pills */
+.currency-pills {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.currency-pill {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.currency-pill:hover {
+  border-color: var(--income-color);
+  background: var(--income-light);
+}
+
+.currency-pill.active {
+  background: linear-gradient(135deg, var(--income-color) 0%, var(--income-dark) 100%);
+  border-color: var(--income-color);
+  color: white;
+  box-shadow: 0 4px 12px var(--income-shadow);
+}
+
+/* Income Type Pills */
+.income-type-pills {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.income-type-pill {
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.income-type-pill:hover {
+  border-color: var(--income-color);
+  background: var(--income-light);
+}
+
+.income-type-pill.active {
+  background: linear-gradient(135deg, var(--income-color) 0%, var(--income-dark) 100%);
+  border-color: var(--income-color);
+  color: white;
+  box-shadow: 0 4px 12px var(--income-shadow);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--income-color) 0%, var(--income-dark) 100%);
+  border: none;
+  box-shadow: 0 4px 12px var(--income-shadow);
+  transition: all 0.2s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--income-shadow);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc2626;
+  display: block;
+  margin-top: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.p-invalid {
+  border-color: #dc2626 !important;
+}
+
+.w-full {
+  width: 100%;
+}
+
+/* Mobile-first: Full-screen experience */
+@media (max-width: 768px) {
+  .income-form {
+    padding: 1.25rem 1rem;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .form-title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-field {
+    margin-bottom: 1.375rem;
+  }
+
+  .field-label {
+    font-size: 0.9375rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .amount-field {
+    margin-bottom: 1.75rem;
+  }
+
+  .amount-input-large :deep(input) {
+    font-size: 2rem !important;
+    padding: 1rem !important;
+  }
+
+  .currency-pill {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+
+  .income-type-pill {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.875rem;
+  }
+
+  .submit-btn {
+    padding: 1.125rem;
+    font-size: 1.0625rem;
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--income-color) 0%, var(--income-dark) 100%);
+    border-radius: 0;
+    margin: 0 -1rem -1.25rem -1rem;
+    width: calc(100% + 2rem);
+  }
+}
+
+/* Tablet and desktop: Card layout */
+@media (min-width: 769px) {
+  .income-form {
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-top: 0;
+  }
+
+  .submit-btn {
+    border-radius: 0.75rem;
+  }
+}
+</style>

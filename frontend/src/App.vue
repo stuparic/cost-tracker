@@ -26,14 +26,38 @@
           </div>
         </div>
       </header>
-      <nav class="tab-nav">
+      <!-- Main Section Navigation -->
+      <nav class="main-nav">
+        <router-link to="/add" class="main-tab expense-tab">
+          <i class="pi pi-shopping-cart"></i>
+          <span>Troškovi</span>
+        </router-link>
+        <router-link to="/income/add" class="main-tab income-tab">
+          <i class="pi pi-wallet"></i>
+          <span>Prihodi</span>
+        </router-link>
+      </nav>
+
+      <!-- Sub Navigation -->
+      <nav v-if="isExpenseRoute" class="tab-nav expense-subnav">
         <router-link to="/add" class="tab-link">
           <i class="pi pi-plus-circle"></i>
-          <span>Dodaj trošak</span>
+          <span>Dodaj</span>
         </router-link>
         <router-link to="/list" class="tab-link">
           <i class="pi pi-list"></i>
-          <span>Lista troškova</span>
+          <span>Lista</span>
+        </router-link>
+      </nav>
+
+      <nav v-if="isIncomeRoute" class="tab-nav income-subnav">
+        <router-link to="/income/add" class="tab-link">
+          <i class="pi pi-plus-circle"></i>
+          <span>Dodaj</span>
+        </router-link>
+        <router-link to="/income/list" class="tab-link">
+          <i class="pi pi-list"></i>
+          <span>Lista</span>
         </router-link>
       </nav>
       <main class="app-main">
@@ -45,11 +69,13 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import Toast from 'primevue/toast';
 import Sidebar from 'primevue/sidebar';
 import ThemeSelector from './components/ThemeSelector.vue';
 import UserSelectionDialog from './components/UserSelectionDialog.vue';
 
+const route = useRoute();
 const sidebarVisible = ref(false);
 const manualDialogVisible = ref(false);
 
@@ -68,6 +94,15 @@ const showUserDialog = computed({
       manualDialogVisible.value = false;
     }
   }
+});
+
+// Detect current route section
+const isExpenseRoute = computed(() => {
+  return route.path === '/add' || route.path === '/list';
+});
+
+const isIncomeRoute = computed(() => {
+  return route.path.startsWith('/income');
 });
 
 // Function to allow switching users
@@ -97,6 +132,12 @@ function switchUser() {
   --text-secondary: #6b7280;
   --border-color: #e5e7eb;
   --background: #f8fafb;
+
+  /* Income Colors */
+  --income-color: #0891b2;
+  --income-dark: #0e7490;
+  --income-light: #ecfeff;
+  --income-shadow: rgba(8, 145, 178, 0.25);
 }
 
 * {
@@ -234,6 +275,53 @@ body {
   font-size: 1rem;
 }
 
+/* Main Navigation (Troškovi/Prihodi) */
+.main-nav {
+  display: flex;
+  background: white;
+  border-bottom: 2px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 91;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.main-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+}
+
+.main-tab i {
+  font-size: 1.5rem;
+}
+
+.main-tab.expense-tab.router-link-active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  background: var(--primary-light);
+}
+
+.main-tab.income-tab.router-link-active {
+  color: var(--income-color);
+  border-bottom-color: var(--income-color);
+  background: var(--income-light);
+}
+
+.main-tab:hover {
+  background: var(--background);
+}
+
+/* Sub Navigation (Dodaj/Lista) */
 .tab-nav {
   display: flex;
   background: white;
@@ -241,7 +329,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 90;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .tab-link {
@@ -250,7 +338,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 0.875rem;
   text-decoration: none;
   color: var(--text-secondary);
   font-weight: 500;
@@ -260,18 +348,28 @@ body {
   position: relative;
 }
 
-.tab-link:hover {
+.tab-link i {
+  font-size: 1.125rem;
+}
+
+.expense-subnav .tab-link:hover {
   color: var(--primary-color);
   background: var(--primary-light);
 }
 
-.tab-link.router-link-active {
+.expense-subnav .tab-link.router-link-active {
   color: var(--primary-color);
   border-bottom-color: var(--primary-color);
 }
 
-.tab-link i {
-  font-size: 1.25rem;
+.income-subnav .tab-link:hover {
+  color: var(--income-color);
+  background: var(--income-light);
+}
+
+.income-subnav .tab-link.router-link-active {
+  color: var(--income-color);
+  border-bottom-color: var(--income-color);
 }
 
 .app-main {

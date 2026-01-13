@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { FirebaseModule } from './firebase/firebase.module';
 import { ExpensesModule } from './expenses/expenses.module';
+import { IncomesModule } from './incomes/incomes.module';
 import { AutocompleteModule } from './autocomplete/autocomplete.module';
 import { HealthModule } from './health/health.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
@@ -17,6 +18,7 @@ import firebaseConfig from './config/firebase.config';
     }),
     FirebaseModule,
     ExpensesModule,
+    IncomesModule,
     AutocompleteModule,
     HealthModule,
   ],
