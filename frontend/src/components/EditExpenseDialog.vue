@@ -171,7 +171,7 @@ const errors = reactive({
 const loading = ref(false);
 
 // Options
-const currencies = [
+const currencies: Array<{ label: string; value: Currency }> = [
   { label: 'RSD', value: 'RSD' },
   { label: 'EUR', value: 'EUR' },
 ];
