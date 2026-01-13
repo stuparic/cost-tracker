@@ -86,6 +86,18 @@
         </template>
       </Column>
 
+      <Column header="Izvor" style="min-width: 100px">
+        <template #body="{ data }">
+          <Tag
+            v-if="data.recurringOccurrenceId"
+            value="Auto"
+            severity="info"
+            icon="pi pi-replay"
+          />
+          <span v-else class="manual-label">Ručno</span>
+        </template>
+      </Column>
+
       <Column field="description" header="Opis" style="min-width: 180px">
         <template #body="{ data }">
           <div class="description-cell">
@@ -173,6 +185,7 @@ import Paginator from 'primevue/paginator';
 import Sidebar from 'primevue/sidebar';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
+import Tag from 'primevue/tag';
 import ConfirmDialog from 'primevue/confirmdialog';
 import EditIncomeDialog from './EditIncomeDialog.vue';
 import { useIncomesStore } from '@/stores/incomes';
@@ -633,6 +646,12 @@ onMounted(() => {
   display: flex;
   gap: 0.25rem;
   justify-content: flex-end;
+}
+
+.manual-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 /* Pagination */

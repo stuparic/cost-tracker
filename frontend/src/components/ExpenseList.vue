@@ -160,6 +160,18 @@
         </template>
       </Column>
 
+      <Column header="Izvor" style="min-width: 100px">
+        <template #body="{ data }">
+          <Tag
+            v-if="data.recurringOccurrenceId"
+            value="Auto"
+            severity="info"
+            icon="pi pi-replay"
+          />
+          <span v-else class="manual-label">Ručno</span>
+        </template>
+      </Column>
+
       <Column field="productDescription" header="Opis" />
 
       <Column field="createdBy" header="Osoba" :sortable="true">
@@ -228,6 +240,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import AutoComplete from 'primevue/autocomplete';
+import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
 import Sidebar from 'primevue/sidebar';
 import EditExpenseDialog from './EditExpenseDialog.vue';
@@ -845,6 +858,12 @@ onMounted(() => {
 .person-badge.unknown {
   background: #f3f4f6;
   color: #6b7280;
+}
+
+.manual-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 /* Mobile responsiveness */

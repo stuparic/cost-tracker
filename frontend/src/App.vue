@@ -7,6 +7,13 @@
         <h2 class="sidebar-title">Podešavanja</h2>
       </template>
       <ThemeSelector />
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Navigacija</h3>
+        <router-link to="/recurring" class="sidebar-link" @click="sidebarVisible = false">
+          <i class="pi pi-replay"></i>
+          <span>Ponavljajuće stavke</span>
+        </router-link>
+      </div>
     </Sidebar>
 
     <div class="app-container">
@@ -423,5 +430,48 @@ body {
     justify-content: flex-start;
     align-items: center;
   }
+}
+
+/* Sidebar Navigation */
+.sidebar-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.sidebar-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1rem 0;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.sidebar-link:hover {
+  background: var(--primary-light);
+  color: var(--primary-color);
+}
+
+.sidebar-link.router-link-active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.sidebar-link i {
+  font-size: 1.125rem;
 }
 </style>

@@ -3,6 +3,7 @@ import ExpenseForm from '@/components/expense-form/ExpenseForm.vue';
 import ExpenseList from '@/components/ExpenseList.vue';
 import IncomeForm from '@/components/income-form/IncomeForm.vue';
 import IncomeList from '@/components/IncomeList.vue';
+import RecurringOccurrencesList from '@/components/RecurringOccurrencesList.vue';
 
 const routes = [
   {
@@ -28,6 +29,11 @@ const routes = [
     path: '/income/list',
     name: 'IncomeList',
     component: IncomeList
+  },
+  {
+    path: '/recurring',
+    name: 'RecurringOccurrences',
+    component: RecurringOccurrencesList
   }
 ];
 
