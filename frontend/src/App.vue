@@ -127,6 +127,13 @@ function switchUser() {
   --primary-shadow: rgba(168, 85, 247, 0.25);
 }
 
+:root[data-theme="blue"] {
+  --primary-color: #3b82f6;
+  --primary-dark: #2563eb;
+  --primary-light: #eff6ff;
+  --primary-shadow: rgba(59, 130, 246, 0.25);
+}
+
 :root {
   --text-primary: #1f2937;
   --text-secondary: #6b7280;

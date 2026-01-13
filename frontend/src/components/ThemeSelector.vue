@@ -28,6 +28,19 @@
         <span class="theme-name">Ljubičasta</span>
         <i v-if="themeStore.currentTheme === 'purple'" class="pi pi-check"></i>
       </button>
+
+      <button
+        class="theme-option"
+        :class="{ active: themeStore.currentTheme === 'blue' }"
+        @click="themeStore.setTheme('blue')"
+      >
+        <div class="theme-preview blue-preview">
+          <div class="preview-bar"></div>
+          <div class="preview-content"></div>
+        </div>
+        <span class="theme-name">Plava</span>
+        <i v-if="themeStore.currentTheme === 'blue'" class="pi pi-check"></i>
+      </button>
     </div>
   </div>
 </template>
@@ -104,6 +117,10 @@ const themeStore = useThemeStore();
 
 .purple-preview .preview-bar {
   background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+}
+
+.blue-preview .preview-bar {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 }
 
 .theme-name {

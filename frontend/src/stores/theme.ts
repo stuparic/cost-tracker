@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
 
-export type Theme = 'green' | 'purple';
+export type Theme = 'green' | 'purple' | 'blue';
 
 export const useThemeStore = defineStore('theme', () => {
   // Load theme from localStorage or default to green
