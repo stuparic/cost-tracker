@@ -74,10 +74,10 @@ export class RecurringService {
       amount: occurrence.amount,
       currency: occurrence.originalCurrency,
       category: occurrence.expenseCategory,
-      store: occurrence.store,
-      datePurchased: new Date().toISOString(),
+      shopName: occurrence.store,
+      purchaseDate: new Date().toISOString(),
       createdBy: occurrence.createdBy,
-      description: occurrence.description,
+      productDescription: occurrence.description,
       recurringOccurrenceId: occurrence.id,
     };
 

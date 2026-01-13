@@ -26,7 +26,7 @@ export class RecurringOccurrencesRepository {
 
       // Income fields
       source: dto.source,
-      incomeType: dto.incomeType,
+      incomeType: dto.incomeType as 'Salary' | 'Freelance' | 'Investment' | 'Gift' | 'Other',
 
       // Expense fields
       expenseCategory: dto.expenseCategory,

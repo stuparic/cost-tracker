@@ -8,5 +8,6 @@ import { CurrencyModule } from '../currency/currency.module';
   imports: [CurrencyModule],
   controllers: [ExpensesController],
   providers: [ExpensesService, ExpensesRepository],
+  exports: [ExpensesService],
 })
 export class ExpensesModule {}
