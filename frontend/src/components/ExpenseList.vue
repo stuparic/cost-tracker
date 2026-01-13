@@ -173,6 +173,14 @@
       <Column header="Akcije">
         <template #body="{ data }">
           <Button
+            icon="pi pi-pencil"
+            severity="secondary"
+            text
+            rounded
+            @click="openEditDialog(data)"
+            v-tooltip.top="'Izmeni'"
+          />
+          <Button
             icon="pi pi-trash"
             severity="danger"
             text
@@ -184,6 +192,14 @@
       </Column>
       </DataTable>
     </div>
+
+    <!-- Edit Expense Dialog -->
+    <EditExpenseDialog
+      v-if="expenseToEdit"
+      v-model:visible="editDialogVisible"
+      :expense="expenseToEdit"
+      @success="handleEditSuccess"
+    />
 
     <!-- Delete Confirmation Dialog -->
     <Dialog
@@ -214,6 +230,7 @@ import Button from 'primevue/button';
 import AutoComplete from 'primevue/autocomplete';
 import Dialog from 'primevue/dialog';
 import Sidebar from 'primevue/sidebar';
+import EditExpenseDialog from './EditExpenseDialog.vue';
 
 const toast = useToast();
 const expensesStore = useExpensesStore();
@@ -255,6 +272,10 @@ const categorySuggestions = ref<string[]>([]);
 const deleteDialogVisible = ref(false);
 const expenseToDelete = ref<Expense | null>(null);
 const deleting = ref(false);
+
+// Edit dialog
+const editDialogVisible = ref(false);
+const expenseToEdit = ref<Expense | null>(null);
 
 // Monthly summaries
 interface MonthlySummary {
@@ -404,6 +425,17 @@ function getMonthNameLatin(date: Date): string {
   ];
 
   return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function openEditDialog(expense: Expense) {
+  expenseToEdit.value = expense;
+  editDialogVisible.value = true;
+}
+
+function handleEditSuccess() {
+  editDialogVisible.value = false;
+  expenseToEdit.value = null;
+  fetchExpenses();
 }
 
 function confirmDelete(expense: Expense) {
