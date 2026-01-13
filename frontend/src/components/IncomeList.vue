@@ -176,6 +176,7 @@ import Select from 'primevue/select';
 import ConfirmDialog from 'primevue/confirmdialog';
 import EditIncomeDialog from './EditIncomeDialog.vue';
 import { useIncomesStore } from '@/stores/incomes';
+import { incomeApi } from '@/api/incomes';
 import type { Income, IncomeType } from '@/types/income';
 import { incomeTypeLabels } from '@/types/income';
 
@@ -212,20 +213,60 @@ const incomeTypeOptions = [
 ];
 
 // Monthly summaries (last 3 months)
-const monthlySummaries = computed(() => {
-  const summaries = [];
-  for (let i = 0; i < 3; i++) {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
-    summaries.push({
-      month: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
-      monthName: date.toLocaleDateString('sr-Latn', { month: 'long', year: 'numeric' }),
-      totalRSD: 0, // Would be calculated from actual data
-      totalEUR: 0,
-    });
+interface MonthlySummary {
+  month: string;
+  monthName: string;
+  totalRSD: number;
+  totalEUR: number;
+}
+
+const monthlySummaries = ref<MonthlySummary[]>([]);
+const loadingSummaries = ref(false);
+
+// Fetch monthly summaries for the last 3 months
+async function fetchMonthlySummaries() {
+  loadingSummaries.value = true;
+  try {
+    const summaries: MonthlySummary[] = [];
+
+    for (let i = 0; i < 3; i++) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+
+      const startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+      const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
+
+      // Fetch incomes for this month
+      const response = await incomeApi.getAll({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        limit: 1000, // Get all for this month
+      });
+
+      // Calculate totals
+      let totalRSD = 0;
+      let totalEUR = 0;
+
+      response.data.forEach((income: Income) => {
+        totalRSD += income.rsdAmount;
+        totalEUR += income.eurAmount;
+      });
+
+      summaries.push({
+        month: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+        monthName: date.toLocaleDateString('sr-Latn', { month: 'long', year: 'numeric' }),
+        totalRSD,
+        totalEUR,
+      });
+    }
+
+    monthlySummaries.value = summaries;
+  } catch (error) {
+    console.error('Failed to load monthly summaries:', error);
+  } finally {
+    loadingSummaries.value = false;
   }
-  return summaries;
-});
+}
 
 const currentMonthDisplay = computed(() => {
   return currentMonth.value.toLocaleDateString('sr-Latn', { month: 'long', year: 'numeric' });
@@ -323,6 +364,7 @@ function confirmDelete(income: Income) {
           life: 3000,
         });
         applyFilters();
+        fetchMonthlySummaries();
       } catch (error) {
         toast.add({
           severity: 'error',
@@ -338,6 +380,7 @@ function confirmDelete(income: Income) {
 function onIncomeUpdated() {
   editDialogVisible.value = false;
   applyFilters();
+  fetchMonthlySummaries();
 }
 
 // Formatting
@@ -375,6 +418,7 @@ function getRowClass(data: Income) {
 
 // Load initial data
 onMounted(() => {
+  fetchMonthlySummaries();
   applyFilters();
 });
 </script>
