@@ -129,8 +129,8 @@
         />
       </div>
 
-      <!-- Purchase Date -->
-      <div class="form-field">
+      <!-- Purchase Date (only show if NOT recurring) -->
+      <div v-if="!form.isRecurring" class="form-field">
         <label for="purchaseDate" class="field-label">Datum kupovine</label>
         <DatePicker
           id="purchaseDate"
@@ -139,6 +139,55 @@
           hourFormat="24"
           dateFormat="dd.mm.yy"
           placeholder="Odaberi datum..."
+          class="w-full"
+        />
+      </div>
+
+      <!-- Recurring Checkbox -->
+      <div class="form-field">
+        <div class="recurring-checkbox">
+          <Checkbox v-model="form.isRecurring" inputId="recurring" binary />
+          <label for="recurring" class="checkbox-label">Ponavljajući trošak</label>
+        </div>
+      </div>
+
+      <!-- Recurring Frequency (show only if isRecurring is true) -->
+      <div v-if="form.isRecurring" class="form-field">
+        <label class="field-label">Učestalost *</label>
+        <div class="frequency-pills">
+          <button
+            v-for="(label, freq) in recurringFrequencyLabels"
+            :key="freq"
+            type="button"
+            class="frequency-pill"
+            :class="{ active: form.recurringFrequency === freq }"
+            @click="form.recurringFrequency = freq as RecurringFrequency"
+          >
+            {{ label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Start Date (show only if isRecurring is true) -->
+      <div v-if="form.isRecurring" class="form-field">
+        <label for="startDate" class="field-label">Datum prve kupovine *</label>
+        <DatePicker
+          id="startDate"
+          v-model="form.startDate"
+          dateFormat="dd.mm.yy"
+          placeholder="Odaberi datum..."
+          class="w-full"
+        />
+      </div>
+
+      <!-- Recurring Until (optional) -->
+      <div v-if="form.isRecurring" class="form-field">
+        <label for="recurringUntil" class="field-label">Ponavljaj do (opciono)</label>
+        <DatePicker
+          id="recurringUntil"
+          v-model="form.recurringUntil"
+          dateFormat="dd.mm.yy"
+          placeholder="Ako nije odabrano, ponavlja se beskonačno..."
           class="w-full"
         />
       </div>
@@ -166,12 +215,15 @@ import AutoComplete from 'primevue/autocomplete';
 import Textarea from 'primevue/textarea';
 import Chips from 'primevue/chips';
 import DatePicker from 'primevue/datepicker';
+import Checkbox from 'primevue/checkbox';
 import { useExpensesStore } from '@/stores/expenses';
 import { useUserStore } from '@/stores/user';
 import { autocompleteApi } from '@/api/autocomplete';
 import { inferCategory, getConfidenceIcon } from '@/utils/category-inference';
 import type { CreateExpenseDto, Currency } from '@/types/expense';
 import type { CategoryInference } from '@/utils/category-inference';
+import { recurringFrequencyLabels, type RecurringFrequency, type CreateRecurringOccurrenceDto } from '@/types/recurring-occurrence';
+import apiClient from '@/api/client';
 
 const toast = useToast();
 const expensesStore = useExpensesStore();
@@ -196,6 +248,10 @@ const form = reactive({
   category: '',
   paymentMethod: 'Kartica',
   tags: [] as string[],
+  isRecurring: false,
+  recurringFrequency: 'monthly' as RecurringFrequency,
+  startDate: new Date(),
+  recurringUntil: null as Date | null,
 });
 
 const purchaseDate = ref<Date>(new Date());
@@ -309,36 +365,62 @@ async function handleSubmit() {
   loading.value = true;
 
   try {
-    const expenseData: CreateExpenseDto = {
-      amount: form.amount,
-      currency: form.currency,
-      shopName: form.shopName.trim(),
-      purchaseDate: purchaseDate.value.toISOString(),
-      createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
-    };
+    if (form.isRecurring) {
+      // Create recurring occurrence
+      const occurrenceData: CreateRecurringOccurrenceDto = {
+        occurrenceType: 'expense',
+        amount: form.amount,
+        currency: form.currency,
+        store: form.shopName.trim(),
+        expenseCategory: form.category?.trim() || '',
+        description: form.productDescription?.trim() || '',
+        frequency: form.recurringFrequency,
+        startDate: form.startDate.toISOString(),
+        recurringUntil: form.recurringUntil?.toISOString(),
+        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
+      };
 
-    // Add optional fields only if provided
-    if (form.productDescription?.trim()) {
-      expenseData.productDescription = form.productDescription.trim();
-    }
-    if (form.category?.trim()) {
-      expenseData.category = form.category.trim();
-    }
-    if (form.paymentMethod?.trim()) {
-      expenseData.paymentMethod = form.paymentMethod.trim();
-    }
-    if (form.tags && form.tags.length > 0) {
-      expenseData.tags = form.tags;
-    }
+      await apiClient.post('/recurring-occurrences', occurrenceData);
 
-    await expensesStore.createExpense(expenseData);
+      toast.add({
+        severity: 'success',
+        summary: 'Uspešno!',
+        detail: 'Ponavljajući trošak je kreiran',
+        life: 3000,
+      });
+    } else {
+      // Create regular one-time expense
+      const expenseData: CreateExpenseDto = {
+        amount: form.amount,
+        currency: form.currency,
+        shopName: form.shopName.trim(),
+        purchaseDate: purchaseDate.value.toISOString(),
+        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
+      };
 
-    toast.add({
-      severity: 'success',
-      summary: 'Uspešno!',
-      detail: 'Trošak je sačuvan',
-      life: 3000,
-    });
+      // Add optional fields only if provided
+      if (form.productDescription?.trim()) {
+        expenseData.productDescription = form.productDescription.trim();
+      }
+      if (form.category?.trim()) {
+        expenseData.category = form.category.trim();
+      }
+      if (form.paymentMethod?.trim()) {
+        expenseData.paymentMethod = form.paymentMethod.trim();
+      }
+      if (form.tags && form.tags.length > 0) {
+        expenseData.tags = form.tags;
+      }
+
+      await expensesStore.createExpense(expenseData);
+
+      toast.add({
+        severity: 'success',
+        summary: 'Uspešno!',
+        detail: 'Trošak je sačuvan',
+        life: 3000,
+      });
+    }
 
     // Reset form
     resetForm();
@@ -362,6 +444,10 @@ function resetForm() {
   form.category = '';
   form.paymentMethod = 'Kartica';
   form.tags = [];
+  form.isRecurring = false;
+  form.recurringFrequency = 'monthly';
+  form.startDate = new Date();
+  form.recurringUntil = null;
   purchaseDate.value = new Date();
   inferredCategory.value = {
     category: 'General',
@@ -621,6 +707,63 @@ function resetForm() {
     margin: 0 -1rem -1.25rem -1rem;
     width: calc(100% + 2rem);
   }
+}
+
+/* Recurring Checkbox */
+.recurring-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 0.75rem;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.recurring-checkbox:has(input:checked) {
+  background: var(--primary-light);
+  border-color: var(--primary-color);
+}
+
+.checkbox-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Frequency Pills */
+.frequency-pills {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.frequency-pill {
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.frequency-pill:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-light);
+}
+
+.frequency-pill.active {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  border-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 4px 12px var(--primary-shadow);
 }
 
 /* Tablet and desktop: Card layout */
