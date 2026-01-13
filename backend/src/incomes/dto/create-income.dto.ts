@@ -59,4 +59,12 @@ export class CreateIncomeDto {
   @IsString()
   @MinLength(1, { message: 'Created by cannot be empty' })
   createdBy: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'ID of recurring occurrence if auto-created',
+  })
+  @IsOptional()
+  @IsString()
+  recurringOccurrenceId?: string;
 }

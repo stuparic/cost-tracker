@@ -14,4 +14,5 @@ export interface Expense {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  recurringOccurrenceId?: string;
 }

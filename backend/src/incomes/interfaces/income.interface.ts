@@ -12,4 +12,5 @@ export interface Income {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  recurringOccurrenceId?: string;
 }
