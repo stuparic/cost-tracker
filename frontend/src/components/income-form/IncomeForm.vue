@@ -81,8 +81,8 @@
         />
       </div>
 
-      <!-- Date Received -->
-      <div class="form-field">
+      <!-- Date Received (only show if NOT recurring) -->
+      <div v-if="!form.isRecurring" class="form-field">
         <label for="dateReceived" class="field-label">Datum primanja</label>
         <DatePicker
           id="dateReceived"
@@ -91,6 +91,55 @@
           hourFormat="24"
           dateFormat="dd.mm.yy"
           placeholder="Odaberi datum..."
+          class="w-full"
+        />
+      </div>
+
+      <!-- Recurring Checkbox -->
+      <div class="form-field">
+        <div class="recurring-checkbox">
+          <Checkbox v-model="form.isRecurring" inputId="recurring" binary />
+          <label for="recurring" class="checkbox-label">Ponavljajući prihod</label>
+        </div>
+      </div>
+
+      <!-- Recurring Frequency (show only if isRecurring is true) -->
+      <div v-if="form.isRecurring" class="form-field">
+        <label class="field-label">Učestalost *</label>
+        <div class="frequency-pills">
+          <button
+            v-for="(label, freq) in recurringFrequencyLabels"
+            :key="freq"
+            type="button"
+            class="frequency-pill"
+            :class="{ active: form.recurringFrequency === freq }"
+            @click="form.recurringFrequency = freq as RecurringFrequency"
+          >
+            {{ label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Start Date (show only if isRecurring is true) -->
+      <div v-if="form.isRecurring" class="form-field">
+        <label for="startDate" class="field-label">Datum prvog prihoda *</label>
+        <DatePicker
+          id="startDate"
+          v-model="form.startDate"
+          dateFormat="dd.mm.yy"
+          placeholder="Odaberi datum..."
+          class="w-full"
+        />
+      </div>
+
+      <!-- Recurring Until (optional) -->
+      <div v-if="form.isRecurring" class="form-field">
+        <label for="recurringUntil" class="field-label">Ponavljaj do (opciono)</label>
+        <DatePicker
+          id="recurringUntil"
+          v-model="form.recurringUntil"
+          dateFormat="dd.mm.yy"
+          placeholder="Ako nije odabrano, ponavlja se beskonačno..."
           class="w-full"
         />
       </div>
@@ -116,10 +165,13 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Textarea from 'primevue/textarea';
 import DatePicker from 'primevue/datepicker';
+import Checkbox from 'primevue/checkbox';
 import { useIncomesStore } from '@/stores/incomes';
 import { useUserStore } from '@/stores/user';
 import type { CreateIncomeDto, Currency, IncomeType } from '@/types/income';
 import { incomeTypeLabels } from '@/types/income';
+import { recurringFrequencyLabels, type RecurringFrequency, type CreateRecurringOccurrenceDto } from '@/types/recurring-occurrence';
+import apiClient from '@/api/client';
 
 const toast = useToast();
 const incomesStore = useIncomesStore();
@@ -152,6 +204,10 @@ const form = reactive({
   source: getDefaultSource(),
   incomeType: 'Salary' as IncomeType,
   description: '',
+  isRecurring: false,
+  recurringFrequency: 'monthly' as RecurringFrequency,
+  startDate: new Date(),
+  recurringUntil: null as Date | null,
 });
 
 const dateReceived = ref<Date>(new Date());
@@ -193,28 +249,54 @@ async function handleSubmit() {
   loading.value = true;
 
   try {
-    const incomeData: CreateIncomeDto = {
-      amount: form.amount,
-      currency: form.currency,
-      source: form.source.trim(),
-      incomeType: form.incomeType,
-      dateReceived: dateReceived.value.toISOString(),
-      createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
-    };
+    if (form.isRecurring) {
+      // Create recurring occurrence
+      const occurrenceData: CreateRecurringOccurrenceDto = {
+        occurrenceType: 'income',
+        amount: form.amount,
+        currency: form.currency,
+        source: form.source.trim(),
+        incomeType: form.incomeType,
+        description: form.description?.trim() || '',
+        frequency: form.recurringFrequency,
+        startDate: form.startDate.toISOString(),
+        recurringUntil: form.recurringUntil?.toISOString(),
+        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
+      };
 
-    // Add description if provided
-    if (form.description?.trim()) {
-      incomeData.description = form.description.trim();
+      await apiClient.post('/recurring-occurrences', occurrenceData);
+
+      toast.add({
+        severity: 'success',
+        summary: 'Uspešno!',
+        detail: 'Ponavljajući prihod je kreiran',
+        life: 3000,
+      });
+    } else {
+      // Create regular one-time income
+      const incomeData: CreateIncomeDto = {
+        amount: form.amount,
+        currency: form.currency,
+        source: form.source.trim(),
+        incomeType: form.incomeType,
+        dateReceived: dateReceived.value.toISOString(),
+        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
+      };
+
+      // Add description if provided
+      if (form.description?.trim()) {
+        incomeData.description = form.description.trim();
+      }
+
+      await incomesStore.createIncome(incomeData);
+
+      toast.add({
+        severity: 'success',
+        summary: 'Uspešno!',
+        detail: 'Prihod je sačuvan',
+        life: 3000,
+      });
     }
-
-    await incomesStore.createIncome(incomeData);
-
-    toast.add({
-      severity: 'success',
-      summary: 'Uspešno!',
-      detail: 'Prihod je sačuvan',
-      life: 3000,
-    });
 
     // Reset form
     resetForm();
@@ -236,6 +318,10 @@ function resetForm() {
   form.source = getDefaultSource();
   form.incomeType = 'Salary';
   form.description = '';
+  form.isRecurring = false;
+  form.recurringFrequency = 'monthly';
+  form.startDate = new Date();
+  form.recurringUntil = null;
   dateReceived.value = new Date();
 }
 
@@ -412,6 +498,63 @@ onMounted(() => {
 
 .w-full {
   width: 100%;
+}
+
+/* Recurring Checkbox */
+.recurring-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 0.75rem;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.recurring-checkbox:has(input:checked) {
+  background: var(--income-light);
+  border-color: var(--income-color);
+}
+
+.checkbox-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Frequency Pills */
+.frequency-pills {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.frequency-pill {
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.frequency-pill:hover {
+  border-color: var(--income-color);
+  background: var(--income-light);
+}
+
+.frequency-pill.active {
+  background: linear-gradient(135deg, var(--income-color) 0%, var(--income-dark) 100%);
+  border-color: var(--income-color);
+  color: white;
+  box-shadow: 0 4px 12px var(--income-shadow);
 }
 
 /* Mobile-first: Full-screen experience */
