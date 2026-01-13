@@ -50,7 +50,7 @@
 
         <Column field="frequency" header="Učestalost" style="min-width: 120px">
           <template #body="{ data }">
-            {{ recurringFrequencyLabels[data.frequency] }}
+            {{ recurringFrequencyLabels[data.frequency as RecurringFrequency] }}
           </template>
         </Column>
 
@@ -94,7 +94,7 @@ import { useUserStore } from '@/stores/user';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import apiClient from '@/api/client';
-import { recurringFrequencyLabels, type RecurringOccurrence } from '@/types/recurring-occurrence';
+import { recurringFrequencyLabels, type RecurringOccurrence, type RecurringFrequency } from '@/types/recurring-occurrence';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
