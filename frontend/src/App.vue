@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Toast from 'primevue/toast';
 import Sidebar from 'primevue/sidebar';
@@ -93,9 +93,24 @@ const manualDialogVisible = ref(false);
 // Initialize stores on app load
 import { useThemeStore } from './stores/theme';
 import { useUserStore } from './stores/user';
+import { useBalanceStore } from './stores/balance';
 
 useThemeStore(); // Initialize theme
 const userStore = useUserStore();
+const balanceStore = useBalanceStore();
+
+// Preload balance data in background on app start
+onMounted(() => {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+  balanceStore.fetchBalanceData({
+    startDate: startOfMonth.toISOString(),
+    endDate: endOfMonth.toISOString(),
+    limit: 1000,
+  });
+});
 
 // Show user selection dialog if no user is selected or manually triggered
 const showUserDialog = computed({

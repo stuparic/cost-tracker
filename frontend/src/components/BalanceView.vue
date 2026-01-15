@@ -26,13 +26,13 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
+    <div v-if="balanceStore.loading" class="loading-state">
       <i class="pi pi-spinner pi-spin" style="font-size: 2rem"></i>
       <p>Učitavanje podataka...</p>
     </div>
 
     <!-- Main Content -->
-    <div v-else-if="!loading && hasData" class="balance-content">
+    <div v-else-if="!balanceStore.loading && hasData" class="balance-content">
       <!-- Main Balance Chart -->
       <div class="chart-section main-chart-section">
         <h3 class="chart-title">Ukupan bilans</h3>
@@ -96,15 +96,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import Button from 'primevue/button';
-import { expenseApi } from '@/api/expenses';
-import { incomeApi } from '@/api/incomes';
 import { useListFormatting } from '@/composables/useListFormatting';
 import { USERS } from '@/constants/app';
 import DoughnutChart from '@/components/shared/DoughnutChart.vue';
-import type { Expense } from '@/types/expense';
-import type { Income } from '@/types/income';
+import { useBalanceStore } from '@/stores/balance';
 
 const { formatRSD, formatMonthYear } = useListFormatting();
+const balanceStore = useBalanceStore();
 
 // Filters
 const currentMonth = ref(new Date());
@@ -115,11 +113,6 @@ const personOptions = [
   { label: 'Svetla', value: 'Svetla' },
   { label: 'Dejan', value: 'Dejan' },
 ];
-
-// Data
-const expenses = ref<Expense[]>([]);
-const incomes = ref<Income[]>([]);
-const loading = ref(false);
 
 // Month navigation
 const currentMonthLabel = computed(() => formatMonthYear(currentMonth.value));
@@ -139,11 +132,11 @@ const dateRange = computed(() => {
 
 // Computed: Totals
 const totalExpense = computed(() => {
-  return expenses.value.reduce((sum, expense) => sum + expense.rsdAmount, 0);
+  return balanceStore.expenses.reduce((sum, expense) => sum + expense.rsdAmount, 0);
 });
 
 const totalIncome = computed(() => {
-  return incomes.value.reduce((sum, income) => sum + income.rsdAmount, 0);
+  return balanceStore.incomes.reduce((sum, income) => sum + income.rsdAmount, 0);
 });
 
 const netBalance = computed(() => {
@@ -151,13 +144,13 @@ const netBalance = computed(() => {
 });
 
 const hasData = computed(() => {
-  return expenses.value.length > 0 || incomes.value.length > 0;
+  return balanceStore.expenses.length > 0 || balanceStore.incomes.length > 0;
 });
 
 // Computed: Category breakdown
 const categoryData = computed(() => {
   const categoryMap = new Map<string, number>();
-  expenses.value.forEach(expense => {
+  balanceStore.expenses.forEach(expense => {
     const category = expense.category || 'Nekategorisano';
     categoryMap.set(category, (categoryMap.get(category) || 0) + expense.rsdAmount);
   });
@@ -166,7 +159,7 @@ const categoryData = computed(() => {
 
 const categoryLabels = computed(() => {
   const categoryMap = new Map<string, number>();
-  expenses.value.forEach(expense => {
+  balanceStore.expenses.forEach(expense => {
     const category = expense.category || 'Nekategorisano';
     categoryMap.set(category, (categoryMap.get(category) || 0) + expense.rsdAmount);
   });
@@ -184,7 +177,7 @@ const categoryColors = computed<string[]>(() => {
 // Computed: Person breakdown
 const personData = computed(() => {
   const personMap = new Map<string, number>();
-  expenses.value.forEach(expense => {
+  balanceStore.expenses.forEach(expense => {
     personMap.set(expense.createdBy, (personMap.get(expense.createdBy) || 0) + expense.rsdAmount);
   });
   return Array.from(personMap.values());
@@ -192,7 +185,7 @@ const personData = computed(() => {
 
 const personLabels = computed(() => {
   const personMap = new Map<string, number>();
-  expenses.value.forEach(expense => {
+  balanceStore.expenses.forEach(expense => {
     personMap.set(expense.createdBy, (personMap.get(expense.createdBy) || 0) + expense.rsdAmount);
   });
   return Array.from(personMap.keys());
@@ -216,33 +209,17 @@ function formatBalance(amount: number): string {
 
 // Fetch data
 async function fetchData() {
-  loading.value = true;
-  try {
-    const params: any = {
-      startDate: dateRange.value.start.toISOString(),
-      endDate: dateRange.value.end.toISOString(),
-      limit: 1000,
-    };
+  const params: any = {
+    startDate: dateRange.value.start.toISOString(),
+    endDate: dateRange.value.end.toISOString(),
+    limit: 1000,
+  };
 
-    if (selectedPerson.value !== 'all') {
-      params.createdBy = selectedPerson.value;
-    }
-
-    // Fetch expenses and incomes in parallel
-    const [expensesResponse, incomesResponse] = await Promise.all([
-      expenseApi.getAll(params),
-      incomeApi.getAll(params),
-    ]);
-
-    expenses.value = expensesResponse.data;
-    incomes.value = incomesResponse.data;
-  } catch (error) {
-    console.error('Failed to fetch balance data:', error);
-    expenses.value = [];
-    incomes.value = [];
-  } finally {
-    loading.value = false;
+  if (selectedPerson.value !== 'all') {
+    params.createdBy = selectedPerson.value;
   }
+
+  await balanceStore.fetchBalanceData(params);
 }
 
 // Watch for filter changes
@@ -252,7 +229,23 @@ watch([currentMonth, selectedPerson], () => {
 
 // Initial load
 onMounted(() => {
-  fetchData();
+  // Check if preloaded data matches current filters
+  const currentParams = {
+    startDate: dateRange.value.start.toISOString(),
+    endDate: dateRange.value.end.toISOString(),
+    limit: 1000,
+  };
+
+  const paramsMatch =
+    balanceStore.lastFetchParams &&
+    balanceStore.lastFetchParams.startDate === currentParams.startDate &&
+    balanceStore.lastFetchParams.endDate === currentParams.endDate &&
+    (selectedPerson.value === 'all' || balanceStore.lastFetchParams.createdBy === selectedPerson.value);
+
+  // Only fetch if preloaded data doesn't match current filters
+  if (!paramsMatch && !balanceStore.loading) {
+    fetchData();
+  }
 });
 </script>
 

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { expenseApi } from '@/api/expenses';
 import type { Expense, CreateExpenseDto, ExpenseListResponse } from '@/types/expense';
+import { useBalanceStore } from './balance';
 
 export const useExpensesStore = defineStore('expenses', () => {
   // State
@@ -22,6 +23,11 @@ export const useExpensesStore = defineStore('expenses', () => {
     try {
       const expense = await expenseApi.create(data);
       expenses.value.unshift(expense); // Add to beginning of list
+
+      // Invalidate balance cache
+      const balanceStore = useBalanceStore();
+      balanceStore.invalidateCache();
+
       return expense;
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Greška pri kreiranju troška';
@@ -52,6 +58,10 @@ export const useExpensesStore = defineStore('expenses', () => {
     try {
       await expenseApi.delete(id);
       expenses.value = expenses.value.filter(e => e.id !== id);
+
+      // Invalidate balance cache
+      const balanceStore = useBalanceStore();
+      balanceStore.invalidateCache();
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Greška pri brisanju troška';
       throw err;

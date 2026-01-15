@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { incomeApi } from '@/api/incomes';
 import type { Income, CreateIncomeDto, IncomeListResponse } from '@/types/income';
+import { useBalanceStore } from './balance';
 
 export const useIncomesStore = defineStore('incomes', () => {
   // State
@@ -22,6 +23,11 @@ export const useIncomesStore = defineStore('incomes', () => {
     try {
       const income = await incomeApi.create(data);
       incomes.value.unshift(income); // Add to beginning of list
+
+      // Invalidate balance cache
+      const balanceStore = useBalanceStore();
+      balanceStore.invalidateCache();
+
       return income;
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Greška pri kreiranju prihoda';
@@ -52,6 +58,10 @@ export const useIncomesStore = defineStore('incomes', () => {
     try {
       await incomeApi.delete(id);
       incomes.value = incomes.value.filter(i => i.id !== id);
+
+      // Invalidate balance cache
+      const balanceStore = useBalanceStore();
+      balanceStore.invalidateCache();
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Greška pri brisanju prihoda';
       throw err;
