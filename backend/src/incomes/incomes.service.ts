@@ -11,19 +11,7 @@ export class IncomesService {
   constructor(private currencyService: CurrencyService, private incomesRepository: IncomesRepository) {}
 
   async create(createIncomeDto: CreateIncomeDto): Promise<Income> {
-    const exchangeRate = this.currencyService.getCurrentRate();
-    let eurAmount: number;
-    let rsdAmount: number;
-
-    // Calculate both currency amounts based on which one was entered
-    if (createIncomeDto.currency === 'EUR') {
-      eurAmount = createIncomeDto.amount;
-      rsdAmount = this.currencyService.convertEurToRsd(eurAmount);
-    } else {
-      // RSD
-      rsdAmount = createIncomeDto.amount;
-      eurAmount = this.currencyService.convertRsdToEur(rsdAmount);
-    }
+    const { eurAmount, rsdAmount, exchangeRate } = this.currencyService.convertAmount(createIncomeDto.amount, createIncomeDto.currency);
 
     // Apply default description if not provided
     const description = createIncomeDto.description || `Income from ${createIncomeDto.source}`;
@@ -70,18 +58,8 @@ export class IncomesService {
     if (updateIncomeDto.amount !== undefined || updateIncomeDto.currency !== undefined) {
       const newAmount = updateIncomeDto.amount ?? existingIncome.amount;
       const newCurrency = updateIncomeDto.currency ?? existingIncome.originalCurrency;
-      const exchangeRate = this.currencyService.getCurrentRate();
 
-      let eurAmount: number;
-      let rsdAmount: number;
-
-      if (newCurrency === 'EUR') {
-        eurAmount = newAmount;
-        rsdAmount = this.currencyService.convertEurToRsd(eurAmount);
-      } else {
-        rsdAmount = newAmount;
-        eurAmount = this.currencyService.convertRsdToEur(rsdAmount);
-      }
+      const { eurAmount, rsdAmount, exchangeRate } = this.currencyService.convertAmount(newAmount, newCurrency);
 
       updateData.amount = newAmount;
       updateData.originalCurrency = newCurrency;

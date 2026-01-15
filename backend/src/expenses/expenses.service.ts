@@ -5,30 +5,23 @@ import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { QueryExpensesDto } from './dto/query-expenses.dto';
 import { Expense } from './interfaces/expense.interface';
+import { CategoryInferenceService } from '../category-inference/category-inference.service';
 
 @Injectable()
 export class ExpensesService {
-  constructor(private currencyService: CurrencyService, private expensesRepository: ExpensesRepository) {}
+  constructor(
+    private currencyService: CurrencyService,
+    private expensesRepository: ExpensesRepository,
+    private categoryInferenceService: CategoryInferenceService,
+  ) {}
 
   async create(createExpenseDto: CreateExpenseDto): Promise<Expense> {
-    const exchangeRate = this.currencyService.getCurrentRate();
-    let eurAmount: number;
-    let rsdAmount: number;
-
-    // Calculate both currency amounts based on which one was entered
-    if (createExpenseDto.currency === 'EUR') {
-      eurAmount = createExpenseDto.amount;
-      rsdAmount = this.currencyService.convertEurToRsd(eurAmount);
-    } else {
-      // RSD
-      rsdAmount = createExpenseDto.amount;
-      eurAmount = this.currencyService.convertRsdToEur(rsdAmount);
-    }
+    const { eurAmount, rsdAmount, exchangeRate } = this.currencyService.convertAmount(createExpenseDto.amount, createExpenseDto.currency);
 
     // Apply defaults for optional fields
     const productDescription = createExpenseDto.productDescription || `Purchase at ${createExpenseDto.shopName}`;
 
-    const category = createExpenseDto.category || this.inferCategory(createExpenseDto.shopName) || 'General';
+    const category = createExpenseDto.category || this.categoryInferenceService.inferCategory(createExpenseDto.shopName) || 'General';
 
     const paymentMethod = createExpenseDto.paymentMethod || 'Card';
 
@@ -78,18 +71,8 @@ export class ExpensesService {
     if (updateExpenseDto.amount !== undefined || updateExpenseDto.currency !== undefined) {
       const newAmount = updateExpenseDto.amount ?? existingExpense.amount;
       const newCurrency = updateExpenseDto.currency ?? existingExpense.originalCurrency;
-      const exchangeRate = this.currencyService.getCurrentRate();
 
-      let eurAmount: number;
-      let rsdAmount: number;
-
-      if (newCurrency === 'EUR') {
-        eurAmount = newAmount;
-        rsdAmount = this.currencyService.convertEurToRsd(eurAmount);
-      } else {
-        rsdAmount = newAmount;
-        eurAmount = this.currencyService.convertRsdToEur(rsdAmount);
-      }
+      const { eurAmount, rsdAmount, exchangeRate } = this.currencyService.convertAmount(newAmount, newCurrency);
 
       updateData.amount = newAmount;
       updateData.originalCurrency = newCurrency;
@@ -126,46 +109,5 @@ export class ExpensesService {
 
   async remove(id: string): Promise<void> {
     return this.expensesRepository.delete(id);
-  }
-
-  private inferCategory(shopName: string): string | null {
-    const shopLower = shopName.toLowerCase();
-
-    // Supermarkets & Grocery Stores
-    if (/(maxi|lidl|mercator|idea|tempo|aman|dis)/i.test(shopLower)) {
-      return 'Groceries';
-    }
-
-    // Furniture & Home Improvement
-    if (/(ikea|jysk|emezeta)/i.test(shopLower)) {
-      return 'Home';
-    }
-
-    // Gas Stations & Transport
-    if (/(nis|petrol|mol|lukoil|omv|parking|taxi|bolt|car)/i.test(shopLower)) {
-      return 'Transport';
-    }
-
-    // Pharmacies & Health
-    if (/(apoteka|pharmacy|lilly|benu|zegin)/i.test(shopLower)) {
-      return 'Health';
-    }
-
-    // Electronics & Technology
-    if (/(gigatron|tehnomanija|comtrade|mediamarkt|tech)/i.test(shopLower)) {
-      return 'Electronics';
-    }
-
-    // Restaurants & Dining
-    if (/(restoran|restaurant|cafe|kafana|pizza|burger|mcdon)/i.test(shopLower)) {
-      return 'Dining';
-    }
-
-    // Clothing & Fashion
-    if (/(zara|h&m|mango|new\s*yorker|fashion|clothes)/i.test(shopLower)) {
-      return 'Clothing';
-    }
-
-    return null; // Will default to 'General' in calling code
   }
 }

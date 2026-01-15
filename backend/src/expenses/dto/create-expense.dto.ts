@@ -16,7 +16,7 @@ export class CreateExpenseDto {
     description: 'Currency of the amount',
   })
   @IsEnum(['EUR', 'RSD'], { message: 'Currency must be either EUR or RSD' })
-  currency: string;
+  currency: 'EUR' | 'RSD';
 
   @ApiProperty({ example: 'Maxi', description: 'Name of the shop' })
   @IsString()

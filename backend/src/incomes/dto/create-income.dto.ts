@@ -16,7 +16,7 @@ export class CreateIncomeDto {
     description: 'Currency of the amount',
   })
   @IsEnum(['EUR', 'RSD'], { message: 'Currency must be either EUR or RSD' })
-  currency: string;
+  currency: 'EUR' | 'RSD';
 
   @ApiProperty({
     example: 'Symphony',
