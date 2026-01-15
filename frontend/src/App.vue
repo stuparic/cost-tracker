@@ -19,7 +19,7 @@
     <div class="app-container">
       <header class="app-header">
         <div class="header-content">
-          <button class="hamburger-btn" @click="sidebarVisible = true" aria-label="Open menu">
+          <button class="hamburger-btn" aria-label="Open menu" @click="sidebarVisible = true">
             <i class="pi pi-bars"></i>
           </button>
           <div class="app-title">

@@ -22,7 +22,7 @@ export class AutocompleteService {
 
     const shopCounts = new Map<string, number>();
 
-    snapshot.docs.forEach((doc) => {
+    snapshot.docs.forEach(doc => {
       const data = doc.data();
       const shopName = data.shopName;
       if (shopName) {
@@ -38,7 +38,7 @@ export class AutocompleteService {
     // Filter by search prefix if provided
     if (search) {
       const searchLower = search.toLowerCase();
-      suggestions = suggestions.filter((item) => item.value.toLowerCase().includes(searchLower));
+      suggestions = suggestions.filter(item => item.value.toLowerCase().includes(searchLower));
     }
 
     // Sort by count (descending), then alphabetically
@@ -57,7 +57,7 @@ export class AutocompleteService {
 
     const productCounts = new Map<string, number>();
 
-    snapshot.docs.forEach((doc) => {
+    snapshot.docs.forEach(doc => {
       const data = doc.data();
       const productDescription = data.productDescription;
       if (productDescription) {
@@ -73,7 +73,7 @@ export class AutocompleteService {
     // Filter by search prefix if provided
     if (search) {
       const searchLower = search.toLowerCase();
-      suggestions = suggestions.filter((item) => item.value.toLowerCase().includes(searchLower));
+      suggestions = suggestions.filter(item => item.value.toLowerCase().includes(searchLower));
     }
 
     // Sort by count (descending), then alphabetically
@@ -92,7 +92,7 @@ export class AutocompleteService {
 
     const categoryCounts = new Map<string, number>();
 
-    snapshot.docs.forEach((doc) => {
+    snapshot.docs.forEach(doc => {
       const data = doc.data();
       const category = data.category;
       if (category) {
@@ -108,7 +108,7 @@ export class AutocompleteService {
     // Filter by search prefix if provided
     if (search) {
       const searchLower = search.toLowerCase();
-      suggestions = suggestions.filter((item) => item.value.toLowerCase().includes(searchLower));
+      suggestions = suggestions.filter(item => item.value.toLowerCase().includes(searchLower));
     }
 
     // Sort by count (descending), then alphabetically
@@ -127,11 +127,11 @@ export class AutocompleteService {
 
     const tagCounts = new Map<string, number>();
 
-    snapshot.docs.forEach((doc) => {
+    snapshot.docs.forEach(doc => {
       const data = doc.data();
       const tags = data.tags;
       if (tags && Array.isArray(tags)) {
-        tags.forEach((tag) => {
+        tags.forEach(tag => {
           if (tag) {
             tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
           }
@@ -147,7 +147,7 @@ export class AutocompleteService {
     // Filter by search prefix if provided
     if (search) {
       const searchLower = search.toLowerCase();
-      suggestions = suggestions.filter((item) => item.value.toLowerCase().includes(searchLower));
+      suggestions = suggestions.filter(item => item.value.toLowerCase().includes(searchLower));
     }
 
     // Sort by count (descending), then alphabetically

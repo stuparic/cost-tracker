@@ -9,9 +9,9 @@
       <DataTable
         :value="occurrences"
         :loading="loading"
-        responsiveLayout="scroll"
+        responsive-layout="scroll"
         class="occurrences-table"
-        stripedRows
+        striped-rows
       >
         <template #empty>
           <div class="empty-state">
@@ -76,8 +76,8 @@
               severity="danger"
               text
               rounded
-              @click="confirmDelete(data)"
               :loading="deletingId === data.id"
+              @click="confirmDelete(data)"
             />
           </template>
         </Column>
@@ -114,7 +114,7 @@ async function fetchOccurrences() {
     const userId = userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan';
     const response = await apiClient.get(`/recurring-occurrences?userId=${userId}`);
     occurrences.value = response.data;
-  } catch (error) {
+  } catch {
     toast.add({
       severity: 'error',
       summary: 'Greška',
@@ -164,7 +164,7 @@ async function deleteOccurrence(id: string) {
       life: 3000,
     });
     await fetchOccurrences();
-  } catch (error) {
+  } catch {
     toast.add({
       severity: 'error',
       summary: 'Greška',

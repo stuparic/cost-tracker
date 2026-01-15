@@ -66,7 +66,7 @@ export class IncomesRepository {
     const paginatedQuery = firestoreQuery.limit(limit).offset(offset);
     const paginatedSnapshot = await paginatedQuery.get();
 
-    const data = paginatedSnapshot.docs.map((doc) => this.mapDocToIncome(doc));
+    const data = paginatedSnapshot.docs.map(doc => this.mapDocToIncome(doc));
 
     return { data, total };
   }

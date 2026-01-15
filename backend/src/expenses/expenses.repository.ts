@@ -66,7 +66,7 @@ export class ExpensesRepository {
     const paginatedQuery = firestoreQuery.limit(limit).offset(offset);
     const paginatedSnapshot = await paginatedQuery.get();
 
-    const data = paginatedSnapshot.docs.map((doc) => this.mapDocToExpense(doc));
+    const data = paginatedSnapshot.docs.map(doc => this.mapDocToExpense(doc));
 
     return { data, total };
   }

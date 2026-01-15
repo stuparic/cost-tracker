@@ -39,7 +39,7 @@ describe('App (e2e)', () => {
       return request(app.getHttpServer())
         .get('/')
         .expect(200)
-        .expect((res) => {
+        .expect(res => {
           expect(res.body).toHaveProperty('name', 'Cost Tracker API');
           expect(res.body).toHaveProperty('version');
           expect(res.body).toHaveProperty('endpoints');
@@ -50,7 +50,7 @@ describe('App (e2e)', () => {
       return request(app.getHttpServer())
         .get('/health')
         .expect(200)
-        .expect((res) => {
+        .expect(res => {
           expect(res.body).toHaveProperty('status');
           expect(res.body).toHaveProperty('timestamp');
           expect(res.body).toHaveProperty('dependencies');
@@ -63,7 +63,7 @@ describe('App (e2e)', () => {
     it('/api/v1/expenses (GET) should be accessible', () => {
       return request(app.getHttpServer())
         .get('/api/v1/expenses')
-        .expect((res) => {
+        .expect(res => {
           // Should return 200 or may need auth - just verify endpoint exists
           expect([200, 401, 403]).toContain(res.status);
         });

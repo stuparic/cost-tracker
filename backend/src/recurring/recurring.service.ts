@@ -40,9 +40,7 @@ export class RecurringService {
           // Update occurrence's next date
           await this.updateNextOccurrenceDate(occurrence);
 
-          this.logger.log(
-            `Created ${occurrence.occurrenceType} from occurrence: ${occurrence.id} for ${occurrence.createdBy}`
-          );
+          this.logger.log(`Created ${occurrence.occurrenceType} from occurrence: ${occurrence.id} for ${occurrence.createdBy}`);
         } catch (error) {
           this.logger.error(`Failed to process occurrence ${occurrence.id}:`, error);
         }
@@ -85,10 +83,7 @@ export class RecurringService {
   }
 
   private async updateNextOccurrenceDate(occurrence: RecurringOccurrence): Promise<void> {
-    const nextDate = this.calculateNextDate(
-      occurrence.nextOccurrenceDate,
-      occurrence.frequency,
-    );
+    const nextDate = this.calculateNextDate(occurrence.nextOccurrenceDate, occurrence.frequency);
 
     await this.occurrencesRepository.update(occurrence.id, {
       nextOccurrenceDate: nextDate,

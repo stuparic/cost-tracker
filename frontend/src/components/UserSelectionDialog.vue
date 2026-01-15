@@ -1,12 +1,12 @@
 <template>
   <Dialog
     :visible="visible"
-    @update:visible="$emit('update:visible', $event)"
     :closable="false"
-    :dismissableMask="false"
+    :dismissable-mask="false"
     :modal="true"
     header="Izaberite korisnika"
     class="user-selection-dialog"
+    @update:visible="$emit('update:visible', $event)"
   >
     <div class="user-options">
       <button

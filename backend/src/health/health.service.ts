@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { FirebaseService } from '../firebase/firebase.service';
 
 export interface HealthStatus {

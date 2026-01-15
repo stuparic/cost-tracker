@@ -1,13 +1,13 @@
 <template>
   <Dialog
     :visible="visible"
-    @update:visible="$emit('update:visible', $event)"
     header="Izmeni trošak"
     :modal="true"
     class="edit-expense-dialog"
     :style="{ width: '90vw', maxWidth: '600px' }"
+    @update:visible="$emit('update:visible', $event)"
   >
-    <form @submit.prevent="handleSubmit" class="edit-form">
+    <form class="edit-form" @submit.prevent="handleSubmit">
       <!-- Amount -->
       <div class="form-field">
         <label for="edit-amount" class="field-label">Iznos *</label>
@@ -15,8 +15,8 @@
           id="edit-amount"
           v-model="form.amount"
           mode="decimal"
-          :minFractionDigits="2"
-          :maxFractionDigits="2"
+          :min-fraction-digits="2"
+          :max-fraction-digits="2"
           :min="0.01"
           class="w-full"
           :class="{ 'p-invalid': errors.amount }"
@@ -49,9 +49,9 @@
           id="edit-shop"
           v-model="form.shopName"
           :suggestions="shopSuggestions"
-          @complete="searchShops"
           class="w-full"
           :class="{ 'p-invalid': errors.shopName }"
+          @complete="searchShops"
           @input="errors.shopName = ''"
         />
         <small v-if="errors.shopName" class="error-message">{{ errors.shopName }}</small>
@@ -64,8 +64,8 @@
           id="edit-category"
           v-model="form.category"
           :suggestions="categorySuggestions"
-          @complete="searchCategories"
           class="w-full"
+          @complete="searchCategories"
         />
       </div>
 
@@ -108,9 +108,9 @@
         <DatePicker
           id="edit-date"
           v-model="form.purchaseDate"
-          showTime
-          hourFormat="24"
-          dateFormat="dd.mm.yy"
+          show-time
+          hour-format="24"
+          date-format="dd.mm.yy"
           class="w-full"
         />
       </div>
@@ -118,7 +118,7 @@
 
     <template #footer>
       <Button label="Otkaži" severity="secondary" @click="$emit('update:visible', false)" />
-      <Button label="Sačuvaj" @click="handleSubmit" :loading="loading" />
+      <Button label="Sačuvaj" :loading="loading" @click="handleSubmit" />
     </template>
   </Dialog>
 </template>

@@ -25,18 +25,18 @@
       <div class="month-navigation">
         <Button
           icon="pi pi-chevron-left"
-          @click="navigateMonth(-1)"
           text
           rounded
           class="month-nav-btn"
+          @click="navigateMonth(-1)"
         />
         <span class="current-month">{{ currentMonthLabel }}</span>
         <Button
           icon="pi pi-chevron-right"
-          @click="navigateMonth(1)"
           text
           rounded
           class="month-nav-btn"
+          @click="navigateMonth(1)"
         />
       </div>
 
@@ -45,9 +45,9 @@
         <button
           v-for="option in personOptions"
           :key="option.value"
-          @click="filters.createdBy = option.value"
           class="person-pill"
           :class="{ active: filters.createdBy === option.value }"
+          @click="filters.createdBy = option.value"
         >
           {{ option.label }}
         </button>
@@ -55,12 +55,12 @@
 
       <!-- More Filters Button -->
       <Button
+        v-tooltip.top="'Dodatni filteri'"
         icon="pi pi-filter"
-        @click="advancedFiltersVisible = true"
         text
         rounded
         class="more-filters-btn"
-        v-tooltip.top="'Dodatni filteri'"
+        @click="advancedFiltersVisible = true"
       >
         <span v-if="advancedFiltersCount > 0" class="filter-count-badge">
           {{ advancedFiltersCount }}
@@ -84,9 +84,9 @@
           <AutoComplete
             v-model="filters.shopName"
             :suggestions="shopSuggestions"
-            @complete="searchShops"
             placeholder="Pretraži prodavnicu"
             class="filter-input"
+            @complete="searchShops"
           />
         </div>
 
@@ -95,9 +95,9 @@
           <AutoComplete
             v-model="filters.category"
             :suggestions="categorySuggestions"
-            @complete="searchCategories"
             placeholder="Pretraži kategoriju"
             class="filter-input"
+            @complete="searchCategories"
           />
         </div>
 
@@ -105,10 +105,10 @@
           <Button
             label="Očisti dodatne filtere"
             icon="pi pi-filter-slash"
-            @click="clearAdvancedFilters"
             severity="secondary"
             outlined
             class="w-full"
+            @click="clearAdvancedFilters"
           />
         </div>
       </div>
@@ -121,14 +121,14 @@
         :loading="expensesStore.loading"
         :paginator="true"
         :rows="20"
-        :totalRecords="expensesStore.pagination.total"
+        :total-records="expensesStore.pagination.total"
         :lazy="true"
-        @page="onPageChange"
-        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
-        currentPageReportTemplate="Prikazano {first} do {last} od {totalRecords} troškova"
+        paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+        current-page-report-template="Prikazano {first} do {last} od {totalRecords} troškova"
         class="expenses-table"
-        stripedRows
-        :rowClass="getRowClass"
+        striped-rows
+        :row-class="getRowClass"
+        @page="onPageChange"
       >
       <template #empty>
         <div class="empty-state">
@@ -185,20 +185,20 @@
       <Column header="Akcije">
         <template #body="{ data }">
           <Button
+            v-tooltip.top="'Izmeni'"
             icon="pi pi-pencil"
             severity="secondary"
             text
             rounded
             @click="openEditDialog(data)"
-            v-tooltip.top="'Izmeni'"
           />
           <Button
+            v-tooltip.top="'Obriši'"
             icon="pi pi-trash"
             severity="danger"
             text
             rounded
             @click="confirmDelete(data)"
-            v-tooltip.top="'Obriši'"
           />
         </template>
       </Column>
@@ -223,7 +223,7 @@
       <p>Da li ste sigurni da želite da obrišete ovaj trošak?</p>
       <template #footer>
         <Button label="Otkaži" severity="secondary" @click="deleteDialogVisible = false" />
-        <Button label="Obriši" severity="danger" @click="deleteExpense" :loading="deleting" />
+        <Button label="Obriši" severity="danger" :loading="deleting" @click="deleteExpense" />
       </template>
     </Dialog>
   </div>

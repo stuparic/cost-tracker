@@ -1,13 +1,13 @@
 <template>
   <Dialog
     :visible="visible"
-    @update:visible="$emit('update:visible', $event)"
     header="Izmeni prihod"
     :modal="true"
     class="edit-income-dialog"
     :style="{ width: '90vw', maxWidth: '600px' }"
+    @update:visible="$emit('update:visible', $event)"
   >
-    <form @submit.prevent="handleSubmit" class="edit-form">
+    <form class="edit-form" @submit.prevent="handleSubmit">
       <!-- Amount -->
       <div class="form-field">
         <label for="edit-amount" class="field-label">Iznos *</label>
@@ -15,8 +15,8 @@
           id="edit-amount"
           v-model="form.amount"
           mode="decimal"
-          :minFractionDigits="2"
-          :maxFractionDigits="2"
+          :min-fraction-digits="2"
+          :max-fraction-digits="2"
           :min="0.01"
           class="w-full"
           :class="{ 'p-invalid': errors.amount }"
@@ -89,9 +89,9 @@
         <DatePicker
           id="edit-date"
           v-model="form.dateReceived"
-          showTime
-          hourFormat="24"
-          dateFormat="dd.mm.yy"
+          show-time
+          hour-format="24"
+          date-format="dd.mm.yy"
           class="w-full"
         />
       </div>
@@ -99,7 +99,7 @@
 
     <template #footer>
       <Button label="Otkaži" severity="secondary" @click="$emit('update:visible', false)" />
-      <Button label="Sačuvaj" @click="handleSubmit" :loading="loading" class="income-button" />
+      <Button label="Sačuvaj" :loading="loading" class="income-button" @click="handleSubmit" />
     </template>
   </Dialog>
 </template>

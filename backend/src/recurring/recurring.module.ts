@@ -8,12 +8,7 @@ import { ExpensesModule } from '../expenses/expenses.module';
 import { FirebaseModule } from '../firebase/firebase.module';
 
 @Module({
-  imports: [
-    ScheduleModule.forRoot(),
-    IncomesModule,
-    ExpensesModule,
-    FirebaseModule,
-  ],
+  imports: [ScheduleModule.forRoot(), IncomesModule, ExpensesModule, FirebaseModule],
   controllers: [RecurringOccurrencesController],
   providers: [RecurringService, RecurringOccurrencesRepository],
   exports: [RecurringService, RecurringOccurrencesRepository],

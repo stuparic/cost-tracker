@@ -10,8 +10,8 @@
           id="amount"
           v-model="form.amount"
           mode="decimal"
-          :minFractionDigits="2"
-          :maxFractionDigits="2"
+          :min-fraction-digits="2"
+          :max-fraction-digits="2"
           :min="0.01"
           placeholder="0.00"
           class="amount-input-large"
@@ -87,9 +87,9 @@
         <DatePicker
           id="dateReceived"
           v-model="dateReceived"
-          showTime
-          hourFormat="24"
-          dateFormat="dd.mm.yy"
+          show-time
+          hour-format="24"
+          date-format="dd.mm.yy"
           placeholder="Odaberi datum..."
           class="w-full"
         />
@@ -98,7 +98,7 @@
       <!-- Recurring Checkbox -->
       <div class="form-field">
         <div class="recurring-checkbox">
-          <Checkbox v-model="form.isRecurring" inputId="recurring" binary />
+          <Checkbox v-model="form.isRecurring" input-id="recurring" binary />
           <label for="recurring" class="checkbox-label">Ponavljajući prihod</label>
         </div>
       </div>
@@ -126,7 +126,7 @@
         <DatePicker
           id="startDate"
           v-model="form.startDate"
-          dateFormat="dd.mm.yy"
+          date-format="dd.mm.yy"
           placeholder="Odaberi datum..."
           class="w-full"
         />
@@ -138,7 +138,7 @@
         <DatePicker
           id="recurringUntil"
           v-model="form.recurringUntil"
-          dateFormat="dd.mm.yy"
+          date-format="dd.mm.yy"
           placeholder="Ako nije odabrano, ponavlja se beskonačno..."
           class="w-full"
         />

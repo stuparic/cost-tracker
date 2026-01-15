@@ -54,10 +54,13 @@ export class RecurringOccurrencesRepository {
       .where('nextOccurrenceDate', '<=', beforeDate)
       .get();
 
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    } as RecurringOccurrence));
+    return snapshot.docs.map(
+      doc =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        } as RecurringOccurrence),
+    );
   }
 
   async update(id: string, updates: Partial<RecurringOccurrence>): Promise<void> {
@@ -77,17 +80,17 @@ export class RecurringOccurrencesRepository {
       .orderBy('createdAt', 'desc')
       .get();
 
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    } as RecurringOccurrence));
+    return snapshot.docs.map(
+      doc =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        } as RecurringOccurrence),
+    );
   }
 
   async findById(id: string): Promise<RecurringOccurrence | null> {
-    const doc = await this.firestore
-      .collection(this.collectionName)
-      .doc(id)
-      .get();
+    const doc = await this.firestore.collection(this.collectionName).doc(id).get();
 
     if (!doc.exists) return null;
     return { id: doc.id, ...doc.data() } as RecurringOccurrence;

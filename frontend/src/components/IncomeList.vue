@@ -37,9 +37,9 @@
         <Button
           label="Filteri"
           icon="pi pi-filter"
-          @click="filtersVisible = true"
           outlined
           class="income-button"
+          @click="filtersVisible = true"
         />
       </div>
     </div>
@@ -49,9 +49,9 @@
       :value="incomesStore.incomes"
       :loading="incomesStore.loading"
       class="incomes-table"
-      stripedRows
-      :rowClass="getRowClass"
-      responsiveLayout="scroll"
+      striped-rows
+      :row-class="getRowClass"
+      responsive-layout="scroll"
     >
       <Column field="dateReceived" header="Datum" :sortable="true" style="min-width: 120px">
         <template #body="{ data }">
@@ -117,8 +117,8 @@
       <Column header="Akcije" style="min-width: 120px">
         <template #body="{ data }">
           <div class="action-buttons">
-            <Button icon="pi pi-pencil" text @click="editIncome(data)" class="p-button-sm" />
-            <Button icon="pi pi-trash" text severity="danger" @click="confirmDelete(data)" class="p-button-sm" />
+            <Button icon="pi pi-pencil" text class="p-button-sm" @click="editIncome(data)" />
+            <Button icon="pi pi-trash" text severity="danger" class="p-button-sm" @click="confirmDelete(data)" />
           </div>
         </template>
       </Column>
@@ -128,10 +128,10 @@
     <Paginator
       v-if="incomesStore.pagination.totalPages > 1"
       :rows="incomesStore.pagination.limit"
-      :totalRecords="incomesStore.pagination.total"
+      :total-records="incomesStore.pagination.total"
       :first="(incomesStore.pagination.page - 1) * incomesStore.pagination.limit"
-      @page="onPageChange"
       class="income-paginator"
+      @page="onPageChange"
     />
 
     <!-- Advanced Filters Sidebar -->
@@ -150,15 +150,15 @@
         <Select
           v-model="advancedFilters.incomeType"
           :options="incomeTypeOptions"
-          optionLabel="label"
-          optionValue="value"
+          option-label="label"
+          option-value="value"
           placeholder="Svi tipovi"
         />
       </div>
 
       <div class="filter-actions">
-        <Button label="Primeni" @click="applyAdvancedFilters" class="income-button" />
-        <Button label="Resetuj" @click="resetFilters" outlined />
+        <Button label="Primeni" class="income-button" @click="applyAdvancedFilters" />
+        <Button label="Resetuj" outlined @click="resetFilters" />
       </div>
     </Sidebar>
 
@@ -377,8 +377,8 @@ function confirmDelete(income: Income) {
           life: 3000,
         });
         applyFilters();
-        fetchMonthlySummaries();
-      } catch (error) {
+        await fetchMonthlySummaries();
+      } catch {
         toast.add({
           severity: 'error',
           summary: 'Greška',
