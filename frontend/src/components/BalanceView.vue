@@ -66,7 +66,7 @@
         <!-- Category Breakdown -->
         <div class="chart-section">
           <h3 class="chart-title">Troškovi po kategorijama</h3>
-          <PieChart v-if="categoryLabels.length > 0" :labels="categoryLabels" :data="categoryData" :colors="categoryColors" />
+          <DoughnutChart v-if="categoryLabels.length > 0" :labels="categoryLabels" :data="categoryData" :colors="categoryColors" />
           <div v-else class="empty-chart">Nema podataka o kategorijama</div>
         </div>
 
@@ -101,7 +101,6 @@ import { incomeApi } from '@/api/incomes';
 import { useListFormatting } from '@/composables/useListFormatting';
 import { USERS } from '@/constants/app';
 import DoughnutChart from '@/components/shared/DoughnutChart.vue';
-import PieChart from '@/components/shared/PieChart.vue';
 import type { Expense } from '@/types/expense';
 import type { Income } from '@/types/income';
 
