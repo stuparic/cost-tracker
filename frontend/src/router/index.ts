@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import ExpenseForm from '@/components/expense-form/ExpenseForm.vue';
 import ExpenseList from '@/components/ExpenseList.vue';
+import BalanceView from '@/components/BalanceView.vue';
 import IncomeForm from '@/components/income-form/IncomeForm.vue';
 import IncomeList from '@/components/IncomeList.vue';
 import RecurringOccurrencesList from '@/components/RecurringOccurrencesList.vue';
@@ -19,6 +20,11 @@ const routes = [
     path: '/list',
     name: 'ExpenseList',
     component: ExpenseList
+  },
+  {
+    path: '/balance',
+    name: 'Balance',
+    component: BalanceView
   },
   {
     path: '/income/add',

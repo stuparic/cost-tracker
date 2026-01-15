@@ -39,6 +39,10 @@
           <i class="pi pi-shopping-cart"></i>
           <span>Troškovi</span>
         </router-link>
+        <router-link to="/balance" class="main-tab balance-tab">
+          <i class="pi pi-chart-pie"></i>
+          <span>Bilans</span>
+        </router-link>
         <router-link to="/income/add" class="main-tab income-tab">
           <i class="pi pi-wallet"></i>
           <span>Prihodi</span>
@@ -46,7 +50,7 @@
       </nav>
 
       <!-- Sub Navigation -->
-      <nav v-if="isExpenseRoute" class="tab-nav expense-subnav">
+      <nav v-if="isExpenseRoute && !isBalanceRoute" class="tab-nav expense-subnav">
         <router-link to="/add" class="tab-link">
           <i class="pi pi-plus-circle"></i>
           <span>Dodaj</span>
@@ -57,7 +61,7 @@
         </router-link>
       </nav>
 
-      <nav v-if="isIncomeRoute" class="tab-nav income-subnav">
+      <nav v-if="isIncomeRoute && !isBalanceRoute" class="tab-nav income-subnav">
         <router-link to="/income/add" class="tab-link">
           <i class="pi pi-plus-circle"></i>
           <span>Dodaj</span>
@@ -106,6 +110,10 @@ const showUserDialog = computed({
 // Detect current route section
 const isExpenseRoute = computed(() => {
   return route.path === '/add' || route.path === '/list';
+});
+
+const isBalanceRoute = computed(() => {
+  return route.path === '/balance';
 });
 
 const isIncomeRoute = computed(() => {
@@ -329,6 +337,12 @@ body {
   color: var(--income-color);
   border-bottom-color: var(--income-color);
   background: var(--income-light);
+}
+
+.main-tab.balance-tab.router-link-active {
+  color: #f59e0b;
+  border-bottom-color: #f59e0b;
+  background: #fffbeb;
 }
 
 .main-tab:hover {
