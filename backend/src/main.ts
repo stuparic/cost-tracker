@@ -1,4 +1,3 @@
-// Ensure crypto is available globally for @nestjs/schedule
 import * as crypto from 'crypto';
 (global as any).crypto = crypto;
 import { NestFactory } from '@nestjs/core';
