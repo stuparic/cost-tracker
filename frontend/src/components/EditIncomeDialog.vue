@@ -28,18 +28,7 @@
       <!-- Currency -->
       <div class="form-field">
         <label class="field-label">Valuta</label>
-        <div class="currency-pills">
-          <button
-            v-for="curr in currencies"
-            :key="curr.value"
-            type="button"
-            class="currency-pill"
-            :class="{ active: form.currency === curr.value }"
-            @click="form.currency = curr.value"
-          >
-            {{ curr.label }}
-          </button>
-        </div>
+        <CurrencyPills v-model="form.currency" />
       </div>
 
       <!-- Source -->
@@ -91,7 +80,7 @@
           v-model="form.dateReceived"
           show-time
           hour-format="24"
-          date-format="dd.mm.yy"
+          :date-format="DATE_FORMAT"
           class="w-full"
         />
       </div>
@@ -106,14 +95,16 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue';
-import { useToast } from 'primevue/usetoast';
 import Dialog from 'primevue/dialog';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Textarea from 'primevue/textarea';
 import DatePicker from 'primevue/datepicker';
+import CurrencyPills from '@/components/shared/CurrencyPills.vue';
 import { incomeApi } from '@/api/incomes';
+import { useAppToast } from '@/composables/useAppToast';
+import { DATE_FORMAT } from '@/constants/app';
 import type { Income, UpdateIncomeDto, Currency, IncomeType } from '@/types/income';
 import { incomeTypeLabels } from '@/types/income';
 
@@ -127,7 +118,7 @@ const emit = defineEmits<{
   (e: 'success'): void;
 }>();
 
-const toast = useToast();
+const { showSuccess, showError } = useAppToast();
 
 // Form state
 const form = reactive({
@@ -146,12 +137,6 @@ const errors = reactive({
 });
 
 const loading = ref(false);
-
-// Options
-const currencies: Array<{ label: string; value: Currency }> = [
-  { label: 'RSD', value: 'RSD' },
-  { label: 'EUR', value: 'EUR' },
-];
 
 // Watch for income changes and populate form
 watch(() => props.income, (income) => {
@@ -198,21 +183,10 @@ async function handleSubmit() {
 
     await incomeApi.update(props.income.id, updateData);
 
-    toast.add({
-      severity: 'success',
-      summary: 'Uspešno!',
-      detail: 'Prihod je izmenjen',
-      life: 3000,
-    });
-
+    showSuccess('Prihod je izmenjen');
     emit('success');
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Greška',
-      detail: error.response?.data?.message || 'Nije moguće izmeniti prihod',
-      life: 5000,
-    });
+    showError('Nije moguće izmeniti prihod', error);
   } finally {
     loading.value = false;
   }
@@ -236,37 +210,6 @@ async function handleSubmit() {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-secondary);
-}
-
-.currency-pills {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.currency-pill {
-  flex: 1;
-  padding: 0.5rem 1rem;
-  border: 2px solid var(--border-color);
-  border-radius: 2rem;
-  background: white;
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-.currency-pill:hover {
-  border-color: var(--income-color);
-  color: var(--income-color);
-}
-
-.currency-pill.active {
-  background: var(--income-color);
-  border-color: var(--income-color);
-  color: white;
 }
 
 .income-type-pills {

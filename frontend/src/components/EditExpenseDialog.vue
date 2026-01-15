@@ -28,18 +28,7 @@
       <!-- Currency -->
       <div class="form-field">
         <label class="field-label">Valuta</label>
-        <div class="currency-pills">
-          <button
-            v-for="curr in currencies"
-            :key="curr.value"
-            type="button"
-            class="currency-pill"
-            :class="{ active: form.currency === curr.value }"
-            @click="form.currency = curr.value"
-          >
-            {{ curr.label }}
-          </button>
-        </div>
+        <CurrencyPills v-model="form.currency" />
       </div>
 
       <!-- Shop Name -->
@@ -110,7 +99,7 @@
           v-model="form.purchaseDate"
           show-time
           hour-format="24"
-          date-format="dd.mm.yy"
+          :date-format="DATE_FORMAT"
           class="w-full"
         />
       </div>
@@ -125,7 +114,6 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue';
-import { useToast } from 'primevue/usetoast';
 import Dialog from 'primevue/dialog';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
@@ -134,8 +122,12 @@ import Textarea from 'primevue/textarea';
 import Select from 'primevue/select';
 import Chips from 'primevue/chips';
 import DatePicker from 'primevue/datepicker';
+import CurrencyPills from '@/components/shared/CurrencyPills.vue';
 import { expenseApi } from '@/api/expenses';
 import { autocompleteApi } from '@/api/autocomplete';
+import { useAppToast } from '@/composables/useAppToast';
+import { useAutocomplete } from '@/composables/useAutocomplete';
+import { PAYMENT_METHODS, DATE_FORMAT } from '@/constants/app';
 import type { Expense, UpdateExpenseDto, Currency } from '@/types/expense';
 
 const props = defineProps<{
@@ -148,7 +140,7 @@ const emit = defineEmits<{
   (e: 'success'): void;
 }>();
 
-const toast = useToast();
+const { showSuccess, showError } = useAppToast();
 
 // Form state
 const form = reactive({
@@ -171,16 +163,11 @@ const errors = reactive({
 const loading = ref(false);
 
 // Options
-const currencies: Array<{ label: string; value: Currency }> = [
-  { label: 'RSD', value: 'RSD' },
-  { label: 'EUR', value: 'EUR' },
-];
-
-const paymentMethods = ['Kartica', 'Keš', 'Online'];
+const paymentMethods = [...PAYMENT_METHODS];
 
 // Autocomplete
-const shopSuggestions = ref<string[]>([]);
-const categorySuggestions = ref<string[]>([]);
+const { suggestions: shopSuggestions, search: searchShops } = useAutocomplete(autocompleteApi.getShops);
+const { suggestions: categorySuggestions, search: searchCategories } = useAutocomplete(autocompleteApi.getCategories);
 
 // Watch for expense changes and populate form
 watch(() => props.expense, (expense) => {
@@ -195,26 +182,6 @@ watch(() => props.expense, (expense) => {
     form.purchaseDate = new Date(expense.purchaseDate);
   }
 }, { immediate: true });
-
-async function searchShops(event: any) {
-  try {
-    const response = await autocompleteApi.getShops(event.query);
-    shopSuggestions.value = response.suggestions.map((s: any) => s.value);
-  } catch (error) {
-    console.error('Failed to load shop suggestions:', error);
-    shopSuggestions.value = [];
-  }
-}
-
-async function searchCategories(event: any) {
-  try {
-    const response = await autocompleteApi.getCategories(event.query);
-    categorySuggestions.value = response.suggestions.map((s: any) => s.value);
-  } catch (error) {
-    console.error('Failed to load category suggestions:', error);
-    categorySuggestions.value = [];
-  }
-}
 
 async function handleSubmit() {
   // Validate
@@ -257,21 +224,10 @@ async function handleSubmit() {
 
     await expenseApi.update(props.expense.id, updateData);
 
-    toast.add({
-      severity: 'success',
-      summary: 'Uspešno!',
-      detail: 'Trošak je izmenjen',
-      life: 3000,
-    });
-
+    showSuccess('Trošak je izmenjen');
     emit('success');
   } catch (error: any) {
-    toast.add({
-      severity: 'error',
-      summary: 'Greška',
-      detail: error.response?.data?.message || 'Nije moguće izmeniti trošak',
-      life: 5000,
-    });
+    showError('Nije moguće izmeniti trošak', error);
   } finally {
     loading.value = false;
   }
@@ -295,36 +251,6 @@ async function handleSubmit() {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-secondary);
-}
-
-.currency-pills {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.currency-pill {
-  padding: 0.5rem 1rem;
-  border: 2px solid var(--border-color);
-  border-radius: 2rem;
-  background: white;
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-.currency-pill:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-.currency-pill.active {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-  color: white;
 }
 
 .error-message {
