@@ -54,6 +54,8 @@ const recordingState = ref<RecordingState>('idle');
 const transcript = ref('');
 const errorMessage = ref('');
 let recognition: any = null;
+let silenceTimeout: ReturnType<typeof setTimeout> | null = null;
+const SILENCE_DURATION = 3000; // 3 seconds of silence
 
 // Computed
 const buttonIcon = computed(() => {
@@ -71,7 +73,7 @@ const buttonTitle = computed(() => {
   if (!isSupported) return 'Vaš pretraživač ne podržava glasovni unos';
   switch (recordingState.value) {
     case 'listening':
-      return 'Klikni da zaustaviš snimanje';
+      return 'Snimanje... (zaustaviće se nakon 3s tišine)';
     case 'processing':
       return 'Obrađujem...';
     default:
@@ -79,28 +81,67 @@ const buttonTitle = computed(() => {
   }
 });
 
+// Clear silence timeout
+function clearSilenceTimeout() {
+  if (silenceTimeout) {
+    clearTimeout(silenceTimeout);
+    silenceTimeout = null;
+  }
+}
+
+// Start silence timeout - stop after 3 seconds of no speech
+function startSilenceTimeout() {
+  clearSilenceTimeout();
+  silenceTimeout = setTimeout(() => {
+    if (recordingState.value === 'listening') {
+      stopRecording();
+    }
+  }, SILENCE_DURATION);
+}
+
 // Initialize Speech Recognition
 function initRecognition() {
   const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
   recognition = new SpeechRecognition();
 
   recognition.lang = 'sr-RS'; // Serbian language
-  recognition.continuous = false; // Stop after single phrase
-  recognition.interimResults = false; // Only final results
+  recognition.continuous = true; // Keep listening
+  recognition.interimResults = true; // Get interim results to detect speech
   recognition.maxAlternatives = 1;
 
   recognition.onstart = () => {
     recordingState.value = 'listening';
     transcript.value = '';
     errorMessage.value = '';
+    clearSilenceTimeout();
+  };
+
+  // Detect when user starts speaking
+  recognition.onspeechstart = () => {
+    clearSilenceTimeout(); // Cancel silence timer when user speaks
+  };
+
+  // Detect when user stops speaking
+  recognition.onspeechend = () => {
+    startSilenceTimeout(); // Start 3-second countdown
   };
 
   recognition.onresult = (event: SpeechRecognitionEvent) => {
-    recordingState.value = 'processing';
-    const result = event.results[0];
+    // Get the latest result
+    const lastResultIndex = event.results.length - 1;
+    const result = event.results[lastResultIndex];
+
     if (result && result[0]) {
+      // Update transcript with latest result
       transcript.value = result[0].transcript;
-      emit('transcript', transcript.value);
+
+      // If it's a final result, emit it
+      if (result.isFinal) {
+        recordingState.value = 'processing';
+        clearSilenceTimeout();
+        emit('transcript', transcript.value);
+        stopRecording();
+      }
     }
   };
 
@@ -135,6 +176,8 @@ function initRecognition() {
   };
 
   recognition.onend = () => {
+    clearSilenceTimeout();
+
     if (recordingState.value === 'listening') {
       // Recording stopped without result
       recordingState.value = 'idle';
@@ -181,6 +224,7 @@ function stopRecording() {
 
 // Cleanup
 onUnmounted(() => {
+  clearSilenceTimeout();
   if (recognition) {
     recognition.stop();
     recognition = null;
