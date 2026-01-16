@@ -107,17 +107,8 @@ function initRecognition() {
     recordingState.value = 'listening';
     transcript.value = '';
     errorMessage.value = '';
-    clearSilenceTimeout();
-  };
-
-  // Detect when user starts speaking
-  recognition.onspeechstart = () => {
-    clearSilenceTimeout(); // Cancel silence timer when user speaks
-  };
-
-  // Detect when user stops speaking
-  recognition.onspeechend = () => {
-    startSilenceTimeout(); // Start 3-second countdown
+    // Start silence timer immediately
+    startSilenceTimeout();
   };
 
   recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -129,12 +120,14 @@ function initRecognition() {
       // Update transcript with latest result
       transcript.value = result[0].transcript;
 
-      // If it's a final result, emit it
+      // Reset silence timer on every result (user is still speaking)
+      startSilenceTimeout();
+
+      // If it's a final result, just update the transcript
+      // Don't stop - let silence timer handle it
       if (result.isFinal) {
-        recordingState.value = 'processing';
-        clearSilenceTimeout();
-        emit('transcript', transcript.value);
-        stopRecording();
+        // Keep listening for more speech
+        startSilenceTimeout();
       }
     }
   };
@@ -172,15 +165,8 @@ function initRecognition() {
   recognition.onend = () => {
     clearSilenceTimeout();
 
+    // If we're still listening (not already processing), reset to idle
     if (recordingState.value === 'listening') {
-      // Recording stopped without result
-      recordingState.value = 'idle';
-    } else if (recordingState.value === 'processing') {
-      // Processing complete
-      setTimeout(() => {
-        recordingState.value = 'idle';
-      }, 1000);
-    } else {
       recordingState.value = 'idle';
     }
   };
@@ -213,6 +199,18 @@ function startRecording() {
 function stopRecording() {
   if (recognition) {
     recognition.stop();
+
+    // Emit transcript if we have any
+    if (transcript.value) {
+      recordingState.value = 'processing';
+      emit('transcript', transcript.value);
+
+      // Reset after a short delay
+      setTimeout(() => {
+        recordingState.value = 'idle';
+        transcript.value = '';
+      }, 1000);
+    }
   }
 }
 
