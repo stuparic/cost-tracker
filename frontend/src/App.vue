@@ -303,16 +303,25 @@ body {
   color: white !important;
   width: 48px !important;
   height: 48px !important;
-  font-size: 1.5rem !important;
   flex-shrink: 0;
+}
+
+.header-left :deep(.voice-button .pi) {
+  font-size: 1.5rem !important;
+  color: white !important;
 }
 
 .header-left :deep(.voice-button.idle) {
   color: white !important;
 }
 
+.header-left :deep(.voice-button.idle .pi) {
+  color: white !important;
+}
+
 .header-left :deep(.voice-button:hover:not(:disabled)) {
   background: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
 }
 
 .header-left :deep(.voice-button.listening) {
@@ -320,8 +329,16 @@ body {
   color: white !important;
 }
 
+.header-left :deep(.voice-button.listening .pi) {
+  color: white !important;
+}
+
 .header-left :deep(.voice-button.processing) {
   background: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+}
+
+.header-left :deep(.voice-button.processing .pi) {
   color: white !important;
 }
 
