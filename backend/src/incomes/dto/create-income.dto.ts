@@ -37,11 +37,11 @@ export class CreateIncomeDto {
 
   @ApiProperty({
     example: 'Salary',
-    enum: ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'],
+    enum: ['Salary', 'Freelance', 'Rent', 'Investment', 'Gift', 'Other'],
     description: 'Type of income',
   })
-  @IsEnum(['Salary', 'Freelance', 'Investment', 'Gift', 'Other'], {
-    message: 'Income type must be one of: Salary, Freelance, Investment, Gift, Other',
+  @IsEnum(['Salary', 'Freelance', 'Rent', 'Investment', 'Gift', 'Other'], {
+    message: 'Income type must be one of: Salary, Freelance, Rent, Investment, Gift, Other',
   })
   incomeType: string;
 

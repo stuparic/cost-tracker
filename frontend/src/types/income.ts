@@ -1,11 +1,12 @@
 export type Currency = 'EUR' | 'RSD';
-export type IncomeType = 'Salary' | 'Freelance' | 'Investment' | 'Gift' | 'Other';
+export type IncomeType = 'Salary' | 'Freelance' | 'Rent' | 'Investment' | 'Gift' | 'Other';
 export type CreationMethod = 'manual' | 'voice' | 'auto';
 
 // Serbian labels for income types
 export const incomeTypeLabels: Record<IncomeType, string> = {
   Salary: 'Plata',
   Freelance: 'Honorar',
+  Rent: 'Zakup',
   Investment: 'Investicija',
   Gift: 'Poklon',
   Other: 'Ostalo',

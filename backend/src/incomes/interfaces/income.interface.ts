@@ -7,7 +7,7 @@ export interface Income {
   exchangeRate: number;
   source: string;
   description: string;
-  incomeType: 'Salary' | 'Freelance' | 'Investment' | 'Gift' | 'Other';
+  incomeType: 'Salary' | 'Freelance' | 'Rent' | 'Investment' | 'Gift' | 'Other';
   dateReceived: string;
   createdBy: string;
   createdAt: string;
