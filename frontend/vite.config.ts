@@ -14,6 +14,7 @@ export default defineConfig({
         name: 'Troškić',
         short_name: 'Troškić',
         description: 'Pratite troškove domaćinstva',
+        id: '/?v=2',
         theme_color: '#10b981',
         background_color: '#ffffff',
         display: 'standalone',
