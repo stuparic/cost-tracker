@@ -19,14 +19,19 @@
     <div class="app-container">
       <header class="app-header">
         <div class="header-content">
-          <button class="hamburger-btn" aria-label="Open menu" @click="sidebarVisible = true">
-            <i class="pi pi-bars"></i>
-          </button>
-          <div class="app-title">
-            <i class="pi pi-wallet"></i>
-            <h1>Troškić</h1>
+          <div class="header-left">
+            <button class="hamburger-btn" aria-label="Open menu" @click="sidebarVisible = true">
+              <i class="pi pi-bars"></i>
+            </button>
+            <VoiceRecorder @transcript="handleVoiceTranscript" />
           </div>
-          <p class="app-subtitle">Pratite troškove domaćinstva</p>
+          <div class="header-center">
+            <div class="app-title">
+              <i class="pi pi-wallet"></i>
+              <h1>Troškić</h1>
+            </div>
+            <p class="app-subtitle">Pratite troškove domaćinstva</p>
+          </div>
           <div v-if="userStore.selectedUser" class="user-badge" @click="switchUser">
             <i class="pi pi-user"></i>
             <span>{{ userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan' }}</span>
@@ -81,12 +86,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import Sidebar from 'primevue/sidebar';
 import ThemeSelector from './components/ThemeSelector.vue';
 import UserSelectionDialog from './components/UserSelectionDialog.vue';
+import VoiceRecorder from './components/shared/VoiceRecorder.vue';
+import { useVoiceInput } from './composables/useVoiceInput';
 
 const route = useRoute();
+const toast = useToast();
 const sidebarVisible = ref(false);
 const manualDialogVisible = ref(false);
 
@@ -98,6 +107,7 @@ import { useBalanceStore } from './stores/balance';
 useThemeStore(); // Initialize theme
 const userStore = useUserStore();
 const balanceStore = useBalanceStore();
+const { sendTranscript } = useVoiceInput();
 
 // Preload balance data in background on app start
 onMounted(() => {
@@ -138,6 +148,28 @@ const isIncomeRoute = computed(() => {
 // Function to allow switching users
 function switchUser() {
   manualDialogVisible.value = true;
+}
+
+// Voice input handler - AI will determine if it's expense or income
+async function handleVoiceTranscript(text: string) {
+  try {
+    // Don't send context - let AI determine if it's expense or income
+    await sendTranscript(text);
+    toast.add({
+      severity: 'success',
+      summary: 'Glasovni unos primljen',
+      detail: `"${text}"`,
+      life: 3000,
+    });
+  } catch (error) {
+    console.error('Failed to process voice input:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Greška',
+      detail: 'Nije moguće poslati glasovni unos',
+      life: 3000,
+    });
+  }
 }
 </script>
 
@@ -222,14 +254,50 @@ body {
 .header-content {
   max-width: 600px;
   margin: 0 auto;
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Voice Recorder in Header - Override default styles */
+.header-left :deep(.voice-button) {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  width: 40px !important;
+  height: 40px !important;
+  font-size: 1.125rem !important;
+  flex-shrink: 0;
+}
+
+.header-left :deep(.voice-button:hover:not(:disabled)) {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.header-left :deep(.voice-button.listening) {
+  background: rgba(239, 68, 68, 0.9) !important;
+  color: white !important;
+}
+
+.header-left :deep(.voice-button.processing) {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .hamburger-btn {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
@@ -241,6 +309,7 @@ body {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .hamburger-btn:hover {
