@@ -10,12 +10,6 @@
       @click="toggleRecording"
     />
 
-    <!-- Transcription Display -->
-    <div v-if="transcript" class="transcript-display">
-      <i class="pi pi-comment"></i>
-      <span>{{ transcript }}</span>
-    </div>
-
     <!-- Error Message -->
     <div v-if="errorMessage" class="error-display">
       <i class="pi pi-exclamation-triangle"></i>
@@ -280,24 +274,6 @@ onUnmounted(() => {
     transform: scale(1.1);
     opacity: 0.8;
   }
-}
-
-.transcript-display {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: var(--primary-light);
-  border-left: 3px solid var(--primary-color);
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  animation: slideIn 0.3s ease-out;
-}
-
-.transcript-display i {
-  color: var(--primary-color);
-  font-size: 1rem;
 }
 
 .error-display {
