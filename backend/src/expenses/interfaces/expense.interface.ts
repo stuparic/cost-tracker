@@ -15,4 +15,6 @@ export interface Expense {
   createdAt: string;
   updatedAt: string;
   recurringOccurrenceId?: string;
+  creationMethod?: 'manual' | 'voice' | 'auto';
+  voiceTranscript?: string;
 }

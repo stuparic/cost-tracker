@@ -13,4 +13,6 @@ export interface Income {
   createdAt: string;
   updatedAt: string;
   recurringOccurrenceId?: string;
+  creationMethod?: 'manual' | 'voice' | 'auto';
+  voiceTranscript?: string;
 }

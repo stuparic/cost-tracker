@@ -1,5 +1,6 @@
 export type Currency = 'EUR' | 'RSD';
 export type IncomeType = 'Salary' | 'Freelance' | 'Investment' | 'Gift' | 'Other';
+export type CreationMethod = 'manual' | 'voice' | 'auto';
 
 // Serbian labels for income types
 export const incomeTypeLabels: Record<IncomeType, string> = {
@@ -25,6 +26,8 @@ export interface Income {
   createdAt: string;
   updatedAt: string;
   recurringOccurrenceId?: string;
+  creationMethod?: CreationMethod;
+  voiceTranscript?: string;
 }
 
 export interface CreateIncomeDto {

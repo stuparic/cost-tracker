@@ -62,6 +62,7 @@ export class RecurringService {
       createdBy: occurrence.createdBy,
       description: occurrence.description,
       recurringOccurrenceId: occurrence.id,
+      creationMethod: 'auto' as const,
     };
 
     return this.incomesService.create(createDto);
@@ -77,6 +78,7 @@ export class RecurringService {
       createdBy: occurrence.createdBy,
       productDescription: occurrence.description,
       recurringOccurrenceId: occurrence.id,
+      creationMethod: 'auto' as const,
     };
 
     return this.expensesService.create(createDto);

@@ -1,5 +1,7 @@
 export type Currency = 'EUR' | 'RSD';
 
+export type CreationMethod = 'manual' | 'voice' | 'auto';
+
 export interface Expense {
   id: string;
   amount: number;
@@ -17,6 +19,8 @@ export interface Expense {
   createdAt: string;
   updatedAt: string;
   recurringOccurrenceId?: string;
+  creationMethod?: CreationMethod;
+  voiceTranscript?: string;
 }
 
 export interface CreateExpenseDto {

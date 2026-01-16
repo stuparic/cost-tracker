@@ -83,4 +83,25 @@ export class CreateExpenseDto {
   @IsOptional()
   @IsString()
   recurringOccurrenceId?: string;
+
+  @ApiProperty({
+    required: false,
+    example: 'manual',
+    enum: ['manual', 'voice', 'auto'],
+    description: 'How this expense was created. "auto" = recurring auto-created. Defaults to "manual" if not specified.',
+  })
+  @IsOptional()
+  @IsEnum(['manual', 'voice', 'auto'], {
+    message: 'Creation method must be one of: manual, voice, auto',
+  })
+  creationMethod?: 'manual' | 'voice' | 'auto';
+
+  @ApiProperty({
+    required: false,
+    example: 'Kupio sam kafu za 250 dinara',
+    description: 'Original voice transcript if created via voice input (for debugging)',
+  })
+  @IsOptional()
+  @IsString()
+  voiceTranscript?: string;
 }
