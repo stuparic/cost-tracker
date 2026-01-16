@@ -1,14 +1,13 @@
 <template>
   <div class="voice-recorder">
-    <Button
-      :icon="buttonIcon"
+    <button
       :class="['voice-button', recordingState]"
       :disabled="!isSupported"
       :title="buttonTitle"
-      rounded
-      text
       @click="toggleRecording"
-    />
+    >
+      <i :class="buttonIcon"></i>
+    </button>
 
     <!-- Error Message -->
     <div v-if="errorMessage" class="error-display">
@@ -20,7 +19,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue';
-import Button from 'primevue/button';
 
 // Check browser support
 const isSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
@@ -232,15 +230,22 @@ onUnmounted(() => {
 }
 
 .voice-button {
-  font-size: 1.5rem !important;
-  width: 3rem !important;
-  height: 3rem !important;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
 }
 
 /* Default idle state */
 .voice-button.idle {
   color: #6b7280;
+  background: transparent;
 }
 
 .voice-button.idle:hover:not(:disabled) {
@@ -249,14 +254,14 @@ onUnmounted(() => {
 }
 
 .voice-button.listening {
-  color: #ef4444 !important;
-  background: #fef2f2 !important;
+  color: #ef4444;
+  background: #fef2f2;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 .voice-button.processing {
-  color: var(--primary-color) !important;
-  background: var(--primary-light) !important;
+  color: var(--primary-color);
+  background: var(--primary-light);
 }
 
 .voice-button:disabled {

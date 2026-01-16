@@ -299,45 +299,30 @@ body {
 
 /* Voice Recorder in Header - Override default styles */
 .header-left :deep(.voice-button) {
-  width: 48px !important;
-  height: 48px !important;
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
-}
-
-.header-left :deep(.voice-button .pi) {
-  font-size: 1.5rem !important;
+  font-size: 1.5rem;
 }
 
 .header-left :deep(.voice-button.idle) {
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
-.header-left :deep(.voice-button.idle .pi) {
-  color: white !important;
-}
-
-.header-left :deep(.voice-button:hover:not(:disabled)) {
-  background: rgba(255, 255, 255, 0.3) !important;
-  color: white !important;
+.header-left :deep(.voice-button.idle:hover:not(:disabled)) {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
 }
 
 .header-left :deep(.voice-button.listening) {
-  background: rgba(239, 68, 68, 0.9) !important;
-  color: white !important;
-}
-
-.header-left :deep(.voice-button.listening .pi) {
-  color: white !important;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
 }
 
 .header-left :deep(.voice-button.processing) {
-  background: rgba(255, 255, 255, 0.3) !important;
-  color: white !important;
-}
-
-.header-left :deep(.voice-button.processing .pi) {
-  color: white !important;
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
 }
 
 .header-center {
