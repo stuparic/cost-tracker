@@ -238,11 +238,7 @@ onUnmounted(() => {
   transition: all 0.3s ease;
 }
 
-/* Default idle state - can be overridden by parent */
-.voice-button.idle {
-  color: #6b7280;
-}
-
+/* Default idle state - color controlled by parent */
 .voice-button.idle:hover:not(:disabled) {
   color: var(--primary-color);
   background: var(--primary-light);
