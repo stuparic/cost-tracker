@@ -1,8 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
     </linearGradient>
     <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
@@ -27,39 +28,46 @@
   <!-- Background circle -->
   <circle cx="256" cy="256" r="256" fill="url(#bgGrad)"/>
 
-  <!-- Hand (palm and fingers) -->
-  <g transform="translate(256, 380)">
-    <!-- Palm -->
-    <ellipse cx="0" cy="0" rx="90" ry="70" fill="url(#skinGrad)"/>
-    <ellipse cx="0" cy="0" rx="90" ry="70" fill="#000" opacity="0.1"/>
+  <!-- Hand (open palm) -->
+  <g transform="translate(256, 340)">
+    <!-- Palm base -->
+    <ellipse cx="0" cy="0" rx="85" ry="65" fill="url(#skinGrad)"/>
+    <ellipse cx="0" cy="0" rx="85" ry="65" fill="#000" opacity="0.08"/>
 
-    <!-- Thumb -->
-    <ellipse cx="-75" cy="-20" rx="35" ry="55" fill="url(#skinGrad)" transform="rotate(-25 -75 -20)"/>
+    <!-- Palm details (contours) -->
+    <path d="M -50,-20 Q -30,-10 -40,20" stroke="#e09465" stroke-width="2" fill="none" opacity="0.5"/>
+    <path d="M 0,-25 Q 0,-5 0,25" stroke="#e09465" stroke-width="2" fill="none" opacity="0.5"/>
+    <path d="M 40,-15 Q 30,-5 35,20" stroke="#e09465" stroke-width="2" fill="none" opacity="0.5"/>
+
+    <!-- Thumb (on left side, relaxed) -->
+    <ellipse cx="-85" cy="5" rx="28" ry="45" fill="url(#skinGrad)" transform="rotate(-30 -85 5)"/>
+    <ellipse cx="-100" cy="-15" rx="22" ry="30" fill="url(#skinGrad)" transform="rotate(-40 -100 -15)"/>
 
     <!-- Index finger -->
-    <rect x="-45" y="-90" width="40" height="90" rx="20" fill="url(#skinGrad)"/>
-    <circle cx="-25" cy="-90" r="20" fill="url(#skinGrad)"/>
+    <ellipse cx="-55" cy="-70" rx="18" ry="50" fill="url(#skinGrad)" transform="rotate(-5 -55 -70)"/>
+    <circle cx="-55" cy="-95" r="18" fill="url(#skinGrad)"/>
 
     <!-- Middle finger -->
-    <rect x="-5" y="-110" width="40" height="110" rx="20" fill="url(#skinGrad)"/>
-    <circle cx="15" cy="-110" r="20" fill="url(#skinGrad)"/>
+    <ellipse cx="-15" cy="-80" rx="18" ry="55" fill="url(#skinGrad)"/>
+    <circle cx="-15" cy="-108" r="18" fill="url(#skinGrad)"/>
 
     <!-- Ring finger -->
-    <rect x="35" y="-95" width="38" height="95" rx="19" fill="url(#skinGrad)"/>
-    <circle cx="54" cy="-95" r="19" fill="url(#skinGrad)"/>
+    <ellipse cx="25" cy="-75" rx="17" ry="50" fill="url(#skinGrad)" transform="rotate(5 25 -75)"/>
+    <circle cx="25" cy="-100" r="17" fill="url(#skinGrad)"/>
 
     <!-- Pinky -->
-    <rect x="70" y="-70" width="32" height="70" rx="16" fill="url(#skinGrad)"/>
-    <circle cx="86" cy="-70" r="16" fill="url(#skinGrad)"/>
+    <ellipse cx="60" cy="-60" rx="15" ry="42" fill="url(#skinGrad)" transform="rotate(10 60 -60)"/>
+    <circle cx="62" cy="-82" r="15" fill="url(#skinGrad)"/>
 
-    <!-- Wrist -->
-    <rect x="-60" y="40" width="120" height="80" rx="10" fill="url(#skinGrad)"/>
+    <!-- Wrist/forearm -->
+    <ellipse cx="0" cy="60" rx="70" ry="45" fill="url(#skinGrad)"/>
+    <rect x="-60" y="50" width="120" height="50" fill="url(#skinGrad)"/>
   </g>
 
   <!-- Coins floating above/around hand -->
   <g>
     <!-- Large gold coin (center) -->
-    <g transform="translate(256, 180)">
+    <g transform="translate(256, 200)">
       <ellipse cx="0" cy="0" rx="75" ry="75" fill="url(#goldGrad)"/>
       <ellipse cx="0" cy="0" rx="75" ry="75" fill="url(#coinShine)" opacity="0.4"/>
       <circle cx="0" cy="0" r="60" fill="none" stroke="#d97706" stroke-width="4"/>
@@ -68,7 +76,7 @@
     </g>
 
     <!-- Silver coin (left) -->
-    <g transform="translate(140, 140)">
+    <g transform="translate(140, 160)">
       <ellipse cx="0" cy="0" rx="55" ry="55" fill="url(#silverGrad)"/>
       <ellipse cx="0" cy="0" rx="55" ry="55" fill="url(#coinShine)" opacity="0.3"/>
       <circle cx="0" cy="0" r="45" fill="none" stroke="#9ca3af" stroke-width="3"/>
@@ -76,7 +84,7 @@
     </g>
 
     <!-- Gold coin (right) -->
-    <g transform="translate(372, 150)">
+    <g transform="translate(372, 170)">
       <ellipse cx="0" cy="0" rx="58" ry="58" fill="url(#goldGrad)"/>
       <ellipse cx="0" cy="0" rx="58" ry="58" fill="url(#coinShine)" opacity="0.4"/>
       <circle cx="0" cy="0" r="47" fill="none" stroke="#d97706" stroke-width="3"/>
@@ -100,7 +108,7 @@
     </g>
 
     <!-- Tiny coin near hand -->
-    <g transform="translate(200, 260)">
+    <g transform="translate(320, 270)">
       <ellipse cx="0" cy="0" rx="32" ry="32" fill="url(#goldGrad)"/>
       <ellipse cx="0" cy="0" rx="32" ry="32" fill="url(#coinShine)" opacity="0.4"/>
       <circle cx="0" cy="0" r="25" fill="none" stroke="#d97706" stroke-width="2"/>

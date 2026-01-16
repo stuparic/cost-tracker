@@ -6,16 +6,27 @@ interface VoiceParseRequest {
 }
 
 interface VoiceParseResponse {
-  receivedText: string;
-  timestamp: string;
-  message: string;
+  success: boolean;
+  type?: 'expense' | 'income';
+  data?: {
+    amount: number;
+    currency: 'EUR' | 'RSD';
+    shopOrSource: string;
+    description?: string;
+    category?: string;
+    incomeType?: string;
+    date?: string;
+  };
+  confidence?: 'high' | 'medium' | 'low';
+  originalTranscript?: string;
+  message?: string;
 }
 
 export function useVoiceInput() {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  async function sendTranscript(text: string): Promise<void> {
+  async function sendTranscript(text: string): Promise<VoiceParseResponse> {
     loading.value = true;
     error.value = null;
 
@@ -24,12 +35,17 @@ export function useVoiceInput() {
         text,
       };
 
-      const response = await apiClient.post<VoiceParseResponse>('/voice/parse', payload);
+      const response = await apiClient.post<VoiceParseResponse>(
+        '/voice/parse',
+        payload,
+      );
 
-      console.log('Voice input sent successfully:', response.data);
+      console.log('Voice parsing result:', response.data);
+      return response.data;
     } catch (err: any) {
-      console.error('Failed to send voice input:', err);
-      error.value = err.response?.data?.message || 'Greška pri slanju glasovnog unosa';
+      console.error('Failed to parse voice input:', err);
+      error.value =
+        err.response?.data?.message || 'Greška pri analizi glasovnog unosa';
       throw err;
     } finally {
       loading.value = false;

@@ -95,7 +95,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import Sidebar from 'primevue/sidebar';
@@ -105,6 +105,7 @@ import VoiceRecorder from './components/shared/VoiceRecorder.vue';
 import { useVoiceInput } from './composables/useVoiceInput';
 
 const route = useRoute();
+const router = useRouter();
 const toast = useToast();
 const sidebarVisible = ref(false);
 const manualDialogVisible = ref(false);
@@ -192,8 +193,46 @@ async function handleVoiceTranscript(text: string) {
   showVoiceTranscriptBubble(text);
 
   try {
-    // Don't send context - let AI determine if it's expense or income
-    await sendTranscript(text);
+    // Call AI parsing endpoint
+    const result = await sendTranscript(text);
+
+    if (!result.success) {
+      toast.add({
+        severity: 'error',
+        summary: 'Greška',
+        detail: result.message || 'Nije moguće analizirati glasovni unos',
+        life: 5000,
+      });
+      return;
+    }
+
+    // Navigate to appropriate form with pre-filled data
+    if (result.type === 'expense') {
+      router.push({
+        name: 'AddExpense',
+        state: {
+          voiceData: result.data,
+          voiceTranscript: text,
+          confidence: result.confidence,
+        },
+      });
+    } else {
+      router.push({
+        name: 'AddIncome',
+        state: {
+          voiceData: result.data,
+          voiceTranscript: text,
+          confidence: result.confidence,
+        },
+      });
+    }
+
+    toast.add({
+      severity: 'success',
+      summary: 'Uspešno',
+      detail: `Detektovano: ${result.type === 'expense' ? 'Trošak' : 'Prihod'}`,
+      life: 3000,
+    });
   } catch (error) {
     console.error('Failed to process voice input:', error);
     toast.add({
