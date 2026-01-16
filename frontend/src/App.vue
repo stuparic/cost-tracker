@@ -301,10 +301,14 @@ body {
 .header-left :deep(.voice-button) {
   background: rgba(255, 255, 255, 0.2) !important;
   color: white !important;
-  width: 40px !important;
-  height: 40px !important;
-  font-size: 1.125rem !important;
+  width: 48px !important;
+  height: 48px !important;
+  font-size: 1.5rem !important;
   flex-shrink: 0;
+}
+
+.header-left :deep(.voice-button.idle) {
+  color: white !important;
 }
 
 .header-left :deep(.voice-button:hover:not(:disabled)) {
