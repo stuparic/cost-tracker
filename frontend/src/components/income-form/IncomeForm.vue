@@ -327,7 +327,35 @@ function resetForm() {
 
 // Initialize defaults when component mounts or user changes
 onMounted(() => {
-  form.source = getDefaultSource();
+  // Check for voice data from route state (AI-parsed transcript)
+  const voiceData = history.state?.voiceData;
+  if (voiceData) {
+    // Pre-fill form with AI-parsed data
+    if (voiceData.amount) form.amount = voiceData.amount;
+    if (voiceData.currency) form.currency = voiceData.currency;
+    if (voiceData.shopOrSource) form.source = voiceData.shopOrSource;
+    if (voiceData.description) form.description = voiceData.description;
+    if (voiceData.incomeType) form.incomeType = voiceData.incomeType as IncomeType;
+
+    // Set date if provided
+    if (voiceData.date) {
+      dateReceived.value = new Date(voiceData.date);
+    }
+
+    // Show warning if confidence is not high
+    const confidence = history.state?.confidence;
+    if (confidence === 'low' || confidence === 'medium') {
+      toast.add({
+        severity: 'warn',
+        summary: 'Proverite podatke',
+        detail: 'Molimo pregledajte automatski popunjene podatke pre čuvanja',
+        life: 5000,
+      });
+    }
+  } else {
+    // Use smart defaults if no voice data
+    form.source = getDefaultSource();
+  }
 });
 </script>
 

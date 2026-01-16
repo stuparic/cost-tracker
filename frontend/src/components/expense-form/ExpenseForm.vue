@@ -206,7 +206,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue';
+import { ref, reactive, computed, watch, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
@@ -455,6 +455,35 @@ function resetForm() {
     isInferred: false,
   };
 }
+
+// Handle voice data from route state (AI-parsed transcript)
+onMounted(() => {
+  const voiceData = history.state?.voiceData;
+  if (voiceData) {
+    // Pre-fill form with AI-parsed data
+    if (voiceData.amount) form.amount = voiceData.amount;
+    if (voiceData.currency) form.currency = voiceData.currency;
+    if (voiceData.shopOrSource) form.shopName = voiceData.shopOrSource;
+    if (voiceData.description) form.productDescription = voiceData.description;
+    if (voiceData.category) form.category = voiceData.category;
+
+    // Set purchase date if provided
+    if (voiceData.date) {
+      purchaseDate.value = new Date(voiceData.date);
+    }
+
+    // Show warning if confidence is not high
+    const confidence = history.state?.confidence;
+    if (confidence === 'low' || confidence === 'medium') {
+      toast.add({
+        severity: 'warn',
+        summary: 'Proverite podatke',
+        detail: 'Molimo pregledajte automatski popunjene podatke pre čuvanja',
+        life: 5000,
+      });
+    }
+  }
+});
 </script>
 
 <style scoped>

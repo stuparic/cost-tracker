@@ -45,7 +45,7 @@ export interface CreateRecurringOccurrenceDto {
 
   // Income-specific
   source?: string;
-  incomeType?: 'Salary' | 'Freelance' | 'Investment' | 'Gift' | 'Other';
+  incomeType?: 'Salary' | 'Freelance' | 'Rent' |'Investment' | 'Gift' | 'Other';
 
   // Expense-specific
   expenseCategory?: string;
