@@ -31,7 +31,6 @@
             <button class="hamburger-btn" aria-label="Open menu" @click="sidebarVisible = true">
               <i class="pi pi-bars"></i>
             </button>
-            <VoiceRecorder @transcript="handleVoiceTranscript" />
           </div>
           <div class="header-center">
             <div class="app-title">
@@ -48,6 +47,9 @@
       </header>
       <!-- Main Section Navigation -->
       <nav class="main-nav">
+        <div class="main-tab voice-tab">
+          <VoiceRecorder @transcript="handleVoiceTranscript" />
+        </div>
         <router-link to="/add" class="main-tab expense-tab">
           <i class="pi pi-shopping-cart"></i>
           <span>Troškovi</span>
@@ -297,35 +299,39 @@ body {
   gap: 0.5rem;
 }
 
-/* Voice Recorder in Header - Override default styles */
-.header-left :deep(.voice-button) {
+/* Voice Tab in Main Navigation */
+.voice-tab {
+  flex: 0 0 auto;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-tab :deep(.voice-button) {
   width: 48px;
   height: 48px;
-  flex-shrink: 0;
   font-size: 1.5rem;
 }
 
-.header-left :deep(.voice-button.idle) {
-  background: white;
-  color: var(--primary-color);
-  border: 2px solid white;
-}
-
-.header-left :deep(.voice-button.idle:hover:not(:disabled)) {
-  background: rgba(255, 255, 255, 0.9);
+.voice-tab :deep(.voice-button.idle) {
+  background: var(--primary-light);
   color: var(--primary-color);
 }
 
-.header-left :deep(.voice-button.listening) {
+.voice-tab :deep(.voice-button.idle:hover:not(:disabled)) {
+  background: var(--primary-color);
+  color: white;
+}
+
+.voice-tab :deep(.voice-button.listening) {
   background: #ef4444;
   color: white;
-  border: 2px solid white;
 }
 
-.header-left :deep(.voice-button.processing) {
-  background: white;
-  color: var(--primary-color);
-  border: 2px solid white;
+.voice-tab :deep(.voice-button.processing) {
+  background: var(--primary-color);
+  color: white;
 }
 
 .header-center {
