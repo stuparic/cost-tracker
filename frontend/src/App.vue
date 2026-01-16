@@ -299,8 +299,6 @@ body {
 
 /* Voice Recorder in Header - Override default styles */
 .header-left :deep(.voice-button) {
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
   width: 48px !important;
   height: 48px !important;
   flex-shrink: 0;
@@ -308,10 +306,10 @@ body {
 
 .header-left :deep(.voice-button .pi) {
   font-size: 1.5rem !important;
-  color: white !important;
 }
 
 .header-left :deep(.voice-button.idle) {
+  background: rgba(255, 255, 255, 0.2) !important;
   color: white !important;
 }
 
