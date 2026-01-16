@@ -302,16 +302,16 @@ body {
 /* Voice Tab in Main Navigation */
 .voice-tab {
   flex: 0 0 auto;
-  padding: 0.25rem;
+  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .voice-tab :deep(.voice-button) {
-  width: 40px;
-  height: 40px;
-  font-size: 1.25rem;
+  width: 48px;
+  height: 48px;
+  font-size: 1.5rem;
 }
 
 .voice-tab :deep(.voice-button.idle) {
@@ -320,6 +320,16 @@ body {
 }
 
 .voice-tab :deep(.voice-button.idle:hover:not(:disabled)) {
+  background: var(--primary-color);
+  color: white;
+}
+
+.voice-tab :deep(.voice-button.listening) {
+  background: #ef4444;
+  color: white;
+}
+
+.voice-tab :deep(.voice-button.processing) {
   background: var(--primary-color);
   color: white;
 }
