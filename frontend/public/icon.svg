@@ -10,117 +10,94 @@
       <stop offset="50%" style="stop-color:#f59e0b;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
     </linearGradient>
+    <linearGradient id="goldGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fcd34d;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
     <linearGradient id="silverGrad" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" style="stop-color:#f3f4f6;stop-opacity:1" />
       <stop offset="50%" style="stop-color:#d1d5db;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#9ca3af;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#fcd4b8;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#f4a261;stop-opacity:1" />
-    </linearGradient>
     <radialGradient id="coinShine">
-      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.8" />
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.6" />
       <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
     </radialGradient>
   </defs>
 
-  <!-- Background circle -->
+  <!-- Background -->
   <circle cx="256" cy="256" r="256" fill="url(#bgGrad)"/>
 
-  <!-- Hand (open palm) -->
-  <g transform="translate(256, 340)">
-    <!-- Palm base -->
-    <ellipse cx="0" cy="0" rx="85" ry="65" fill="url(#skinGrad)"/>
-    <ellipse cx="0" cy="0" rx="85" ry="65" fill="#000" opacity="0.08"/>
+  <!-- Stack of coins - central focus -->
 
-    <!-- Palm details (contours) -->
-    <path d="M -50,-20 Q -30,-10 -40,20" stroke="#e09465" stroke-width="2" fill="none" opacity="0.5"/>
-    <path d="M 0,-25 Q 0,-5 0,25" stroke="#e09465" stroke-width="2" fill="none" opacity="0.5"/>
-    <path d="M 40,-15 Q 30,-5 35,20" stroke="#e09465" stroke-width="2" fill="none" opacity="0.5"/>
-
-    <!-- Thumb (on left side, relaxed) -->
-    <ellipse cx="-85" cy="5" rx="28" ry="45" fill="url(#skinGrad)" transform="rotate(-30 -85 5)"/>
-    <ellipse cx="-100" cy="-15" rx="22" ry="30" fill="url(#skinGrad)" transform="rotate(-40 -100 -15)"/>
-
-    <!-- Index finger -->
-    <ellipse cx="-55" cy="-70" rx="18" ry="50" fill="url(#skinGrad)" transform="rotate(-5 -55 -70)"/>
-    <circle cx="-55" cy="-95" r="18" fill="url(#skinGrad)"/>
-
-    <!-- Middle finger -->
-    <ellipse cx="-15" cy="-80" rx="18" ry="55" fill="url(#skinGrad)"/>
-    <circle cx="-15" cy="-108" r="18" fill="url(#skinGrad)"/>
-
-    <!-- Ring finger -->
-    <ellipse cx="25" cy="-75" rx="17" ry="50" fill="url(#skinGrad)" transform="rotate(5 25 -75)"/>
-    <circle cx="25" cy="-100" r="17" fill="url(#skinGrad)"/>
-
-    <!-- Pinky -->
-    <ellipse cx="60" cy="-60" rx="15" ry="42" fill="url(#skinGrad)" transform="rotate(10 60 -60)"/>
-    <circle cx="62" cy="-82" r="15" fill="url(#skinGrad)"/>
-
-    <!-- Wrist/forearm -->
-    <ellipse cx="0" cy="60" rx="70" ry="45" fill="url(#skinGrad)"/>
-    <rect x="-60" y="50" width="120" height="50" fill="url(#skinGrad)"/>
+  <!-- Bottom coin (slightly tilted) -->
+  <g transform="translate(256, 350)">
+    <ellipse cx="0" cy="0" rx="110" ry="35" fill="#b45309"/>
+    <ellipse cx="0" cy="-8" rx="110" ry="35" fill="url(#goldGrad)"/>
+    <ellipse cx="0" cy="-8" rx="110" ry="35" fill="url(#coinShine)" opacity="0.3"/>
+    <ellipse cx="0" cy="-8" rx="90" ry="28" fill="none" stroke="#d97706" stroke-width="3"/>
   </g>
 
-  <!-- Coins floating above/around hand -->
-  <g>
-    <!-- Large gold coin (center) -->
-    <g transform="translate(256, 200)">
-      <ellipse cx="0" cy="0" rx="75" ry="75" fill="url(#goldGrad)"/>
-      <ellipse cx="0" cy="0" rx="75" ry="75" fill="url(#coinShine)" opacity="0.4"/>
-      <circle cx="0" cy="0" r="60" fill="none" stroke="#d97706" stroke-width="4"/>
-      <circle cx="0" cy="0" r="45" fill="none" stroke="#b45309" stroke-width="3"/>
-      <text x="0" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#78350f">$</text>
-    </g>
-
-    <!-- Silver coin (left) -->
-    <g transform="translate(140, 160)">
-      <ellipse cx="0" cy="0" rx="55" ry="55" fill="url(#silverGrad)"/>
-      <ellipse cx="0" cy="0" rx="55" ry="55" fill="url(#coinShine)" opacity="0.3"/>
-      <circle cx="0" cy="0" r="45" fill="none" stroke="#9ca3af" stroke-width="3"/>
-      <text x="0" y="15" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#6b7280">€</text>
-    </g>
-
-    <!-- Gold coin (right) -->
-    <g transform="translate(372, 170)">
-      <ellipse cx="0" cy="0" rx="58" ry="58" fill="url(#goldGrad)"/>
-      <ellipse cx="0" cy="0" rx="58" ry="58" fill="url(#coinShine)" opacity="0.4"/>
-      <circle cx="0" cy="0" r="47" fill="none" stroke="#d97706" stroke-width="3"/>
-      <text x="0" y="16" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="bold" fill="#78350f">¥</text>
-    </g>
-
-    <!-- Small silver coin (top left) -->
-    <g transform="translate(160, 80)">
-      <ellipse cx="0" cy="0" rx="40" ry="40" fill="url(#silverGrad)"/>
-      <ellipse cx="0" cy="0" rx="40" ry="40" fill="url(#coinShine)" opacity="0.3"/>
-      <circle cx="0" cy="0" r="32" fill="none" stroke="#9ca3af" stroke-width="2"/>
-      <text x="0" y="11" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#6b7280">₽</text>
-    </g>
-
-    <!-- Small gold coin (top right) -->
-    <g transform="translate(350, 90)">
-      <ellipse cx="0" cy="0" rx="42" ry="42" fill="url(#goldGrad)"/>
-      <ellipse cx="0" cy="0" rx="42" ry="42" fill="url(#coinShine)" opacity="0.4"/>
-      <circle cx="0" cy="0" r="34" fill="none" stroke="#d97706" stroke-width="2"/>
-      <text x="0" y="12" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#78350f">£</text>
-    </g>
-
-    <!-- Tiny coin near hand -->
-    <g transform="translate(320, 270)">
-      <ellipse cx="0" cy="0" rx="32" ry="32" fill="url(#goldGrad)"/>
-      <ellipse cx="0" cy="0" rx="32" ry="32" fill="url(#coinShine)" opacity="0.4"/>
-      <circle cx="0" cy="0" r="25" fill="none" stroke="#d97706" stroke-width="2"/>
-    </g>
+  <!-- Second coin - SILVER -->
+  <g transform="translate(256, 300)">
+    <ellipse cx="0" cy="0" rx="105" ry="33" fill="#6b7280"/>
+    <ellipse cx="0" cy="-8" rx="105" ry="33" fill="url(#silverGrad)"/>
+    <ellipse cx="0" cy="-8" rx="105" ry="33" fill="url(#coinShine)" opacity="0.4"/>
+    <ellipse cx="0" cy="-8" rx="85" ry="26" fill="none" stroke="#9ca3af" stroke-width="3"/>
   </g>
 
-  <!-- Sparkles -->
-  <g opacity="0.7">
-    <circle cx="120" cy="200" r="5" fill="#fbbf24"/>
-    <circle cx="390" cy="220" r="4" fill="#f3f4f6"/>
-    <circle cx="256" cy="100" r="6" fill="#fbbf24"/>
-    <circle cx="100" cy="130" r="4" fill="#f3f4f6"/>
-    <circle cx="410" cy="180" r="5" fill="#fbbf24"/>
+  <!-- Third coin - GOLD -->
+  <g transform="translate(256, 250)">
+    <ellipse cx="0" cy="0" rx="100" ry="31" fill="#b45309"/>
+    <ellipse cx="0" cy="-8" rx="100" ry="31" fill="url(#goldGrad2)"/>
+    <ellipse cx="0" cy="-8" rx="100" ry="31" fill="url(#coinShine)" opacity="0.3"/>
+    <ellipse cx="0" cy="-8" rx="80" ry="24" fill="none" stroke="#d97706" stroke-width="3"/>
+  </g>
+
+  <!-- Top coin - SILVER -->
+  <g transform="translate(256, 200)">
+    <ellipse cx="0" cy="0" rx="95" ry="29" fill="#6b7280"/>
+    <ellipse cx="0" cy="-8" rx="95" ry="29" fill="url(#silverGrad)"/>
+    <ellipse cx="0" cy="-8" rx="95" ry="29" fill="url(#coinShine)" opacity="0.5"/>
+    <ellipse cx="0" cy="-8" rx="75" ry="22" fill="none" stroke="#9ca3af" stroke-width="2"/>
+  </g>
+
+  <!-- Large upright coin (front and center) -->
+  <g transform="translate(256, 220)">
+    <circle cx="0" cy="0" r="95" fill="#b45309" opacity="0.3"/>
+    <circle cx="-5" cy="-5" r="95" fill="url(#goldGrad)"/>
+    <circle cx="-5" cy="-5" r="95" fill="url(#coinShine)" opacity="0.4"/>
+    <circle cx="-5" cy="-5" r="80" fill="none" stroke="#d97706" stroke-width="4"/>
+    <circle cx="-5" cy="-5" r="65" fill="none" stroke="#f59e0b" stroke-width="3" opacity="0.5"/>
+    <text x="-5" y="15" text-anchor="middle" font-family="Arial, sans-serif" font-size="70" font-weight="bold" fill="#78350f">$</text>
+  </g>
+
+  <!-- Small floating coins -->
+  <g transform="translate(140, 160)" opacity="0.9">
+    <circle cx="0" cy="0" r="35" fill="#6b7280" opacity="0.3"/>
+    <circle cx="-3" cy="-3" r="35" fill="url(#silverGrad)"/>
+    <circle cx="-3" cy="-3" r="35" fill="url(#coinShine)" opacity="0.4"/>
+    <circle cx="-3" cy="-3" r="28" fill="none" stroke="#9ca3af" stroke-width="2"/>
+    <text x="-3" y="7" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#4b5563">€</text>
+  </g>
+
+  <g transform="translate(380, 180)" opacity="0.9">
+    <circle cx="0" cy="0" r="32" fill="#b45309" opacity="0.3"/>
+    <circle cx="-2" cy="-2" r="32" fill="url(#goldGrad)"/>
+    <circle cx="-2" cy="-2" r="32" fill="url(#coinShine)" opacity="0.3"/>
+    <circle cx="-2" cy="-2" r="26" fill="none" stroke="#d97706" stroke-width="2"/>
+    <text x="-2" y="6" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#78350f">¥</text>
+  </g>
+
+  <!-- Sparkles around coins -->
+  <g opacity="0.8">
+    <circle cx="120" cy="240" r="6" fill="#fef3c7"/>
+    <circle cx="390" cy="250" r="5" fill="#fef3c7"/>
+    <circle cx="256" cy="120" r="7" fill="#fef3c7"/>
+    <circle cx="100" cy="180" r="5" fill="#fef3c7"/>
+    <circle cx="410" cy="210" r="6" fill="#fef3c7"/>
+    <circle cx="180" cy="100" r="4" fill="#fef3c7"/>
+    <circle cx="340" cy="110" r="5" fill="#fef3c7"/>
   </g>
 </svg>
