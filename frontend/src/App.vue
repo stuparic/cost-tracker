@@ -306,23 +306,26 @@ body {
 }
 
 .header-left :deep(.voice-button.idle) {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: white;
+  color: var(--primary-color);
+  border: 2px solid white;
 }
 
 .header-left :deep(.voice-button.idle:hover:not(:disabled)) {
-  background: rgba(255, 255, 255, 0.3);
-  color: white;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--primary-color);
 }
 
 .header-left :deep(.voice-button.listening) {
-  background: rgba(239, 68, 68, 0.9);
+  background: #ef4444;
   color: white;
+  border: 2px solid white;
 }
 
 .header-left :deep(.voice-button.processing) {
-  background: rgba(255, 255, 255, 0.3);
-  color: white;
+  background: white;
+  color: var(--primary-color);
+  border: 2px solid white;
 }
 
 .header-center {
