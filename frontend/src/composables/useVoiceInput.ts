@@ -38,6 +38,7 @@ export function useVoiceInput() {
       const response = await apiClient.post<VoiceParseResponse>(
         '/voice/parse',
         payload,
+        { timeout: 10000 } // 10 seconds for AI processing
       );
 
       console.log('Voice parsing result:', response.data);
