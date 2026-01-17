@@ -11,14 +11,14 @@ export class AppService {
       endpoints: {
         expenses: '/expenses',
         autocomplete: '/autocomplete',
-        health: '/health',
+        health: '/health'
       },
       features: [
         'Dual currency support (EUR/RSD)',
         'Intelligent autocomplete',
         'Firebase Firestore integration',
-        'Automatic currency conversion',
-      ],
+        'Automatic currency conversion'
+      ]
     };
   }
 }

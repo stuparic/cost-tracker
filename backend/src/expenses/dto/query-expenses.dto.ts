@@ -13,7 +13,7 @@ export class QueryExpensesDto {
   @ApiPropertyOptional({
     example: 20,
     description: 'Items per page',
-    minimum: 1,
+    minimum: 1
   })
   @IsOptional()
   @Type(() => Number)
@@ -23,7 +23,7 @@ export class QueryExpensesDto {
 
   @ApiPropertyOptional({
     example: 'Groceries',
-    description: 'Filter by category',
+    description: 'Filter by category'
   })
   @IsOptional()
   @IsString()
@@ -41,7 +41,7 @@ export class QueryExpensesDto {
 
   @ApiPropertyOptional({
     example: '2026-01-01T00:00:00Z',
-    description: 'Filter expenses from this date',
+    description: 'Filter expenses from this date'
   })
   @IsOptional()
   @IsDateString()
@@ -49,7 +49,7 @@ export class QueryExpensesDto {
 
   @ApiPropertyOptional({
     example: '2026-01-31T23:59:59Z',
-    description: 'Filter expenses until this date',
+    description: 'Filter expenses until this date'
   })
   @IsOptional()
   @IsDateString()

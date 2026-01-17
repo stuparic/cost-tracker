@@ -26,7 +26,7 @@ export class IncomesService {
       description,
       incomeType: createIncomeDto.incomeType,
       dateReceived: createIncomeDto.dateReceived,
-      createdBy: createIncomeDto.createdBy,
+      createdBy: createIncomeDto.createdBy
     };
 
     return this.incomesRepository.create(incomeData);
@@ -39,7 +39,7 @@ export class IncomesService {
       page: query.page || 1,
       limit: query.limit || 20,
       total,
-      totalPages: Math.ceil(total / (query.limit || 20)),
+      totalPages: Math.ceil(total / (query.limit || 20))
     };
 
     return { data, pagination };

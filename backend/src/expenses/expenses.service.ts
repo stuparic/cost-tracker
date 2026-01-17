@@ -12,7 +12,7 @@ export class ExpensesService {
   constructor(
     private currencyService: CurrencyService,
     private expensesRepository: ExpensesRepository,
-    private categoryInferenceService: CategoryInferenceService,
+    private categoryInferenceService: CategoryInferenceService
   ) {}
 
   async create(createExpenseDto: CreateExpenseDto): Promise<Expense> {
@@ -39,7 +39,7 @@ export class ExpensesService {
       paymentMethod,
       tags,
       purchaseDate: createExpenseDto.purchaseDate,
-      createdBy: createExpenseDto.createdBy,
+      createdBy: createExpenseDto.createdBy
     };
 
     return this.expensesRepository.create(expenseData);
@@ -52,7 +52,7 @@ export class ExpensesService {
       page: query.page || 1,
       limit: query.limit || 20,
       total,
-      totalPages: Math.ceil(total / (query.limit || 20)),
+      totalPages: Math.ceil(total / (query.limit || 20))
     };
 
     return { data, pagination };

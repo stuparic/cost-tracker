@@ -13,7 +13,7 @@ export class VoiceService {
   constructor(
     private readonly geminiService: GeminiService,
     private readonly expensesService: ExpensesService,
-    private readonly incomesService: IncomesService,
+    private readonly incomesService: IncomesService
   ) {}
 
   async parseVoiceInput(dto: VoiceParseDto) {
@@ -25,7 +25,7 @@ export class VoiceService {
     if (!aiResult.success) {
       return {
         success: false,
-        message: aiResult.error || 'Failed to parse voice input',
+        message: aiResult.error || 'Failed to parse voice input'
       };
     }
 
@@ -35,7 +35,7 @@ export class VoiceService {
       type: aiResult.type,
       data: aiResult.data,
       confidence: aiResult.confidence,
-      originalTranscript: dto.text,
+      originalTranscript: dto.text
     };
   }
 
@@ -59,7 +59,7 @@ export class VoiceService {
         purchaseDate: data.date || new Date().toISOString(),
         createdBy,
         creationMethod: 'voice',
-        voiceTranscript: dto.text,
+        voiceTranscript: dto.text
       };
       return this.expensesService.create(createDto);
     } else {
@@ -72,7 +72,7 @@ export class VoiceService {
         dateReceived: data.date || new Date().toISOString(),
         createdBy,
         creationMethod: 'voice',
-        voiceTranscript: dto.text,
+        voiceTranscript: dto.text
       };
       return this.incomesService.create(createDto);
     }

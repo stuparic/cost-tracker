@@ -11,8 +11,7 @@ export class VoiceController {
   @Post('parse')
   @ApiOperation({
     summary: 'Parse voice transcript into expense or income data',
-    description:
-      'Uses AI to extract structured data from Serbian voice transcripts',
+    description: 'Uses AI to extract structured data from Serbian voice transcripts'
   })
   @ApiResponse({
     status: 200,
@@ -27,12 +26,12 @@ export class VoiceController {
           shopOrSource: 'Starbucks',
           description: 'Kupovina kafe',
           category: 'Dining',
-          date: '2026-01-16',
+          date: '2026-01-16'
         },
         confidence: 'high',
-        originalTranscript: 'Kupio sam kafu u Starbucks za 250 dinara',
-      },
-    },
+        originalTranscript: 'Kupio sam kafu u Starbucks za 250 dinara'
+      }
+    }
   })
   @ApiResponse({
     status: 200,
@@ -40,9 +39,9 @@ export class VoiceController {
     schema: {
       example: {
         success: false,
-        message: 'Failed to parse voice input',
-      },
-    },
+        message: 'Failed to parse voice input'
+      }
+    }
   })
   async parseVoiceInput(@Body() dto: VoiceParseDto) {
     return this.voiceService.parseVoiceInput(dto);

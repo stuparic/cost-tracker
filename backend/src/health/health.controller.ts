@@ -11,11 +11,11 @@ export class HealthController {
   @ApiOperation({ summary: 'Comprehensive health check with Firebase connectivity' })
   @ApiResponse({
     status: 200,
-    description: 'Service is healthy with all dependencies operational',
+    description: 'Service is healthy with all dependencies operational'
   })
   @ApiResponse({
     status: 503,
-    description: 'Service is unhealthy or dependencies are unavailable',
+    description: 'Service is unhealthy or dependencies are unavailable'
   })
   async check() {
     return this.healthService.getHealthStatus();

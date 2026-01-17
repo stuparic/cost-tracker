@@ -40,14 +40,14 @@ export class CurrencyService {
       return {
         eurAmount: amount,
         rsdAmount: this.convertEurToRsd(amount),
-        exchangeRate,
+        exchangeRate
       };
     }
 
     return {
       eurAmount: this.convertRsdToEur(amount),
       rsdAmount: amount,
-      exchangeRate,
+      exchangeRate
     };
   }
 }

@@ -1,5 +1,5 @@
-import * as crypto from 'crypto';
-(global as any).crypto = crypto;
+// import * as crypto from 'crypto';
+// (global as any).crypto = crypto;
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -15,15 +15,15 @@ async function bootstrap() {
       'http://localhost:5173',
       'http://localhost:3000',
       'https://moneyflow-832f4.web.app',
-      'https://moneyflow-832f4.firebaseapp.com',
+      'https://moneyflow-832f4.firebaseapp.com'
     ],
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    credentials: true,
+    credentials: true
   });
 
   // Enable API versioning
   app.setGlobalPrefix('api/v1', {
-    exclude: ['/', 'health'], // Keep root and health at base level
+    exclude: ['/', 'health'] // Keep root and health at base level
   });
 
   // Enable global exception filter
@@ -34,14 +34,14 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true,
-    }),
+      transform: true
+    })
   );
 
   const config = new DocumentBuilder()
     .setTitle('Cost Tracker API')
     .setDescription(
-      'API for tracking home expenses with dual currency support (EUR/RSD). Automatically calculates amounts in both currencies.',
+      'API for tracking home expenses with dual currency support (EUR/RSD). Automatically calculates amounts in both currencies.'
     )
     .setVersion('1.0')
     .build();

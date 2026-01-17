@@ -4,7 +4,7 @@ import { IsNumber, IsEnum, IsString, MinLength, IsArray, IsDateString, Min, IsOp
 export class CreateExpenseDto {
   @ApiProperty({
     example: 1500,
-    description: 'Amount in the specified currency',
+    description: 'Amount in the specified currency'
   })
   @IsNumber()
   @Min(0.01, { message: 'Amount must be greater than 0' })
@@ -13,7 +13,7 @@ export class CreateExpenseDto {
   @ApiProperty({
     example: 'RSD',
     enum: ['EUR', 'RSD'],
-    description: 'Currency of the amount',
+    description: 'Currency of the amount'
   })
   @IsEnum(['EUR', 'RSD'], { message: 'Currency must be either EUR or RSD' })
   currency: 'EUR' | 'RSD';
@@ -26,7 +26,7 @@ export class CreateExpenseDto {
   @ApiProperty({
     example: 'Groceries - milk, bread, eggs',
     description: 'Description of the product(s) purchased. Defaults to "Purchase at {shopName}" if not provided.',
-    required: false,
+    required: false
   })
   @IsOptional()
   @IsString()
@@ -35,7 +35,7 @@ export class CreateExpenseDto {
   @ApiProperty({
     example: 'Groceries',
     description: 'Category of the expense. Auto-inferred from shop name if not provided, defaults to "General".',
-    required: false,
+    required: false
   })
   @IsOptional()
   @IsString()
@@ -44,7 +44,7 @@ export class CreateExpenseDto {
   @ApiProperty({
     example: 'Card',
     description: 'Payment method used. Defaults to "Card" if not provided.',
-    required: false,
+    required: false
   })
   @IsOptional()
   @IsString()
@@ -54,7 +54,7 @@ export class CreateExpenseDto {
     example: ['food', 'weekly-shopping'],
     description: 'Tags for organizing expenses. Defaults to empty array if not provided.',
     required: false,
-    type: [String],
+    type: [String]
   })
   @IsOptional()
   @IsArray()
@@ -63,14 +63,14 @@ export class CreateExpenseDto {
 
   @ApiProperty({
     example: '2026-01-10T10:30:00Z',
-    description: 'Date and time of purchase (ISO 8601 format)',
+    description: 'Date and time of purchase (ISO 8601 format)'
   })
   @IsDateString()
   purchaseDate: string;
 
   @ApiProperty({
     example: 'John Doe',
-    description: 'Name of the person who created the expense',
+    description: 'Name of the person who created the expense'
   })
   @IsString()
   @MinLength(1, { message: 'Created by cannot be empty' })
@@ -78,7 +78,7 @@ export class CreateExpenseDto {
 
   @ApiProperty({
     required: false,
-    description: 'ID of recurring occurrence if auto-created',
+    description: 'ID of recurring occurrence if auto-created'
   })
   @IsOptional()
   @IsString()
@@ -88,18 +88,18 @@ export class CreateExpenseDto {
     required: false,
     example: 'manual',
     enum: ['manual', 'voice', 'auto'],
-    description: 'How this expense was created. "auto" = recurring auto-created. Defaults to "manual" if not specified.',
+    description: 'How this expense was created. "auto" = recurring auto-created. Defaults to "manual" if not specified.'
   })
   @IsOptional()
   @IsEnum(['manual', 'voice', 'auto'], {
-    message: 'Creation method must be one of: manual, voice, auto',
+    message: 'Creation method must be one of: manual, voice, auto'
   })
   creationMethod?: 'manual' | 'voice' | 'auto';
 
   @ApiProperty({
     required: false,
     example: 'Kupio sam kafu za 250 dinara',
-    description: 'Original voice transcript if created via voice input (for debugging)',
+    description: 'Original voice transcript if created via voice input (for debugging)'
   })
   @IsOptional()
   @IsString()

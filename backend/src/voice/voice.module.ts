@@ -9,6 +9,6 @@ import { IncomesModule } from '../incomes/incomes.module';
   imports: [ExpensesModule, IncomesModule],
   controllers: [VoiceController],
   providers: [VoiceService, GeminiService],
-  exports: [VoiceService],
+  exports: [VoiceService]
 })
 export class VoiceModule {}

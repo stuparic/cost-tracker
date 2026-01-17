@@ -9,6 +9,6 @@ import { CategoryInferenceModule } from '../category-inference/category-inferenc
   imports: [CurrencyModule, CategoryInferenceModule],
   controllers: [ExpensesController],
   providers: [ExpensesService, ExpensesRepository],
-  exports: [ExpensesService],
+  exports: [ExpensesService]
 })
 export class ExpensesModule {}

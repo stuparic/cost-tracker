@@ -12,7 +12,7 @@ export class RecurringService {
   constructor(
     private occurrencesRepository: RecurringOccurrencesRepository,
     private incomesService: IncomesService,
-    private expensesService: ExpensesService,
+    private expensesService: ExpensesService
   ) {}
 
   // Runs every day at 9:00 AM
@@ -62,7 +62,7 @@ export class RecurringService {
       createdBy: occurrence.createdBy,
       description: occurrence.description,
       recurringOccurrenceId: occurrence.id,
-      creationMethod: 'auto' as const,
+      creationMethod: 'auto' as const
     };
 
     return this.incomesService.create(createDto);
@@ -78,7 +78,7 @@ export class RecurringService {
       createdBy: occurrence.createdBy,
       productDescription: occurrence.description,
       recurringOccurrenceId: occurrence.id,
-      creationMethod: 'auto' as const,
+      creationMethod: 'auto' as const
     };
 
     return this.expensesService.create(createDto);
@@ -88,7 +88,7 @@ export class RecurringService {
     const nextDate = this.calculateNextDate(occurrence.nextOccurrenceDate, occurrence.frequency);
 
     await this.occurrencesRepository.update(occurrence.id, {
-      nextOccurrenceDate: nextDate,
+      nextOccurrenceDate: nextDate
     });
   }
 

@@ -11,6 +11,6 @@ import { FirebaseModule } from '../firebase/firebase.module';
   imports: [ScheduleModule.forRoot(), IncomesModule, ExpensesModule, FirebaseModule],
   controllers: [RecurringOccurrencesController],
   providers: [RecurringService, RecurringOccurrencesRepository],
-  exports: [RecurringService, RecurringOccurrencesRepository],
+  exports: [RecurringService, RecurringOccurrencesRepository]
 })
 export class RecurringModule {}

@@ -3,6 +3,6 @@ import { CategoryInferenceService } from './category-inference.service';
 
 @Module({
   providers: [CategoryInferenceService],
-  exports: [CategoryInferenceService],
+  exports: [CategoryInferenceService]
 })
 export class CategoryInferenceModule {}

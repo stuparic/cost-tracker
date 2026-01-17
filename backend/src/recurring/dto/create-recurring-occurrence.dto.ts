@@ -41,7 +41,7 @@ export class CreateRecurringOccurrenceDto {
   @ApiProperty({
     example: 'monthly',
     enum: ['monthly', 'weekly', 'biweekly', 'yearly'],
-    description: 'Frequency of recurrence',
+    description: 'Frequency of recurrence'
   })
   @IsEnum(['monthly', 'weekly', 'biweekly', 'yearly'])
   frequency: string;

@@ -7,5 +7,5 @@ export default registerAs('firebase', () => ({
   credentialsPath:
     process.env.NODE_ENV === 'production'
       ? '/secrets/serviceAccountKey.json'
-      : process.env.GOOGLE_APPLICATION_CREDENTIALS || './serviceAccountKey.json',
+      : process.env.GOOGLE_APPLICATION_CREDENTIALS || './serviceAccountKey.json'
 }));

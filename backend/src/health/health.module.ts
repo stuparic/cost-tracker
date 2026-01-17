@@ -6,6 +6,6 @@ import { FirebaseModule } from '../firebase/firebase.module';
 @Module({
   imports: [FirebaseModule],
   controllers: [HealthController],
-  providers: [HealthService],
+  providers: [HealthService]
 })
 export class HealthModule {}

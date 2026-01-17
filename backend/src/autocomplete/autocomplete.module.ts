@@ -4,6 +4,6 @@ import { AutocompleteController } from './autocomplete.controller';
 
 @Module({
   controllers: [AutocompleteController],
-  providers: [AutocompleteService],
+  providers: [AutocompleteService]
 })
 export class AutocompleteModule {}

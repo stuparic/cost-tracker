@@ -11,7 +11,7 @@ export class AppController {
   @ApiOperation({ summary: 'Get API information' })
   @ApiResponse({
     status: 200,
-    description: 'API information and available endpoints',
+    description: 'API information and available endpoints'
   })
   getApiInfo() {
     return this.appService.getApiInfo();

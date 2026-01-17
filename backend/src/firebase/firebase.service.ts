@@ -16,7 +16,7 @@ export class FirebaseService implements OnModuleInit {
     if (!admin.apps.length) {
       admin.initializeApp({
         credential: admin.credential.cert(credentialsPath),
-        projectId: projectId,
+        projectId: projectId
       });
     }
 

@@ -4,7 +4,7 @@ import { IsOptional, IsString } from 'class-validator';
 export class AutocompleteQueryDto {
   @ApiPropertyOptional({
     example: 'max',
-    description: 'Search prefix to filter suggestions',
+    description: 'Search prefix to filter suggestions'
   })
   @IsOptional()
   @IsString()

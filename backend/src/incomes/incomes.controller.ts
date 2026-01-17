@@ -13,11 +13,11 @@ export class IncomesController {
   @Post()
   @ApiOperation({
     summary: 'Create a new income',
-    description: 'Creates a new income record. Automatically calculates the amount in both EUR and RSD based on the currency provided.',
+    description: 'Creates a new income record. Automatically calculates the amount in both EUR and RSD based on the currency provided.'
   })
   @ApiResponse({
     status: 201,
-    description: 'Income successfully created',
+    description: 'Income successfully created'
   })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   create(@Body() createIncomeDto: CreateIncomeDto) {
@@ -27,11 +27,11 @@ export class IncomesController {
   @Get()
   @ApiOperation({
     summary: 'Get all incomes',
-    description: 'Retrieves a paginated list of incomes with optional filtering by type, source, date range, etc.',
+    description: 'Retrieves a paginated list of incomes with optional filtering by type, source, date range, etc.'
   })
   @ApiResponse({
     status: 200,
-    description: 'List of incomes with pagination info',
+    description: 'List of incomes with pagination info'
   })
   findAll(@Query() query: QueryIncomesDto) {
     return this.incomesService.findAll(query);
@@ -40,7 +40,7 @@ export class IncomesController {
   @Get(':id')
   @ApiOperation({
     summary: 'Get income by ID',
-    description: 'Retrieves a single income by its ID',
+    description: 'Retrieves a single income by its ID'
   })
   @ApiParam({ name: 'id', description: 'Income ID' })
   @ApiResponse({ status: 200, description: 'Income found' })
@@ -52,7 +52,7 @@ export class IncomesController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Update income',
-    description: 'Updates an existing income. If amount or currency is changed, recalculates both currency amounts.',
+    description: 'Updates an existing income. If amount or currency is changed, recalculates both currency amounts.'
   })
   @ApiParam({ name: 'id', description: 'Income ID' })
   @ApiResponse({ status: 200, description: 'Income successfully updated' })
@@ -66,7 +66,7 @@ export class IncomesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete income',
-    description: 'Deletes an income by its ID',
+    description: 'Deletes an income by its ID'
   })
   @ApiParam({ name: 'id', description: 'Income ID' })
   @ApiResponse({ status: 204, description: 'Income successfully deleted' })

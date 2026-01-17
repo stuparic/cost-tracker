@@ -40,7 +40,7 @@ export class RecurringOccurrencesRepository {
 
       isActive: true,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
 
     await docRef.set(occurrence);
@@ -58,8 +58,8 @@ export class RecurringOccurrencesRepository {
       doc =>
         ({
           id: doc.id,
-          ...doc.data(),
-        } as RecurringOccurrence),
+          ...doc.data()
+        } as RecurringOccurrence)
     );
   }
 
@@ -69,7 +69,7 @@ export class RecurringOccurrencesRepository {
       .doc(id)
       .update({
         ...updates,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       });
   }
 
@@ -84,8 +84,8 @@ export class RecurringOccurrencesRepository {
       doc =>
         ({
           id: doc.id,
-          ...doc.data(),
-        } as RecurringOccurrence),
+          ...doc.data()
+        } as RecurringOccurrence)
     );
   }
 

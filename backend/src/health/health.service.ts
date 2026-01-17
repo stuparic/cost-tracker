@@ -38,16 +38,16 @@ export class HealthService {
       uptime: Math.floor(process.uptime()),
       environment: process.env.NODE_ENV || 'development',
       dependencies: {
-        firebase: firebaseStatus,
+        firebase: firebaseStatus
       },
       system: {
         memory: {
           used: Math.round(usedMemory / 1024 / 1024), // MB
           total: Math.round(totalMemory / 1024 / 1024), // MB
-          percentage: Math.round((usedMemory / totalMemory) * 100),
+          percentage: Math.round((usedMemory / totalMemory) * 100)
         },
-        nodeVersion: process.version,
-      },
+        nodeVersion: process.version
+      }
     };
   }
 
@@ -64,12 +64,12 @@ export class HealthService {
 
       return {
         status: 'connected',
-        message: 'Firestore connection successful',
+        message: 'Firestore connection successful'
       };
     } catch (error) {
       return {
         status: 'disconnected',
-        message: error.message || 'Failed to connect to Firestore',
+        message: error.message || 'Failed to connect to Firestore'
       };
     }
   }

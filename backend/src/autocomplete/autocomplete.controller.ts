@@ -11,7 +11,7 @@ export class AutocompleteController {
   @Get('shops')
   @ApiOperation({
     summary: 'Get shop name suggestions',
-    description: 'Returns a list of previously used shop names, sorted by frequency. Optionally filter by search prefix.',
+    description: 'Returns a list of previously used shop names, sorted by frequency. Optionally filter by search prefix.'
   })
   @ApiResponse({
     status: 200,
@@ -20,10 +20,10 @@ export class AutocompleteController {
       example: {
         suggestions: [
           { value: 'Maxi', count: 5 },
-          { value: 'IKEA', count: 2 },
-        ],
-      },
-    },
+          { value: 'IKEA', count: 2 }
+        ]
+      }
+    }
   })
   async getShops(@Query() query: AutocompleteQueryDto) {
     const suggestions = await this.autocompleteService.getShops(query.search);
@@ -33,11 +33,11 @@ export class AutocompleteController {
   @Get('products')
   @ApiOperation({
     summary: 'Get product description suggestions',
-    description: 'Returns a list of previously used product descriptions, sorted by frequency. Optionally filter by search prefix.',
+    description: 'Returns a list of previously used product descriptions, sorted by frequency. Optionally filter by search prefix.'
   })
   @ApiResponse({
     status: 200,
-    description: 'List of product suggestions with usage count',
+    description: 'List of product suggestions with usage count'
   })
   async getProducts(@Query() query: AutocompleteQueryDto) {
     const suggestions = await this.autocompleteService.getProducts(query.search);
@@ -47,11 +47,11 @@ export class AutocompleteController {
   @Get('categories')
   @ApiOperation({
     summary: 'Get category suggestions',
-    description: 'Returns a list of previously used categories, sorted by frequency. Optionally filter by search prefix.',
+    description: 'Returns a list of previously used categories, sorted by frequency. Optionally filter by search prefix.'
   })
   @ApiResponse({
     status: 200,
-    description: 'List of category suggestions with usage count',
+    description: 'List of category suggestions with usage count'
   })
   async getCategories(@Query() query: AutocompleteQueryDto) {
     const suggestions = await this.autocompleteService.getCategories(query.search);
@@ -61,11 +61,11 @@ export class AutocompleteController {
   @Get('tags')
   @ApiOperation({
     summary: 'Get tag suggestions',
-    description: 'Returns a list of previously used tags, sorted by frequency. Optionally filter by search prefix.',
+    description: 'Returns a list of previously used tags, sorted by frequency. Optionally filter by search prefix.'
   })
   @ApiResponse({
     status: 200,
-    description: 'List of tag suggestions with usage count',
+    description: 'List of tag suggestions with usage count'
   })
   async getTags(@Query() query: AutocompleteQueryDto) {
     const suggestions = await this.autocompleteService.getTags(query.search);

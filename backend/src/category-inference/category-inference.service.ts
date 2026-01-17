@@ -9,7 +9,7 @@ export class CategoryInferenceService {
     Health: /(apoteka|pharmacy|lilly|benu|zegin|jankovic)/i,
     Electronics: /(gigatron|tehnomanija|comtrade|mediamarkt|tech|tahnologija)/i,
     Dining: /(restoran|restaurant|cafe|kafana|pizza|burger|mcdon|hrana)/i,
-    Clothing: /(zara|h&m|mango|new\s*yorker|fashion|clothes|odeca)/i,
+    Clothing: /(zara|h&m|mango|new\s*yorker|fashion|clothes|odeca)/i
   };
 
   /**

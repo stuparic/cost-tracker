@@ -21,7 +21,7 @@ export class ExpensesRepository {
       ...expenseData,
       purchaseDate: admin.firestore.Timestamp.fromDate(new Date(expenseData.purchaseDate)),
       createdAt: admin.firestore.Timestamp.now(),
-      updatedAt: admin.firestore.Timestamp.now(),
+      updatedAt: admin.firestore.Timestamp.now()
     };
 
     await docRef.set(firestoreData);
@@ -91,7 +91,7 @@ export class ExpensesRepository {
 
     const firestoreData: any = {
       ...updateData,
-      updatedAt: admin.firestore.Timestamp.now(),
+      updatedAt: admin.firestore.Timestamp.now()
     };
 
     if (updateData.purchaseDate) {
@@ -132,7 +132,7 @@ export class ExpensesRepository {
       purchaseDate: data.purchaseDate?.toDate().toISOString(),
       createdBy: data.createdBy,
       createdAt: data.createdAt?.toDate().toISOString(),
-      updatedAt: data.updatedAt?.toDate().toISOString(),
+      updatedAt: data.updatedAt?.toDate().toISOString()
     };
   }
 }

@@ -13,11 +13,11 @@ export class ExpensesController {
   @Post()
   @ApiOperation({
     summary: 'Create a new expense',
-    description: 'Creates a new expense record. Automatically calculates the amount in both EUR and RSD based on the currency provided.',
+    description: 'Creates a new expense record. Automatically calculates the amount in both EUR and RSD based on the currency provided.'
   })
   @ApiResponse({
     status: 201,
-    description: 'Expense successfully created',
+    description: 'Expense successfully created'
   })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   create(@Body() createExpenseDto: CreateExpenseDto) {
@@ -27,11 +27,11 @@ export class ExpensesController {
   @Get()
   @ApiOperation({
     summary: 'Get all expenses',
-    description: 'Retrieves a paginated list of expenses with optional filtering by category, shop, date range, etc.',
+    description: 'Retrieves a paginated list of expenses with optional filtering by category, shop, date range, etc.'
   })
   @ApiResponse({
     status: 200,
-    description: 'List of expenses with pagination info',
+    description: 'List of expenses with pagination info'
   })
   findAll(@Query() query: QueryExpensesDto) {
     return this.expensesService.findAll(query);
@@ -40,7 +40,7 @@ export class ExpensesController {
   @Get(':id')
   @ApiOperation({
     summary: 'Get expense by ID',
-    description: 'Retrieves a single expense by its ID',
+    description: 'Retrieves a single expense by its ID'
   })
   @ApiParam({ name: 'id', description: 'Expense ID' })
   @ApiResponse({ status: 200, description: 'Expense found' })
@@ -52,7 +52,7 @@ export class ExpensesController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Update expense',
-    description: 'Updates an existing expense. If amount or currency is changed, recalculates both currency amounts.',
+    description: 'Updates an existing expense. If amount or currency is changed, recalculates both currency amounts.'
   })
   @ApiParam({ name: 'id', description: 'Expense ID' })
   @ApiResponse({ status: 200, description: 'Expense successfully updated' })
@@ -66,7 +66,7 @@ export class ExpensesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete expense',
-    description: 'Deletes an expense by its ID',
+    description: 'Deletes an expense by its ID'
   })
   @ApiParam({ name: 'id', description: 'Expense ID' })
   @ApiResponse({ status: 204, description: 'Expense successfully deleted' })

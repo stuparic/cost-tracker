@@ -21,7 +21,7 @@ export class IncomesRepository {
       ...incomeData,
       dateReceived: admin.firestore.Timestamp.fromDate(new Date(incomeData.dateReceived)),
       createdAt: admin.firestore.Timestamp.now(),
-      updatedAt: admin.firestore.Timestamp.now(),
+      updatedAt: admin.firestore.Timestamp.now()
     };
 
     await docRef.set(firestoreData);
@@ -91,7 +91,7 @@ export class IncomesRepository {
 
     const firestoreData: any = {
       ...updateData,
-      updatedAt: admin.firestore.Timestamp.now(),
+      updatedAt: admin.firestore.Timestamp.now()
     };
 
     if (updateData.dateReceived) {
@@ -130,7 +130,7 @@ export class IncomesRepository {
       dateReceived: data.dateReceived?.toDate().toISOString(),
       createdBy: data.createdBy,
       createdAt: data.createdAt?.toDate().toISOString(),
-      updatedAt: data.updatedAt?.toDate().toISOString(),
+      updatedAt: data.updatedAt?.toDate().toISOString()
     };
   }
 }

@@ -32,7 +32,7 @@ export class AutocompleteService {
 
     let suggestions = Array.from(shopCounts.entries()).map(([value, count]) => ({
       value,
-      count,
+      count
     }));
 
     // Filter by search prefix if provided
@@ -67,7 +67,7 @@ export class AutocompleteService {
 
     let suggestions = Array.from(productCounts.entries()).map(([value, count]) => ({
       value,
-      count,
+      count
     }));
 
     // Filter by search prefix if provided
@@ -102,7 +102,7 @@ export class AutocompleteService {
 
     let suggestions = Array.from(categoryCounts.entries()).map(([value, count]) => ({
       value,
-      count,
+      count
     }));
 
     // Filter by search prefix if provided
@@ -141,7 +141,7 @@ export class AutocompleteService {
 
     let suggestions = Array.from(tagCounts.entries()).map(([value, count]) => ({
       value,
-      count,
+      count
     }));
 
     // Filter by search prefix if provided

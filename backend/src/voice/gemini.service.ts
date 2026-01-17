@@ -1,49 +1,32 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { EXPENSE_CATEGORIES, INCOME_TYPES } from '../constants/categories';
 import { AiParseResult } from './interfaces/ai-parse-result.interface';
 
 @Injectable()
 export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
-  private genAI: GoogleGenerativeAI;
-  private model: any;
+  private genAI: GoogleGenAI;
 
-  constructor(private configService: ConfigService) {
-    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
-    if (!apiKey) {
-      this.logger.warn('GEMINI_API_KEY not found. AI parsing will not work.');
-      return;
-    }
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+  constructor() {
+    this.genAI = new GoogleGenAI({});
   }
 
   async parseVoiceTranscript(transcript: string): Promise<AiParseResult> {
-    if (!this.model) {
-      return {
-        type: 'expense',
-        success: false,
-        error: 'AI service not configured',
-      };
-    }
-
     try {
-      const prompt = this.buildPrompt(transcript);
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      const result = await this.genAI.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: this.buildPrompt(transcript)
+      });
 
       // Parse JSON response
-      const parsed = this.parseAiResponse(text);
-      return parsed;
+      return this.parseAiResponse(result.text);
     } catch (error) {
       this.logger.error('Gemini API error:', error);
       return {
         type: 'expense',
         success: false,
-        error: 'Failed to parse transcript with AI',
+        error: 'Failed to parse transcript with AI'
       };
     }
   }
@@ -88,46 +71,15 @@ Rules:
 
   private parseAiResponse(text: string): AiParseResult {
     try {
-      // Remove markdown code blocks if present
       const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
       const parsed = JSON.parse(cleaned);
 
-      // Validate required fields
-      if (!parsed.type || !['expense', 'income'].includes(parsed.type)) {
-        throw new Error('Invalid type');
+      const validationError = this.validateParsedData(parsed);
+      if (validationError) {
+        return { type: 'expense', success: false, error: validationError };
       }
 
-      if (!parsed.amount || typeof parsed.amount !== 'number') {
-        throw new Error('Invalid amount');
-      }
-
-      if (!parsed.currency || !['EUR', 'RSD'].includes(parsed.currency)) {
-        throw new Error('Invalid currency');
-      }
-
-      if (!parsed.shopOrSource || typeof parsed.shopOrSource !== 'string') {
-        throw new Error('Invalid shop/source');
-      }
-
-      // Validate category for expenses
-      if (parsed.type === 'expense' && parsed.category) {
-        if (!EXPENSE_CATEGORIES.includes(parsed.category)) {
-          this.logger.warn(
-            `Invalid category "${parsed.category}", defaulting to "Other"`,
-          );
-          parsed.category = 'Other';
-        }
-      }
-
-      // Validate income type for incomes
-      if (parsed.type === 'income' && parsed.incomeType) {
-        if (!INCOME_TYPES.includes(parsed.incomeType)) {
-          this.logger.warn(
-            `Invalid income type "${parsed.incomeType}", defaulting to "Other"`,
-          );
-          parsed.incomeType = 'Other';
-        }
-      }
+      this.normalizeCategories(parsed);
 
       return {
         type: parsed.type,
@@ -137,23 +89,34 @@ Rules:
           currency: parsed.currency,
           shopOrSource: parsed.shopOrSource,
           description: parsed.description || undefined,
-          category:
-            parsed.category ||
-            (parsed.type === 'expense' ? 'Other' : undefined),
-          incomeType:
-            parsed.incomeType ||
-            (parsed.type === 'income' ? 'Other' : undefined),
-          date: parsed.date || undefined,
+          category: parsed.category || (parsed.type === 'expense' ? 'Other' : undefined),
+          incomeType: parsed.incomeType || (parsed.type === 'income' ? 'Other' : undefined),
+          date: parsed.date || undefined
         },
-        confidence: parsed.confidence || 'medium',
+        confidence: parsed.confidence || 'medium'
       };
     } catch (error) {
       this.logger.error('Failed to parse AI response:', error);
-      return {
-        type: 'expense',
-        success: false,
-        error: 'Invalid AI response format',
-      };
+      return { type: 'expense', success: false, error: 'Invalid AI response format' };
+    }
+  }
+
+  private validateParsedData(parsed: any): string | null {
+    if (!parsed.type || !['expense', 'income'].includes(parsed.type)) return 'Invalid type';
+    if (!parsed.amount || typeof parsed.amount !== 'number') return 'Invalid amount';
+    if (!parsed.currency || !['EUR', 'RSD'].includes(parsed.currency)) return 'Invalid currency';
+    if (!parsed.shopOrSource || typeof parsed.shopOrSource !== 'string') return 'Invalid shop/source';
+    return null;
+  }
+
+  private normalizeCategories(parsed: any): void {
+    if (parsed.type === 'expense' && parsed.category && !EXPENSE_CATEGORIES.includes(parsed.category)) {
+      this.logger.warn(`Invalid category "${parsed.category}", defaulting to "Other"`);
+      parsed.category = 'Other';
+    }
+    if (parsed.type === 'income' && parsed.incomeType && !INCOME_TYPES.includes(parsed.incomeType)) {
+      this.logger.warn(`Invalid income type "${parsed.incomeType}", defaulting to "Other"`);
+      parsed.incomeType = 'Other';
     }
   }
 }

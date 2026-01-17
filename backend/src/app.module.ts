@@ -16,7 +16,7 @@ import firebaseConfig from './config/firebase.config';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [firebaseConfig],
+      load: [firebaseConfig]
     }),
     FirebaseModule,
     ExpensesModule,
@@ -24,10 +24,10 @@ import firebaseConfig from './config/firebase.config';
     AutocompleteModule,
     HealthModule,
     RecurringModule,
-    VoiceModule,
+    VoiceModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
