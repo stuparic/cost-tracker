@@ -207,8 +207,10 @@ async function handleVoiceTranscript(text: string) {
     }
 
     // Navigate to appropriate form with pre-filled data
+    console.log('Navigating with voice data:', result);
+
     if (result.type === 'expense') {
-      router.push({
+      await router.push({
         name: 'AddExpense',
         state: {
           voiceData: result.data,
@@ -216,8 +218,9 @@ async function handleVoiceTranscript(text: string) {
           confidence: result.confidence,
         },
       });
+      console.log('Navigation complete to AddExpense');
     } else {
-      router.push({
+      await router.push({
         name: 'AddIncome',
         state: {
           voiceData: result.data,
@@ -225,6 +228,7 @@ async function handleVoiceTranscript(text: string) {
           confidence: result.confidence,
         },
       });
+      console.log('Navigation complete to AddIncome');
     }
 
     toast.add({

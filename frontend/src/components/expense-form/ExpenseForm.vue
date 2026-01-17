@@ -458,8 +458,14 @@ function resetForm() {
 
 // Handle voice data from route state (AI-parsed transcript)
 onMounted(() => {
+  console.log('ExpenseForm mounted, checking for voice data...');
+  console.log('history.state:', history.state);
+
   const voiceData = history.state?.voiceData;
+  console.log('voiceData:', voiceData);
+
   if (voiceData) {
+    console.log('Pre-filling form with voice data:', voiceData);
     // Pre-fill form with AI-parsed data
     if (voiceData.amount) form.amount = voiceData.amount;
     if (voiceData.currency) form.currency = voiceData.currency;
