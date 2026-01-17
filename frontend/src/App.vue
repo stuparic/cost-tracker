@@ -473,6 +473,8 @@ body {
   top: 0;
   z-index: 91;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .main-tab {
@@ -481,13 +483,14 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 1rem 0.5rem;
   text-decoration: none;
   color: var(--text-secondary);
   font-weight: 600;
   font-size: 1rem;
   transition: all 0.2s;
   border-bottom: 3px solid transparent;
+  min-width: 0;
 }
 
 .main-tab i {
@@ -601,6 +604,20 @@ body {
   .app-main {
     padding: 0;
     background: white;
+  }
+
+  .main-tab {
+    padding: 0.875rem 0.25rem;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+  }
+
+  .main-tab i {
+    font-size: 1.25rem;
+  }
+
+  .main-tab span {
+    font-size: 0.8125rem;
   }
 }
 
