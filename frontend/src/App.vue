@@ -120,11 +120,11 @@ let bubbleTimeout: ReturnType<typeof setTimeout> | null = null;
 // Initialize stores on app load
 import { useThemeStore } from './stores/theme';
 import { useUserStore } from './stores/user';
-import { useBalanceStore } from './stores/balance';
+// import { useBalanceStore } from './stores/balance';
 
 useThemeStore(); // Initialize theme
 const userStore = useUserStore();
-const balanceStore = useBalanceStore();
+// const balanceStore = useBalanceStore();
 const { sendTranscript } = useVoiceInput();
 
 // Preload balance data in background on app start

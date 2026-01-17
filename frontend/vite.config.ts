@@ -14,32 +14,32 @@ export default defineConfig({
         name: 'Troškić',
         short_name: 'Troškić',
         description: 'Pratite troškove domaćinstva',
-        id: '/?v=4',
+        id: '/?v=5',
         theme_color: '#10b981',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
-        start_url: '/?v=4',
+        start_url: '/?v=5',
         icons: [
           {
-            src: 'pwa-64x64.png?v=4',
+            src: 'pwa-64x64.png?v=5',
             sizes: '64x64',
             type: 'image/png'
           },
           {
-            src: 'pwa-192x192.png?v=4',
+            src: 'pwa-192x192.png?v=5',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png?v=4',
+            src: 'pwa-512x512.png?v=5',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: 'maskable-icon-512x512.png?v=4',
+            src: 'maskable-icon-512x512.png?v=5',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
