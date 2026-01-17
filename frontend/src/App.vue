@@ -129,15 +129,15 @@ const { sendTranscript } = useVoiceInput();
 
 // Preload balance data in background on app start
 onMounted(() => {
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  // const now = new Date();
+  // const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  // const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 
-  balanceStore.fetchBalanceData({
-    startDate: startOfMonth.toISOString(),
-    endDate: endOfMonth.toISOString(),
-    limit: 1000,
-  });
+  // balanceStore.fetchBalanceData({
+  //   startDate: startOfMonth.toISOString(),
+  //   endDate: endOfMonth.toISOString(),
+  //   limit: 1000,
+  // });
 });
 
 // Show user selection dialog if no user is selected or manually triggered
