@@ -95,7 +95,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import Sidebar from 'primevue/sidebar';
@@ -105,6 +105,7 @@ import VoiceRecorder from './components/shared/VoiceRecorder.vue';
 import { useVoiceInput } from './composables/useVoiceInput';
 
 const route = useRoute();
+const router = useRouter();
 const toast = useToast();
 const sidebarVisible = ref(false);
 const manualDialogVisible = ref(false);
@@ -198,14 +199,17 @@ async function handleVoiceTranscript(text: string) {
       toast.add({
         severity: 'error',
         summary: 'Greška',
-        detail: result.message || 'Nije moguće analizirati glasovni unos',
+        detail: result.errorMessage || 'Nije moguće analizirati glasovni unos',
         life: 5000
       });
       return;
     }
-
-    // Log the result
-    console.log('Voice parsing result:', result);
+    
+    if(result.type == 'expense') {
+      await router.push('/list');
+    } else if(result.type == 'income') {
+      await router.push('/income/list');
+    }
 
     toast.add({
       severity: 'success',
