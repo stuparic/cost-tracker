@@ -8,4 +8,11 @@ export class VoiceParseDto {
   })
   @IsString()
   text: string;
+
+  @ApiProperty({
+    description: 'Name of the user who created the voice input',
+    example: 'Dejan'
+  })
+  @IsString()
+  createdBy: string;
 }

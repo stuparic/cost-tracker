@@ -1,22 +1,22 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import PrimeVue from 'primevue/config'
-import Aura from '@primevue/themes/aura'
-import ToastService from 'primevue/toastservice'
-import ConfirmationService from 'primevue/confirmationservice'
-import router from './router'
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import PrimeVue from 'primevue/config';
+import Aura from '@primevue/themes/aura';
+import ToastService from 'primevue/toastservice';
+import ConfirmationService from 'primevue/confirmationservice';
+import router from './router';
 
-import App from './App.vue'
-import './style.css'
-import 'primeicons/primeicons.css'
+import App from './App.vue';
+import './style.css';
+import 'primeicons/primeicons.css';
 
-const app = createApp(App)
+const app = createApp(App);
 
 // Pinia state management
-app.use(createPinia())
+app.use(createPinia());
 
 // Vue Router
-app.use(router)
+app.use(router);
 
 // PrimeVue UI library
 app.use(PrimeVue, {
@@ -28,12 +28,12 @@ app.use(PrimeVue, {
       cssLayer: false
     }
   }
-})
+});
 
 // Toast notifications
-app.use(ToastService)
+app.use(ToastService);
 
 // Confirmation dialogs
-app.use(ConfirmationService)
+app.use(ConfirmationService);
 
-app.mount('#app')
+app.mount('#app');

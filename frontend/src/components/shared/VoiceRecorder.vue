@@ -1,11 +1,6 @@
 <template>
   <div class="voice-recorder">
-    <button
-      :class="['voice-button', recordingState]"
-      :disabled="!isSupported"
-      :title="buttonTitle"
-      @click="toggleRecording"
-    >
+    <button :class="['voice-button', recordingState]" :disabled="!isSupported" :title="buttonTitle" @click="toggleRecording">
       <i :class="buttonIcon"></i>
     </button>
 
@@ -270,7 +265,8 @@ onUnmounted(() => {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }

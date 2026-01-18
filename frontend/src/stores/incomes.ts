@@ -13,7 +13,7 @@ export const useIncomesStore = defineStore('incomes', () => {
     page: 1,
     limit: 20,
     total: 0,
-    totalPages: 0,
+    totalPages: 0
   });
 
   // Actions
@@ -84,6 +84,6 @@ export const useIncomesStore = defineStore('incomes', () => {
     createIncome,
     fetchIncomes,
     deleteIncome,
-    clearError,
+    clearError
   };
 });

@@ -4,12 +4,7 @@
 
     <!-- Monthly Summaries -->
     <div class="monthly-summaries">
-      <div
-        v-for="summary in monthlySummaries"
-        :key="summary.month"
-        class="summary-card"
-        :class="{ 'loading': loadingSummaries }"
-      >
+      <div v-for="summary in monthlySummaries" :key="summary.month" class="summary-card" :class="{ loading: loadingSummaries }">
         <div class="summary-month">{{ summary.monthName }}</div>
         <div class="summary-amount-row">
           <span class="summary-amount">{{ formatAmount(summary.totalRsd, false) }}</span>
@@ -23,21 +18,9 @@
     <div class="quick-filters">
       <!-- Month Navigation -->
       <div class="month-navigation">
-        <Button
-          icon="pi pi-chevron-left"
-          text
-          rounded
-          class="month-nav-btn"
-          @click="navigateMonth(-1)"
-        />
+        <Button icon="pi pi-chevron-left" text rounded class="month-nav-btn" @click="navigateMonth(-1)" />
         <span class="current-month">{{ currentMonthLabel }}</span>
-        <Button
-          icon="pi pi-chevron-right"
-          text
-          rounded
-          class="month-nav-btn"
-          @click="navigateMonth(1)"
-        />
+        <Button icon="pi pi-chevron-right" text rounded class="month-nav-btn" @click="navigateMonth(1)" />
       </div>
 
       <!-- Person Pills -->
@@ -69,11 +52,7 @@
     </div>
 
     <!-- Advanced Filters Sidebar -->
-    <Sidebar
-      v-model:visible="advancedFiltersVisible"
-      position="right"
-      class="advanced-filters-sidebar"
-    >
+    <Sidebar v-model:visible="advancedFiltersVisible" position="right" class="advanced-filters-sidebar">
       <template #header>
         <h3>Dodatni filteri</h3>
       </template>
@@ -130,96 +109,67 @@
         :row-class="getRowClass"
         @page="onPageChange"
       >
-      <template #empty>
-        <div class="empty-state">
-          <i class="pi pi-inbox"></i>
-          <p>Nema troškova za prikaz</p>
-        </div>
-      </template>
-
-      <Column field="purchaseDate" header="Datum" :sortable="true">
-        <template #body="{ data }">
-          {{ formatDate(data.purchaseDate) }}
-        </template>
-      </Column>
-
-      <Column field="shopName" header="Prodavnica" :sortable="true" />
-
-      <Column field="amount" header="Iznos" :sortable="true">
-        <template #body="{ data }">
-          <div class="amount-cell">
-            <span class="amount-primary">{{ formatAmount(data.rsdAmount, false) }} RSD</span>
-            <span class="amount-secondary">{{ formatAmount(data.eurAmount, true) }} EUR</span>
+        <template #empty>
+          <div class="empty-state">
+            <i class="pi pi-inbox"></i>
+            <p>Nema troškova za prikaz</p>
           </div>
         </template>
-      </Column>
 
-      <Column field="category" header="Kategorija" :sortable="true">
-        <template #body="{ data }">
-          <span class="category-badge">{{ data.category }}</span>
-        </template>
-      </Column>
+        <Column field="purchaseDate" header="Datum" :sortable="true">
+          <template #body="{ data }">
+            {{ formatDate(data.purchaseDate) }}
+          </template>
+        </Column>
 
-      <Column header="Izvor" style="min-width: 100px">
-        <template #body="{ data }">
-          <Tag
-            v-if="data.recurringOccurrenceId"
-            value="Auto"
-            severity="info"
-            icon="pi pi-replay"
-          />
-          <span v-else class="manual-label">Ručno</span>
-        </template>
-      </Column>
+        <Column field="shopName" header="Prodavnica" :sortable="true" />
 
-      <Column field="productDescription" header="Opis" />
+        <Column field="amount" header="Iznos" :sortable="true">
+          <template #body="{ data }">
+            <div class="amount-cell">
+              <span class="amount-primary">{{ formatAmount(data.rsdAmount, false) }} RSD</span>
+              <span class="amount-secondary">{{ formatAmount(data.eurAmount, true) }} EUR</span>
+            </div>
+          </template>
+        </Column>
 
-      <Column field="createdBy" header="Osoba" :sortable="true">
-        <template #body="{ data }">
-          <span class="person-badge" :class="data.createdBy ? data.createdBy.toLowerCase() : 'unknown'">
-            {{ data.createdBy || 'Nepoznato' }}
-          </span>
-        </template>
-      </Column>
+        <Column field="category" header="Kategorija" :sortable="true">
+          <template #body="{ data }">
+            <span class="category-badge">{{ data.category }}</span>
+          </template>
+        </Column>
 
-      <Column header="Akcije">
-        <template #body="{ data }">
-          <Button
-            v-tooltip.top="'Izmeni'"
-            icon="pi pi-pencil"
-            severity="secondary"
-            text
-            rounded
-            @click="openEditDialog(data)"
-          />
-          <Button
-            v-tooltip.top="'Obriši'"
-            icon="pi pi-trash"
-            severity="danger"
-            text
-            rounded
-            @click="confirmDelete(data)"
-          />
-        </template>
-      </Column>
+        <Column header="Izvor" style="min-width: 100px">
+          <template #body="{ data }">
+            <Tag v-if="data.recurringOccurrenceId" value="Auto" severity="info" icon="pi pi-replay" />
+            <span v-else class="manual-label">Ručno</span>
+          </template>
+        </Column>
+
+        <Column field="productDescription" header="Opis" />
+
+        <Column field="createdBy" header="Osoba" :sortable="true">
+          <template #body="{ data }">
+            <span class="person-badge" :class="data.createdBy ? data.createdBy.toLowerCase() : 'unknown'">
+              {{ data.createdBy || 'Nepoznato' }}
+            </span>
+          </template>
+        </Column>
+
+        <Column header="Akcije">
+          <template #body="{ data }">
+            <Button v-tooltip.top="'Izmeni'" icon="pi pi-pencil" severity="secondary" text rounded @click="openEditDialog(data)" />
+            <Button v-tooltip.top="'Obriši'" icon="pi pi-trash" severity="danger" text rounded @click="confirmDelete(data)" />
+          </template>
+        </Column>
       </DataTable>
     </div>
 
     <!-- Edit Expense Dialog -->
-    <EditExpenseDialog
-      v-if="expenseToEdit"
-      v-model:visible="editDialogVisible"
-      :expense="expenseToEdit"
-      @success="handleEditSuccess"
-    />
+    <EditExpenseDialog v-if="expenseToEdit" v-model:visible="editDialogVisible" :expense="expenseToEdit" @success="handleEditSuccess" />
 
     <!-- Delete Confirmation Dialog -->
-    <Dialog
-      v-model:visible="deleteDialogVisible"
-      header="Potvrdi brisanje"
-      :modal="true"
-      class="delete-dialog"
-    >
+    <Dialog v-model:visible="deleteDialogVisible" header="Potvrdi brisanje" :modal="true" class="delete-dialog">
       <p>Da li ste sigurni da želite da obrišete ovaj trošak?</p>
       <template #footer>
         <Button label="Otkaži" severity="secondary" @click="deleteDialogVisible = false" />
@@ -267,14 +217,14 @@ const currentMonthLabel = computed(() => {
 const filters = reactive({
   createdBy: '',
   shopName: '',
-  category: '',
+  category: ''
 });
 
 // Person filter options
 const personOptions = [
   { label: 'Sve', value: '' },
   { label: 'Svetla', value: 'Svetla' },
-  { label: 'Dejan', value: 'Dejan' },
+  { label: 'Dejan', value: 'Dejan' }
 ];
 
 // Autocomplete suggestions
@@ -313,14 +263,18 @@ const advancedFiltersCount = computed(() => {
 });
 
 // Fetch expenses when filters or month change (but not on initial mount)
-watch([filters, currentMonth], () => {
-  fetchExpenses();
-}, { deep: true, immediate: false });
+watch(
+  [filters, currentMonth],
+  () => {
+    fetchExpenses();
+  },
+  { deep: true, immediate: false }
+);
 
 async function fetchExpenses(page = 1) {
   const params: any = {
     page,
-    limit: 20,
+    limit: 20
   };
 
   const range = dateRange.value;
@@ -410,32 +364,19 @@ function formatDate(dateString: string): string {
   return date.toLocaleDateString('sr-RS', {
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric',
+    year: 'numeric'
   });
 }
 
 function formatAmount(amount: number, showDecimals: boolean = true): string {
   return amount.toLocaleString('sr-RS', {
     minimumFractionDigits: showDecimals ? 2 : 0,
-    maximumFractionDigits: showDecimals ? 2 : 0,
+    maximumFractionDigits: showDecimals ? 2 : 0
   });
 }
 
 function getMonthNameLatin(date: Date): string {
-  const monthNames = [
-    'Januar',
-    'Februar',
-    'Mart',
-    'April',
-    'Maj',
-    'Jun',
-    'Jul',
-    'Avgust',
-    'Septembar',
-    'Oktobar',
-    'Novembar',
-    'Decembar',
-  ];
+  const monthNames = ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'];
 
   return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
 }
@@ -467,7 +408,7 @@ async function deleteExpense() {
       severity: 'success',
       summary: 'Uspešno!',
       detail: 'Trošak je obrisan',
-      life: 3000,
+      life: 3000
     });
     deleteDialogVisible.value = false;
     expenseToDelete.value = null;
@@ -477,7 +418,7 @@ async function deleteExpense() {
       severity: 'error',
       summary: 'Greška',
       detail: error.response?.data?.message || 'Nije moguće obrisati trošak',
-      life: 5000,
+      life: 5000
     });
   } finally {
     deleting.value = false;
@@ -499,7 +440,7 @@ async function fetchMonthlySummaries() {
       const params = {
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
-        limit: 1000, // Get all expenses for the month
+        limit: 1000 // Get all expenses for the month
       };
 
       // Use direct API call to avoid modifying the store
@@ -512,7 +453,7 @@ async function fetchMonthlySummaries() {
         month: `${monthDate.getFullYear()}-${monthDate.getMonth() + 1}`,
         monthName: getMonthNameLatin(monthDate),
         totalRsd,
-        totalEur,
+        totalEur
       });
     }
 

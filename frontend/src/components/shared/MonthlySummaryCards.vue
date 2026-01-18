@@ -1,11 +1,6 @@
 <template>
   <div class="monthly-summaries">
-    <div
-      v-for="summary in summaries"
-      :key="summary.month"
-      class="summary-card"
-      :class="{ loading: loading }"
-    >
+    <div v-for="summary in summaries" :key="summary.month" class="summary-card" :class="{ loading: loading }">
       <div class="summary-month">{{ summary.monthName }}</div>
       <div class="summary-amount-row">
         <span class="summary-amount">{{ formatAmount(summary.totalRsd, false) }}</span>
@@ -32,7 +27,7 @@ defineProps<{
 function formatAmount(amount: number, showDecimals: boolean = true): string {
   return new Intl.NumberFormat('sr-RS', {
     minimumFractionDigits: showDecimals ? 2 : 0,
-    maximumFractionDigits: showDecimals ? 2 : 0,
+    maximumFractionDigits: showDecimals ? 2 : 0
   }).format(amount);
 }
 </script>

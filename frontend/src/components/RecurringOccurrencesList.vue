@@ -6,13 +6,7 @@
     </div>
 
     <div class="occurrences-container">
-      <DataTable
-        :value="occurrences"
-        :loading="loading"
-        responsive-layout="scroll"
-        class="occurrences-table"
-        striped-rows
-      >
+      <DataTable :value="occurrences" :loading="loading" responsive-layout="scroll" class="occurrences-table" striped-rows>
         <template #empty>
           <div class="empty-state">
             <i class="pi pi-replay empty-icon"></i>
@@ -34,17 +28,13 @@
         <Column header="Opis" style="min-width: 150px">
           <template #body="{ data }">
             <strong>{{ getDescription(data) }}</strong>
-            <small v-if="data.description" class="description-text">
-              <br />{{ data.description }}
-            </small>
+            <small v-if="data.description" class="description-text"> <br />{{ data.description }} </small>
           </template>
         </Column>
 
         <Column field="amount" header="Iznos" style="min-width: 120px">
           <template #body="{ data }">
-            <span class="amount-text">
-              {{ Math.round(data.amount).toLocaleString('sr-RS') }} {{ data.originalCurrency }}
-            </span>
+            <span class="amount-text"> {{ Math.round(data.amount).toLocaleString('sr-RS') }} {{ data.originalCurrency }} </span>
           </template>
         </Column>
 
@@ -62,23 +52,13 @@
 
         <Column field="isActive" header="Status" style="min-width: 100px">
           <template #body="{ data }">
-            <Tag
-              :value="data.isActive ? 'Aktivan' : 'Neaktivan'"
-              :severity="data.isActive ? 'success' : 'secondary'"
-            />
+            <Tag :value="data.isActive ? 'Aktivan' : 'Neaktivan'" :severity="data.isActive ? 'success' : 'secondary'" />
           </template>
         </Column>
 
         <Column header="Akcije" style="min-width: 120px">
           <template #body="{ data }">
-            <Button
-              icon="pi pi-trash"
-              severity="danger"
-              text
-              rounded
-              :loading="deletingId === data.id"
-              @click="confirmDelete(data)"
-            />
+            <Button icon="pi pi-trash" severity="danger" text rounded :loading="deletingId === data.id" @click="confirmDelete(data)" />
           </template>
         </Column>
       </DataTable>
@@ -119,7 +99,7 @@ async function fetchOccurrences() {
       severity: 'error',
       summary: 'Greška',
       detail: 'Nije moguće učitati ponavljajuće stavke',
-      life: 3000,
+      life: 3000
     });
   } finally {
     loading.value = false;
@@ -138,7 +118,7 @@ function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('sr-RS', {
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric',
+    year: 'numeric'
   });
 }
 
@@ -149,7 +129,7 @@ function confirmDelete(occurrence: RecurringOccurrence) {
     icon: 'pi pi-exclamation-triangle',
     acceptLabel: 'Obriši',
     rejectLabel: 'Otkaži',
-    accept: () => deleteOccurrence(occurrence.id),
+    accept: () => deleteOccurrence(occurrence.id)
   });
 }
 
@@ -161,7 +141,7 @@ async function deleteOccurrence(id: string) {
       severity: 'success',
       summary: 'Uspeh',
       detail: 'Ponavljajuća stavka je obrisana',
-      life: 3000,
+      life: 3000
     });
     await fetchOccurrences();
   } catch {
@@ -169,7 +149,7 @@ async function deleteOccurrence(id: string) {
       severity: 'error',
       summary: 'Greška',
       detail: 'Nije moguće obrisati ponavljajuću stavku',
-      life: 3000,
+      life: 3000
     });
   } finally {
     deletingId.value = null;

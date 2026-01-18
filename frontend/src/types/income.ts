@@ -9,7 +9,7 @@ export const incomeTypeLabels: Record<IncomeType, string> = {
   Rent: 'Zakup',
   Investment: 'Investicija',
   Gift: 'Poklon',
-  Other: 'Ostalo',
+  Other: 'Ostalo'
 };
 
 export interface Income {

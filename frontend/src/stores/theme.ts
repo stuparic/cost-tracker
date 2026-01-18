@@ -5,9 +5,7 @@ export type Theme = 'green' | 'purple' | 'blue';
 
 export const useThemeStore = defineStore('theme', () => {
   // Load theme from localStorage or default to green
-  const currentTheme = ref<Theme>(
-    (localStorage.getItem('theme') as Theme) || 'green'
-  );
+  const currentTheme = ref<Theme>((localStorage.getItem('theme') as Theme) || 'green');
 
   // Apply theme to document root
   function applyTheme(theme: Theme) {
@@ -22,12 +20,16 @@ export const useThemeStore = defineStore('theme', () => {
   }
 
   // Watch for theme changes
-  watch(currentTheme, (newTheme) => {
-    applyTheme(newTheme);
-  }, { immediate: true });
+  watch(
+    currentTheme,
+    newTheme => {
+      applyTheme(newTheme);
+    },
+    { immediate: true }
+  );
 
   return {
     currentTheme,
-    setTheme,
+    setTheme
   };
 });

@@ -1,11 +1,5 @@
 import apiClient from './client';
-import type {
-  Expense,
-  CreateExpenseDto,
-  UpdateExpenseDto,
-  QueryExpensesDto,
-  ExpenseListResponse,
-} from '@/types/expense';
+import type { Expense, CreateExpenseDto, UpdateExpenseDto, QueryExpensesDto, ExpenseListResponse } from '@/types/expense';
 
 export const expenseApi = {
   /**
@@ -45,5 +39,5 @@ export const expenseApi = {
    */
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/expenses/${id}`);
-  },
+  }
 };

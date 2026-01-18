@@ -42,13 +42,7 @@
       <div class="form-field">
         <label class="field-label">Brzi iznosi</label>
         <div class="quick-amounts-pills">
-          <button
-            v-for="amount in quickAmounts"
-            :key="amount"
-            type="button"
-            class="quick-pill"
-            @click="form.amount = amount"
-          >
+          <button v-for="amount in quickAmounts" :key="amount" type="button" class="quick-pill" @click="form.amount = amount">
             {{ formatAmount(amount) }}
           </button>
         </div>
@@ -75,22 +69,14 @@
         <div v-if="inferredCategory.isInferred && form.shopName" class="category-badge">
           <i :class="getConfidenceIcon(inferredCategory.confidence)"></i>
           <span>{{ inferredCategory.category }}</span>
-          <span v-if="inferredCategory.confidence !== 'high'" class="editable-hint">
-            (klikni za izmenu)
-          </span>
+          <span v-if="inferredCategory.confidence !== 'high'" class="editable-hint"> (klikni za izmenu) </span>
         </div>
       </div>
 
       <!-- Product Description -->
       <div class="form-field">
         <label for="productDescription" class="field-label">Opis</label>
-        <Textarea
-          id="productDescription"
-          v-model="form.productDescription"
-          rows="2"
-          placeholder="Šta ste kupili..."
-          class="w-full"
-        />
+        <Textarea id="productDescription" v-model="form.productDescription" rows="2" placeholder="Šta ste kupili..." class="w-full" />
       </div>
 
       <!-- Category -->
@@ -109,24 +95,13 @@
       <!-- Payment Method -->
       <div class="form-field">
         <label for="paymentMethod" class="field-label">Način plaćanja</label>
-        <Select
-          id="paymentMethod"
-          v-model="form.paymentMethod"
-          :options="paymentMethods"
-          placeholder="Odaberi..."
-          class="w-full"
-        />
+        <Select id="paymentMethod" v-model="form.paymentMethod" :options="paymentMethods" placeholder="Odaberi..." class="w-full" />
       </div>
 
       <!-- Tags -->
       <div class="form-field">
         <label for="tags" class="field-label">Tagovi</label>
-        <Chips
-          id="tags"
-          v-model="form.tags"
-          placeholder="Dodaj tag..."
-          class="w-full"
-        />
+        <Chips id="tags" v-model="form.tags" placeholder="Dodaj tag..." class="w-full" />
       </div>
 
       <!-- Purchase Date (only show if NOT recurring) -->
@@ -171,13 +146,7 @@
       <!-- Start Date (show only if isRecurring is true) -->
       <div v-if="form.isRecurring" class="form-field">
         <label for="startDate" class="field-label">Datum prve kupovine *</label>
-        <DatePicker
-          id="startDate"
-          v-model="form.startDate"
-          date-format="dd.mm.yy"
-          placeholder="Odaberi datum..."
-          class="w-full"
-        />
+        <DatePicker id="startDate" v-model="form.startDate" date-format="dd.mm.yy" placeholder="Odaberi datum..." class="w-full" />
       </div>
 
       <!-- Recurring Until (optional) -->
@@ -193,20 +162,13 @@
       </div>
 
       <!-- Submit Button -->
-      <Button
-        label="Sačuvaj"
-        type="submit"
-        :loading="loading"
-        :disabled="!isFormValid"
-        class="submit-btn"
-        size="large"
-      />
+      <Button label="Sačuvaj" type="submit" :loading="loading" :disabled="!isFormValid" class="submit-btn" size="large" />
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
@@ -251,7 +213,7 @@ const form = reactive({
   isRecurring: false,
   recurringFrequency: 'monthly' as RecurringFrequency,
   startDate: new Date(),
-  recurringUntil: null as Date | null,
+  recurringUntil: null as Date | null
 });
 
 const purchaseDate = ref<Date>(new Date());
@@ -260,7 +222,7 @@ const loading = ref(false);
 // Errors
 const errors = reactive({
   amount: '',
-  shopName: '',
+  shopName: ''
 });
 
 // Quick amount buttons
@@ -269,7 +231,7 @@ const quickAmounts = [500, 1000, 2000, 5000];
 // Currency options
 const currencies = [
   { label: 'RSD', value: 'RSD' },
-  { label: 'EUR', value: 'EUR' },
+  { label: 'EUR', value: 'EUR' }
 ];
 
 // Payment methods
@@ -283,25 +245,28 @@ const categorySuggestions = ref<string[]>([]);
 const inferredCategory = ref<CategoryInference>({
   category: 'General',
   confidence: 'low',
-  isInferred: false,
+  isInferred: false
 });
 
 // Watch shop name for category inference
-watch(() => form.shopName, (newShop) => {
-  if (newShop && newShop.trim().length > 0) {
-    inferredCategory.value = inferCategory(newShop);
-    // ikona Auto-fill category if not already set by user
-    if (!form.category) {
-      form.category = inferredCategory.value.category;
+watch(
+  () => form.shopName,
+  newShop => {
+    if (newShop && newShop.trim().length > 0) {
+      inferredCategory.value = inferCategory(newShop);
+      // ikona Auto-fill category if not already set by user
+      if (!form.category) {
+        form.category = inferredCategory.value.category;
+      }
+    } else {
+      inferredCategory.value = {
+        category: 'General',
+        confidence: 'low',
+        isInferred: false
+      };
     }
-  } else {
-    inferredCategory.value = {
-      category: 'General',
-      confidence: 'low',
-      isInferred: false,
-    };
   }
-});
+);
 
 // Validation
 const isFormValid = computed(() => {
@@ -377,7 +342,7 @@ async function handleSubmit() {
         frequency: form.recurringFrequency,
         startDate: form.startDate.toISOString(),
         recurringUntil: form.recurringUntil?.toISOString(),
-        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
+        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan'
       };
 
       await apiClient.post('/recurring-occurrences', occurrenceData);
@@ -386,7 +351,7 @@ async function handleSubmit() {
         severity: 'success',
         summary: 'Uspešno!',
         detail: 'Ponavljajući trošak je kreiran',
-        life: 3000,
+        life: 3000
       });
     } else {
       // Create regular one-time expense
@@ -395,7 +360,7 @@ async function handleSubmit() {
         currency: form.currency,
         shopName: form.shopName.trim(),
         purchaseDate: purchaseDate.value.toISOString(),
-        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
+        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan'
       };
 
       // Add optional fields only if provided
@@ -418,7 +383,7 @@ async function handleSubmit() {
         severity: 'success',
         summary: 'Uspešno!',
         detail: 'Trošak je sačuvan',
-        life: 3000,
+        life: 3000
       });
     }
 
@@ -429,7 +394,7 @@ async function handleSubmit() {
       severity: 'error',
       summary: 'Greška',
       detail: error.response?.data?.message || 'Nije moguće sačuvati trošak',
-      life: 5000,
+      life: 5000
     });
   } finally {
     loading.value = false;
@@ -452,44 +417,9 @@ function resetForm() {
   inferredCategory.value = {
     category: 'General',
     confidence: 'low',
-    isInferred: false,
+    isInferred: false
   };
 }
-
-// Handle voice data from route state (AI-parsed transcript)
-onMounted(() => {
-  console.log('ExpenseForm mounted, checking for voice data...');
-  console.log('history.state:', history.state);
-
-  const voiceData = history.state?.voiceData;
-  console.log('voiceData:', voiceData);
-
-  if (voiceData) {
-    console.log('Pre-filling form with voice data:', voiceData);
-    // Pre-fill form with AI-parsed data
-    if (voiceData.amount) form.amount = voiceData.amount;
-    if (voiceData.currency) form.currency = voiceData.currency;
-    if (voiceData.shopOrSource) form.shopName = voiceData.shopOrSource;
-    if (voiceData.description) form.productDescription = voiceData.description;
-    if (voiceData.category) form.category = voiceData.category;
-
-    // Set purchase date if provided
-    if (voiceData.date) {
-      purchaseDate.value = new Date(voiceData.date);
-    }
-
-    // Show warning if confidence is not high
-    const confidence = history.state?.confidence;
-    if (confidence === 'low' || confidence === 'medium') {
-      toast.add({
-        severity: 'warn',
-        summary: 'Proverite podatke',
-        detail: 'Molimo pregledajte automatski popunjene podatke pre čuvanja',
-        life: 5000,
-      });
-    }
-  }
-});
 </script>
 
 <style scoped>
@@ -618,7 +548,6 @@ onMounted(() => {
   transform: translateY(0);
 }
 
-
 .shop-input {
   width: 100%;
 }
@@ -648,7 +577,6 @@ onMounted(() => {
   margin-left: auto;
   font-weight: 400;
 }
-
 
 .submit-btn {
   width: 100%;

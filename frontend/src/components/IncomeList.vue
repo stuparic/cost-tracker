@@ -2,11 +2,7 @@
   <div class="income-list">
     <!-- Monthly Summaries -->
     <div class="monthly-summaries">
-      <div
-        v-for="month in monthlySummaries"
-        :key="month.month"
-        class="summary-card income-card"
-      >
+      <div v-for="month in monthlySummaries" :key="month.month" class="summary-card income-card">
         <div class="month-name">{{ month.monthName }}</div>
         <div class="amount-row">
           <span class="amount-primary">{{ formatRSD(month.totalRSD) }}</span>
@@ -30,17 +26,14 @@
           :key="person.value"
           class="person-pill income-pill"
           :class="{ active: selectedPerson === person.value }"
-          @click="selectedPerson = person.value; applyFilters()"
+          @click="
+            selectedPerson = person.value;
+            applyFilters();
+          "
         >
           {{ person.label }}
         </button>
-        <Button
-          label="Filteri"
-          icon="pi pi-filter"
-          outlined
-          class="income-button"
-          @click="filtersVisible = true"
-        />
+        <Button label="Filteri" icon="pi pi-filter" outlined class="income-button" @click="filtersVisible = true" />
       </div>
     </div>
 
@@ -88,12 +81,7 @@
 
       <Column header="Izvor" style="min-width: 100px">
         <template #body="{ data }">
-          <Tag
-            v-if="data.recurringOccurrenceId"
-            value="Auto"
-            severity="info"
-            icon="pi pi-replay"
-          />
+          <Tag v-if="data.recurringOccurrenceId" value="Auto" severity="info" icon="pi pi-replay" />
           <span v-else class="manual-label">Ručno</span>
         </template>
       </Column>
@@ -163,11 +151,7 @@
     </Sidebar>
 
     <!-- Edit Income Dialog -->
-    <EditIncomeDialog
-      v-model:visible="editDialogVisible"
-      :income="selectedIncome!"
-      @success="onIncomeUpdated"
-    />
+    <EditIncomeDialog v-model:visible="editDialogVisible" :income="selectedIncome!" @success="onIncomeUpdated" />
 
     <!-- Delete Confirmation Dialog -->
     <ConfirmDialog></ConfirmDialog>
@@ -205,7 +189,7 @@ const filtersVisible = ref(false);
 // Advanced filters
 const advancedFilters = reactive({
   source: '',
-  incomeType: '',
+  incomeType: ''
 });
 
 // Edit dialog
@@ -216,13 +200,13 @@ const selectedIncome = ref<Income | null>(null);
 const personFilters = [
   { label: 'Sve', value: 'all' },
   { label: 'Svetla', value: 'Svetla' },
-  { label: 'Dejan', value: 'Dejan' },
+  { label: 'Dejan', value: 'Dejan' }
 ];
 
 // Income type options for dropdown
 const incomeTypeOptions = [
   { label: 'Svi tipovi', value: '' },
-  ...Object.entries(incomeTypeLabels).map(([value, label]) => ({ label, value })),
+  ...Object.entries(incomeTypeLabels).map(([value, label]) => ({ label, value }))
 ];
 
 // Monthly summaries (last 3 months)
@@ -253,7 +237,7 @@ async function fetchMonthlySummaries() {
       const response = await incomeApi.getAll({
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
-        limit: 1000, // Get all for this month
+        limit: 1000 // Get all for this month
       });
 
       // Calculate totals
@@ -269,7 +253,7 @@ async function fetchMonthlySummaries() {
         month: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
         monthName: date.toLocaleDateString('sr-Latn', { month: 'long', year: 'numeric' }),
         totalRSD,
-        totalEUR,
+        totalEUR
       });
     }
 
@@ -305,7 +289,7 @@ function applyFilters() {
     startDate: startDate.toISOString(),
     endDate: endDate.toISOString(),
     sortBy: 'dateReceived',
-    sortOrder: 'desc',
+    sortOrder: 'desc'
   };
 
   if (selectedPerson.value !== 'all') {
@@ -323,7 +307,7 @@ function applyAdvancedFilters() {
     startDate: startDate.toISOString(),
     endDate: endDate.toISOString(),
     sortBy: 'dateReceived',
-    sortOrder: 'desc',
+    sortOrder: 'desc'
   };
 
   if (selectedPerson.value !== 'all') {
@@ -374,7 +358,7 @@ function confirmDelete(income: Income) {
           severity: 'success',
           summary: 'Uspešno!',
           detail: 'Prihod je obrisan',
-          life: 3000,
+          life: 3000
         });
         applyFilters();
         await fetchMonthlySummaries();
@@ -383,10 +367,10 @@ function confirmDelete(income: Income) {
           severity: 'error',
           summary: 'Greška',
           detail: 'Nije moguće obrisati prihod',
-          life: 5000,
+          life: 5000
         });
       }
-    },
+    }
   });
 }
 

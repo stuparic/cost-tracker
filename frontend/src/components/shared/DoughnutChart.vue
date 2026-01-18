@@ -23,7 +23,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   centerText: '',
-  centerSubtext: '',
+  centerSubtext: ''
 });
 
 // Custom plugin to draw text in the center of doughnut chart
@@ -53,7 +53,7 @@ const centerTextPlugin: Plugin = {
     }
 
     ctx.restore();
-  },
+  }
 };
 
 // Register the plugin
@@ -66,9 +66,9 @@ const chartData = computed(() => ({
       data: props.data,
       backgroundColor: props.colors,
       borderWidth: 0,
-      hoverOffset: 8,
-    },
-  ],
+      hoverOffset: 8
+    }
+  ]
 }));
 
 const chartOptions = computed(() => ({
@@ -82,21 +82,21 @@ const chartOptions = computed(() => ({
         padding: 16,
         font: {
           size: 13,
-          family: 'Inter, system-ui, sans-serif',
+          family: 'Inter, system-ui, sans-serif'
         },
         usePointStyle: true,
-        pointStyle: 'circle',
-      },
+        pointStyle: 'circle'
+      }
     },
     tooltip: {
       backgroundColor: 'rgba(0, 0, 0, 0.8)',
       padding: 12,
       cornerRadius: 8,
       titleFont: {
-        size: 14,
+        size: 14
       },
       bodyFont: {
-        size: 13,
+        size: 13
       },
       callbacks: {
         label(context: any) {
@@ -104,13 +104,13 @@ const chartOptions = computed(() => ({
           const value = context.parsed || 0;
           const formatted = new Intl.NumberFormat('sr-RS', {
             minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
+            maximumFractionDigits: 0
           }).format(value);
           return `${label}: ${formatted} RSD`;
-        },
-      },
-    },
-  },
+        }
+      }
+    }
+  }
 }));
 </script>
 

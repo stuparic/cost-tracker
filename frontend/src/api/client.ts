@@ -5,29 +5,29 @@ const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
-  },
+    'Content-Type': 'application/json'
+  }
 });
 
 // Request interceptor for logging (development only)
 apiClient.interceptors.request.use(
-  (config) => {
+  config => {
     if (import.meta.env.VITE_ENABLE_LOGS === 'true') {
       console.log('API Request:', config.method?.toUpperCase(), config.url);
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   }
 );
 
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
-  (response) => {
+  response => {
     return response;
   },
-  (error) => {
+  error => {
     if (error.response) {
       const apiError: ApiError = error.response.data;
       console.error('API Error:', apiError.message);

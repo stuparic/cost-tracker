@@ -13,7 +13,7 @@ export const useExpensesStore = defineStore('expenses', () => {
     page: 1,
     limit: 20,
     total: 0,
-    totalPages: 0,
+    totalPages: 0
   });
 
   // Actions
@@ -84,6 +84,6 @@ export const useExpensesStore = defineStore('expenses', () => {
     createExpense,
     fetchExpenses,
     deleteExpense,
-    clearError,
+    clearError
   };
 });

@@ -3,11 +3,7 @@
     <h3 class="theme-title">Izaberi temu</h3>
 
     <div class="theme-options">
-      <button
-        class="theme-option"
-        :class="{ active: themeStore.currentTheme === 'green' }"
-        @click="themeStore.setTheme('green')"
-      >
+      <button class="theme-option" :class="{ active: themeStore.currentTheme === 'green' }" @click="themeStore.setTheme('green')">
         <div class="theme-preview green-preview">
           <div class="preview-bar"></div>
           <div class="preview-content"></div>
@@ -16,11 +12,7 @@
         <i v-if="themeStore.currentTheme === 'green'" class="pi pi-check"></i>
       </button>
 
-      <button
-        class="theme-option"
-        :class="{ active: themeStore.currentTheme === 'purple' }"
-        @click="themeStore.setTheme('purple')"
-      >
+      <button class="theme-option" :class="{ active: themeStore.currentTheme === 'purple' }" @click="themeStore.setTheme('purple')">
         <div class="theme-preview purple-preview">
           <div class="preview-bar"></div>
           <div class="preview-content"></div>
@@ -29,11 +21,7 @@
         <i v-if="themeStore.currentTheme === 'purple'" class="pi pi-check"></i>
       </button>
 
-      <button
-        class="theme-option"
-        :class="{ active: themeStore.currentTheme === 'blue' }"
-        @click="themeStore.setTheme('blue')"
-      >
+      <button class="theme-option" :class="{ active: themeStore.currentTheme === 'blue' }" @click="themeStore.setTheme('blue')">
         <div class="theme-preview blue-preview">
           <div class="preview-bar"></div>
           <div class="preview-content"></div>

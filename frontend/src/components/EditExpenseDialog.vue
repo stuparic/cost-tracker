@@ -61,47 +61,25 @@
       <!-- Product Description -->
       <div class="form-field">
         <label for="edit-description" class="field-label">Opis</label>
-        <Textarea
-          id="edit-description"
-          v-model="form.productDescription"
-          rows="2"
-          class="w-full"
-        />
+        <Textarea id="edit-description" v-model="form.productDescription" rows="2" class="w-full" />
       </div>
 
       <!-- Payment Method -->
       <div class="form-field">
         <label for="edit-payment" class="field-label">Način plaćanja</label>
-        <Select
-          id="edit-payment"
-          v-model="form.paymentMethod"
-          :options="paymentMethods"
-          class="w-full"
-        />
+        <Select id="edit-payment" v-model="form.paymentMethod" :options="paymentMethods" class="w-full" />
       </div>
 
       <!-- Tags -->
       <div class="form-field">
         <label for="edit-tags" class="field-label">Oznake</label>
-        <Chips
-          id="edit-tags"
-          v-model="form.tags"
-          separator=","
-          class="w-full"
-        />
+        <Chips id="edit-tags" v-model="form.tags" separator="," class="w-full" />
       </div>
 
       <!-- Purchase Date -->
       <div class="form-field">
         <label for="edit-date" class="field-label">Datum kupovine</label>
-        <DatePicker
-          id="edit-date"
-          v-model="form.purchaseDate"
-          show-time
-          hour-format="24"
-          :date-format="DATE_FORMAT"
-          class="w-full"
-        />
+        <DatePicker id="edit-date" v-model="form.purchaseDate" show-time hour-format="24" :date-format="DATE_FORMAT" class="w-full" />
       </div>
     </form>
 
@@ -151,13 +129,13 @@ const form = reactive({
   category: '',
   paymentMethod: '',
   tags: [] as string[],
-  purchaseDate: new Date(),
+  purchaseDate: new Date()
 });
 
 // Errors
 const errors = reactive({
   amount: '',
-  shopName: '',
+  shopName: ''
 });
 
 const loading = ref(false);
@@ -170,18 +148,22 @@ const { suggestions: shopSuggestions, search: searchShops } = useAutocomplete(au
 const { suggestions: categorySuggestions, search: searchCategories } = useAutocomplete(autocompleteApi.getCategories);
 
 // Watch for expense changes and populate form
-watch(() => props.expense, (expense) => {
-  if (expense) {
-    form.amount = expense.amount;
-    form.currency = expense.originalCurrency;
-    form.shopName = expense.shopName;
-    form.productDescription = expense.productDescription;
-    form.category = expense.category;
-    form.paymentMethod = expense.paymentMethod;
-    form.tags = [...expense.tags];
-    form.purchaseDate = new Date(expense.purchaseDate);
-  }
-}, { immediate: true });
+watch(
+  () => props.expense,
+  expense => {
+    if (expense) {
+      form.amount = expense.amount;
+      form.currency = expense.originalCurrency;
+      form.shopName = expense.shopName;
+      form.productDescription = expense.productDescription;
+      form.category = expense.category;
+      form.paymentMethod = expense.paymentMethod;
+      form.tags = [...expense.tags];
+      form.purchaseDate = new Date(expense.purchaseDate);
+    }
+  },
+  { immediate: true }
+);
 
 async function handleSubmit() {
   // Validate
@@ -205,7 +187,7 @@ async function handleSubmit() {
       amount: form.amount,
       currency: form.currency,
       shopName: form.shopName.trim(),
-      purchaseDate: form.purchaseDate.toISOString(),
+      purchaseDate: form.purchaseDate.toISOString()
     };
 
     // Add optional fields

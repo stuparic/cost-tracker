@@ -10,7 +10,7 @@ export function useListFormatting() {
       const year = date.getFullYear();
       const time = date.toLocaleTimeString('sr-RS', {
         hour: '2-digit',
-        minute: '2-digit',
+        minute: '2-digit'
       });
 
       return {
@@ -18,7 +18,7 @@ export function useListFormatting() {
         month,
         year,
         time,
-        full: `${day}. ${month} ${year}`,
+        full: `${day}. ${month} ${year}`
       };
     } catch (error) {
       console.error('Error formatting date:', error);
@@ -27,7 +27,7 @@ export function useListFormatting() {
         month: '-',
         year: '-',
         time: '-',
-        full: '-',
+        full: '-'
       };
     }
   };
@@ -37,7 +37,7 @@ export function useListFormatting() {
       style: 'currency',
       currency: 'RSD',
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount);
   };
 
@@ -46,7 +46,7 @@ export function useListFormatting() {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount);
   };
 
@@ -69,6 +69,6 @@ export function useListFormatting() {
     formatEUR,
     formatAmount,
     getMonthNameLatin,
-    formatMonthYear,
+    formatMonthYear
   };
 }

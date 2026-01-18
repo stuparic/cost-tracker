@@ -64,25 +64,13 @@
       <!-- Description -->
       <div class="form-field">
         <label for="edit-description" class="field-label">Opis</label>
-        <Textarea
-          id="edit-description"
-          v-model="form.description"
-          rows="2"
-          class="w-full"
-        />
+        <Textarea id="edit-description" v-model="form.description" rows="2" class="w-full" />
       </div>
 
       <!-- Date Received -->
       <div class="form-field">
         <label for="edit-date" class="field-label">Datum primanja</label>
-        <DatePicker
-          id="edit-date"
-          v-model="form.dateReceived"
-          show-time
-          hour-format="24"
-          :date-format="DATE_FORMAT"
-          class="w-full"
-        />
+        <DatePicker id="edit-date" v-model="form.dateReceived" show-time hour-format="24" :date-format="DATE_FORMAT" class="w-full" />
       </div>
     </form>
 
@@ -127,28 +115,32 @@ const form = reactive({
   source: '',
   incomeType: 'Salary' as IncomeType,
   description: '',
-  dateReceived: new Date(),
+  dateReceived: new Date()
 });
 
 // Errors
 const errors = reactive({
   amount: '',
-  source: '',
+  source: ''
 });
 
 const loading = ref(false);
 
 // Watch for income changes and populate form
-watch(() => props.income, (income) => {
-  if (income) {
-    form.amount = income.amount;
-    form.currency = income.originalCurrency;
-    form.source = income.source;
-    form.incomeType = income.incomeType;
-    form.description = income.description;
-    form.dateReceived = new Date(income.dateReceived);
-  }
-}, { immediate: true });
+watch(
+  () => props.income,
+  income => {
+    if (income) {
+      form.amount = income.amount;
+      form.currency = income.originalCurrency;
+      form.source = income.source;
+      form.incomeType = income.incomeType;
+      form.description = income.description;
+      form.dateReceived = new Date(income.dateReceived);
+    }
+  },
+  { immediate: true }
+);
 
 async function handleSubmit() {
   // Validate
@@ -173,7 +165,7 @@ async function handleSubmit() {
       currency: form.currency,
       source: form.source.trim(),
       incomeType: form.incomeType,
-      dateReceived: form.dateReceived.toISOString(),
+      dateReceived: form.dateReceived.toISOString()
     };
 
     // Add optional fields

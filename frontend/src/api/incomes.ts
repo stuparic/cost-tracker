@@ -1,11 +1,5 @@
 import apiClient from './client';
-import type {
-  Income,
-  CreateIncomeDto,
-  UpdateIncomeDto,
-  QueryIncomesDto,
-  IncomeListResponse,
-} from '@/types/income';
+import type { Income, CreateIncomeDto, UpdateIncomeDto, QueryIncomesDto, IncomeListResponse } from '@/types/income';
 
 export const incomeApi = {
   /**
@@ -45,5 +39,5 @@ export const incomeApi = {
    */
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/incomes/${id}`);
-  },
+  }
 };

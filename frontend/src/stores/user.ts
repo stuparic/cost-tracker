@@ -6,9 +6,7 @@ export type User = 'svetla' | 'dejan';
 
 export const useUserStore = defineStore('user', () => {
   // Load user from localStorage (null if not set)
-  const selectedUser = ref<User | null>(
-    localStorage.getItem('user') as User | null
-  );
+  const selectedUser = ref<User | null>(localStorage.getItem('user') as User | null);
 
   // Map users to themes
   const userThemeMap: Record<User, 'purple' | 'green'> = {

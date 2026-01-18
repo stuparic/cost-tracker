@@ -16,31 +16,7 @@ export class VoiceService {
     private readonly incomesService: IncomesService
   ) {}
 
-  async parseVoiceInput(dto: VoiceParseDto) {
-    this.logger.log(`Parsing voice input: "${dto.text}"`);
-
-    // Parse with AI
-    const aiResult = await this.geminiService.parseVoiceTranscript(dto.text);
-
-    if (!aiResult.success) {
-      return {
-        success: false,
-        message: aiResult.error || 'Failed to parse voice input'
-      };
-    }
-
-    // Return parsed data - frontend will handle creation
-    return {
-      success: true,
-      type: aiResult.type,
-      data: aiResult.data,
-      confidence: aiResult.confidence,
-      originalTranscript: dto.text
-    };
-  }
-
-  // Optional: Auto-create entry (future enhancement)
-  async parseAndCreate(dto: VoiceParseDto, createdBy: string) {
+  async parseAndCreate(dto: VoiceParseDto) {
     const aiResult = await this.geminiService.parseVoiceTranscript(dto.text);
 
     if (!aiResult.success || !aiResult.data) {
@@ -57,7 +33,7 @@ export class VoiceService {
         productDescription: data.description,
         category: data.category,
         purchaseDate: data.date || new Date().toISOString(),
-        createdBy,
+        createdBy: dto.createdBy,
         creationMethod: 'voice',
         voiceTranscript: dto.text
       };
@@ -70,7 +46,7 @@ export class VoiceService {
         description: data.description,
         incomeType: (data.incomeType as any) || 'Other', // AI-inferred income type
         dateReceived: data.date || new Date().toISOString(),
-        createdBy,
+        createdBy: dto.createdBy,
         creationMethod: 'voice',
         voiceTranscript: dto.text
       };

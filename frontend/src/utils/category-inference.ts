@@ -15,7 +15,7 @@ export function inferCategory(shopName: string): CategoryInference {
     return {
       category: 'General',
       confidence: 'low',
-      isInferred: false,
+      isInferred: false
     };
   }
 
@@ -26,7 +26,7 @@ export function inferCategory(shopName: string): CategoryInference {
     return {
       category: 'Groceries',
       confidence: 'high',
-      isInferred: true,
+      isInferred: true
     };
   }
 
@@ -35,7 +35,7 @@ export function inferCategory(shopName: string): CategoryInference {
     return {
       category: 'Home',
       confidence: 'high',
-      isInferred: true,
+      isInferred: true
     };
   }
 
@@ -44,7 +44,7 @@ export function inferCategory(shopName: string): CategoryInference {
     return {
       category: 'Transport',
       confidence: 'high',
-      isInferred: true,
+      isInferred: true
     };
   }
 
@@ -53,7 +53,7 @@ export function inferCategory(shopName: string): CategoryInference {
     return {
       category: 'Health',
       confidence: 'high',
-      isInferred: true,
+      isInferred: true
     };
   }
 
@@ -62,7 +62,7 @@ export function inferCategory(shopName: string): CategoryInference {
     return {
       category: 'Electronics',
       confidence: 'medium',
-      isInferred: true,
+      isInferred: true
     };
   }
 
@@ -71,7 +71,7 @@ export function inferCategory(shopName: string): CategoryInference {
     return {
       category: 'Dining',
       confidence: 'medium',
-      isInferred: true,
+      isInferred: true
     };
   }
 
@@ -80,7 +80,7 @@ export function inferCategory(shopName: string): CategoryInference {
     return {
       category: 'Clothing',
       confidence: 'medium',
-      isInferred: true,
+      isInferred: true
     };
   }
 
@@ -88,7 +88,7 @@ export function inferCategory(shopName: string): CategoryInference {
   return {
     category: 'General',
     confidence: 'low',
-    isInferred: true,
+    isInferred: true
   };
 }
 

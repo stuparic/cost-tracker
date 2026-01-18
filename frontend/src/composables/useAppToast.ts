@@ -9,7 +9,7 @@ export function useAppToast() {
       severity: 'success',
       summary,
       detail,
-      life: TOAST_DURATION.SUCCESS,
+      life: TOAST_DURATION.SUCCESS
     });
   };
 
@@ -19,7 +19,7 @@ export function useAppToast() {
       severity: 'error',
       summary: 'Greška',
       detail: message,
-      life: TOAST_DURATION.ERROR,
+      life: TOAST_DURATION.ERROR
     });
   };
 
@@ -28,7 +28,7 @@ export function useAppToast() {
       severity: 'info',
       summary,
       detail,
-      life: TOAST_DURATION.SUCCESS,
+      life: TOAST_DURATION.SUCCESS
     });
   };
 

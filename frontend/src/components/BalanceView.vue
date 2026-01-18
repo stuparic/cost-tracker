@@ -73,12 +73,7 @@
         <!-- Person Comparison -->
         <div class="chart-section">
           <h3 class="chart-title">Troškovi po osobi</h3>
-          <DoughnutChart
-            v-if="personLabels.length > 0"
-            :labels="personLabels"
-            :data="personData"
-            :colors="personColors"
-          />
+          <DoughnutChart v-if="personLabels.length > 0" :labels="personLabels" :data="personData" :colors="personColors" />
           <div v-else class="empty-chart">Nema podataka po osobi</div>
         </div>
       </div>
@@ -111,7 +106,7 @@ const selectedPerson = ref('all');
 const personOptions = [
   { label: 'Svi', value: 'all' },
   { label: 'Svetla', value: 'Svetla' },
-  { label: 'Dejan', value: 'Dejan' },
+  { label: 'Dejan', value: 'Dejan' }
 ];
 
 // Month navigation
@@ -167,10 +162,7 @@ const categoryLabels = computed(() => {
 });
 
 const categoryColors = computed<string[]>(() => {
-  const colors: string[] = [
-    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-    '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16',
-  ];
+  const colors: string[] = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
   return categoryLabels.value.map((_, index) => colors[index % colors.length]!);
 });
 
@@ -202,7 +194,7 @@ const personColors = computed<string[]>(() => {
 function formatBalance(amount: number): string {
   const formatted = new Intl.NumberFormat('sr-RS', {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(Math.abs(amount));
   return amount >= 0 ? `+${formatted}` : `-${formatted}`;
 }
@@ -212,7 +204,7 @@ async function fetchData() {
   const params: any = {
     startDate: dateRange.value.start.toISOString(),
     endDate: dateRange.value.end.toISOString(),
-    limit: 1000,
+    limit: 1000
   };
 
   if (selectedPerson.value !== 'all') {
@@ -233,7 +225,7 @@ onMounted(() => {
   const currentParams = {
     startDate: dateRange.value.start.toISOString(),
     endDate: dateRange.value.end.toISOString(),
-    limit: 1000,
+    limit: 1000
   };
 
   const paramsMatch =

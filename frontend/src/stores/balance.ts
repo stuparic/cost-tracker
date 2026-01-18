@@ -19,10 +19,7 @@ export const useBalanceStore = defineStore('balance', () => {
     loading.value = true;
     error.value = null;
     try {
-      const [expensesResponse, incomesResponse] = await Promise.all([
-        expenseApi.getAll(params),
-        incomeApi.getAll(params),
-      ]);
+      const [expensesResponse, incomesResponse] = await Promise.all([expenseApi.getAll(params), incomeApi.getAll(params)]);
 
       expenses.value = expensesResponse.data;
       incomes.value = incomesResponse.data;
@@ -60,6 +57,6 @@ export const useBalanceStore = defineStore('balance', () => {
     // Actions
     fetchBalanceData,
     invalidateCache,
-    clearError,
+    clearError
   };
 });

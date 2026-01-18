@@ -5,7 +5,7 @@ export const recurringFrequencyLabels: Record<RecurringFrequency, string> = {
   monthly: 'Mesečno',
   weekly: 'Nedeljno',
   biweekly: 'Svake dve nedelje',
-  yearly: 'Godišnje',
+  yearly: 'Godišnje'
 };
 
 export interface RecurringOccurrence {
@@ -45,7 +45,7 @@ export interface CreateRecurringOccurrenceDto {
 
   // Income-specific
   source?: string;
-  incomeType?: 'Salary' | 'Freelance' | 'Rent' |'Investment' | 'Gift' | 'Other';
+  incomeType?: 'Salary' | 'Freelance' | 'Rent' | 'Investment' | 'Gift' | 'Other';
 
   // Expense-specific
   expenseCategory?: string;

@@ -7,7 +7,7 @@ export const autocompleteApi = {
    */
   getShops: async (search?: string): Promise<AutocompleteResponse> => {
     const response = await apiClient.get<AutocompleteResponse>('/autocomplete/shops', {
-      params: search ? { search } : undefined,
+      params: search ? { search } : undefined
     });
     return response.data;
   },
@@ -17,7 +17,7 @@ export const autocompleteApi = {
    */
   getProducts: async (search?: string): Promise<AutocompleteResponse> => {
     const response = await apiClient.get<AutocompleteResponse>('/autocomplete/products', {
-      params: search ? { search } : undefined,
+      params: search ? { search } : undefined
     });
     return response.data;
   },
@@ -27,7 +27,7 @@ export const autocompleteApi = {
    */
   getCategories: async (search?: string): Promise<AutocompleteResponse> => {
     const response = await apiClient.get<AutocompleteResponse>('/autocomplete/categories', {
-      params: search ? { search } : undefined,
+      params: search ? { search } : undefined
     });
     return response.data;
   },
@@ -37,8 +37,8 @@ export const autocompleteApi = {
    */
   getTags: async (search?: string): Promise<AutocompleteResponse> => {
     const response = await apiClient.get<AutocompleteResponse>('/autocomplete/tags', {
-      params: search ? { search } : undefined,
+      params: search ? { search } : undefined
     });
     return response.data;
-  },
+  }
 };

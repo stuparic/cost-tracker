@@ -95,7 +95,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import Sidebar from 'primevue/sidebar';
@@ -105,7 +105,6 @@ import VoiceRecorder from './components/shared/VoiceRecorder.vue';
 import { useVoiceInput } from './composables/useVoiceInput';
 
 const route = useRoute();
-const router = useRouter();
 const toast = useToast();
 const sidebarVisible = ref(false);
 const manualDialogVisible = ref(false);
@@ -113,7 +112,7 @@ const manualDialogVisible = ref(false);
 // Voice transcript bubble state
 const voiceTranscriptBubble = ref({
   visible: false,
-  text: '',
+  text: ''
 });
 let bubbleTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -132,7 +131,6 @@ onMounted(() => {
   // const now = new Date();
   // const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   // const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-
   // balanceStore.fetchBalanceData({
   //   startDate: startOfMonth.toISOString(),
   //   endDate: endOfMonth.toISOString(),
@@ -143,7 +141,7 @@ onMounted(() => {
 // Show user selection dialog if no user is selected or manually triggered
 const showUserDialog = computed({
   get: () => userStore.selectedUser === null || manualDialogVisible.value,
-  set: (value) => {
+  set: value => {
     if (!value) {
       manualDialogVisible.value = false;
     }
@@ -178,7 +176,7 @@ function showVoiceTranscriptBubble(text: string) {
   // Show bubble with text
   voiceTranscriptBubble.value = {
     visible: true,
-    text,
+    text
   };
 
   // Hide after 5 seconds
@@ -201,41 +199,18 @@ async function handleVoiceTranscript(text: string) {
         severity: 'error',
         summary: 'Greška',
         detail: result.message || 'Nije moguće analizirati glasovni unos',
-        life: 5000,
+        life: 5000
       });
       return;
     }
 
-    // Navigate to appropriate form with pre-filled data
-    console.log('Navigating with voice data:', result);
-
-    if (result.type === 'expense') {
-      await router.push({
-        name: 'AddExpense',
-        state: {
-          voiceData: result.data,
-          voiceTranscript: text,
-          confidence: result.confidence,
-        },
-      });
-      console.log('Navigation complete to AddExpense');
-    } else {
-      await router.push({
-        name: 'AddIncome',
-        state: {
-          voiceData: result.data,
-          voiceTranscript: text,
-          confidence: result.confidence,
-        },
-      });
-      console.log('Navigation complete to AddIncome');
-    }
+    // Log the result
+    console.log('Voice parsing result:', result);
 
     toast.add({
       severity: 'success',
       summary: 'Uspešno',
-      detail: `Detektovano: ${result.type === 'expense' ? 'Trošak' : 'Prihod'}`,
-      life: 3000,
+      life: 3000
     });
   } catch (error) {
     console.error('Failed to process voice input:', error);
@@ -243,7 +218,7 @@ async function handleVoiceTranscript(text: string) {
       severity: 'error',
       summary: 'Greška',
       detail: 'Nije moguće poslati glasovni unos',
-      life: 3000,
+      life: 3000
     });
   }
 }
@@ -251,21 +226,21 @@ async function handleVoiceTranscript(text: string) {
 
 <style>
 /* CSS Variables for Themes */
-:root[data-theme="green"] {
+:root[data-theme='green'] {
   --primary-color: #10b981;
   --primary-dark: #059669;
   --primary-light: #ecfdf5;
   --primary-shadow: rgba(16, 185, 129, 0.25);
 }
 
-:root[data-theme="purple"] {
+:root[data-theme='purple'] {
   --primary-color: #a855f7;
   --primary-dark: #7c3aed;
   --primary-light: #faf5ff;
   --primary-shadow: rgba(168, 85, 247, 0.25);
 }
 
-:root[data-theme="blue"] {
+:root[data-theme='blue'] {
   --primary-color: #3b82f6;
   --primary-dark: #2563eb;
   --primary-light: #eff6ff;
@@ -291,7 +266,8 @@ async function handleVoiceTranscript(text: string) {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   overflow-x: hidden;
 }

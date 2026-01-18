@@ -72,13 +72,7 @@
       <!-- Description -->
       <div class="form-field">
         <label for="description" class="field-label">Opis</label>
-        <Textarea
-          id="description"
-          v-model="form.description"
-          rows="2"
-          placeholder="Dodatne napomene..."
-          class="w-full"
-        />
+        <Textarea id="description" v-model="form.description" rows="2" placeholder="Dodatne napomene..." class="w-full" />
       </div>
 
       <!-- Date Received (only show if NOT recurring) -->
@@ -123,13 +117,7 @@
       <!-- Start Date (show only if isRecurring is true) -->
       <div v-if="form.isRecurring" class="form-field">
         <label for="startDate" class="field-label">Datum prvog prihoda *</label>
-        <DatePicker
-          id="startDate"
-          v-model="form.startDate"
-          date-format="dd.mm.yy"
-          placeholder="Odaberi datum..."
-          class="w-full"
-        />
+        <DatePicker id="startDate" v-model="form.startDate" date-format="dd.mm.yy" placeholder="Odaberi datum..." class="w-full" />
       </div>
 
       <!-- Recurring Until (optional) -->
@@ -145,14 +133,7 @@
       </div>
 
       <!-- Submit Button -->
-      <Button
-        label="Sačuvaj"
-        type="submit"
-        :loading="loading"
-        :disabled="!isFormValid"
-        class="submit-btn"
-        size="large"
-      />
+      <Button label="Sačuvaj" type="submit" :loading="loading" :disabled="!isFormValid" class="submit-btn" size="large" />
     </form>
   </div>
 </template>
@@ -207,7 +188,7 @@ const form = reactive({
   isRecurring: false,
   recurringFrequency: 'monthly' as RecurringFrequency,
   startDate: new Date(),
-  recurringUntil: null as Date | null,
+  recurringUntil: null as Date | null
 });
 
 const dateReceived = ref<Date>(new Date());
@@ -216,13 +197,13 @@ const loading = ref(false);
 // Errors
 const errors = reactive({
   amount: '',
-  source: '',
+  source: ''
 });
 
 // Currency options
 const currencies = [
   { label: 'RSD', value: 'RSD' },
-  { label: 'EUR', value: 'EUR' },
+  { label: 'EUR', value: 'EUR' }
 ];
 
 // Validation
@@ -261,7 +242,7 @@ async function handleSubmit() {
         frequency: form.recurringFrequency,
         startDate: form.startDate.toISOString(),
         recurringUntil: form.recurringUntil?.toISOString(),
-        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
+        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan'
       };
 
       await apiClient.post('/recurring-occurrences', occurrenceData);
@@ -270,7 +251,7 @@ async function handleSubmit() {
         severity: 'success',
         summary: 'Uspešno!',
         detail: 'Ponavljajući prihod je kreiran',
-        life: 3000,
+        life: 3000
       });
     } else {
       // Create regular one-time income
@@ -280,7 +261,7 @@ async function handleSubmit() {
         source: form.source.trim(),
         incomeType: form.incomeType,
         dateReceived: dateReceived.value.toISOString(),
-        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan',
+        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan'
       };
 
       // Add description if provided
@@ -294,7 +275,7 @@ async function handleSubmit() {
         severity: 'success',
         summary: 'Uspešno!',
         detail: 'Prihod je sačuvan',
-        life: 3000,
+        life: 3000
       });
     }
 
@@ -305,7 +286,7 @@ async function handleSubmit() {
       severity: 'error',
       summary: 'Greška',
       detail: error.response?.data?.message || 'Nije moguće sačuvati prihod',
-      life: 5000,
+      life: 5000
     });
   } finally {
     loading.value = false;
@@ -349,7 +330,7 @@ onMounted(() => {
         severity: 'warn',
         summary: 'Proverite podatke',
         detail: 'Molimo pregledajte automatski popunjene podatke pre čuvanja',
-        life: 5000,
+        life: 5000
       });
     }
   } else {

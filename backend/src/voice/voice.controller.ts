@@ -44,6 +44,6 @@ export class VoiceController {
     }
   })
   async parseVoiceInput(@Body() dto: VoiceParseDto) {
-    return this.voiceService.parseVoiceInput(dto);
+    return this.voiceService.parseAndCreate(dto);
   }
 }

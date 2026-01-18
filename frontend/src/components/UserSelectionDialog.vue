@@ -9,19 +9,13 @@
     @update:visible="$emit('update:visible', $event)"
   >
     <div class="user-options">
-      <button
-        class="user-card svetla"
-        @click="selectUser('svetla')"
-      >
+      <button class="user-card svetla" @click="selectUser('svetla')">
         <div class="color-preview purple"></div>
         <h3>Svetla</h3>
         <p class="theme-label">Ljubičasta tema</p>
       </button>
 
-      <button
-        class="user-card dejan"
-        @click="selectUser('dejan')"
-      >
+      <button class="user-card dejan" @click="selectUser('dejan')">
         <div class="color-preview green"></div>
         <h3>Dejan</h3>
         <p class="theme-label">Zelena tema</p>
