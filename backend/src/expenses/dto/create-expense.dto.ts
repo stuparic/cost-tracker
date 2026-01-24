@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsEnum, IsString, MinLength, IsArray, IsDateString, Min, IsOptional } from 'class-validator';
 
-export class CreateExpenseDto {
+// Base class with common fields
+export class BaseCreateExpenseDto {
   @ApiProperty({
     example: 1500,
     description: 'Amount in the specified currency'
@@ -75,33 +76,37 @@ export class CreateExpenseDto {
   @IsString()
   @MinLength(1, { message: 'Created by cannot be empty' })
   createdBy: string;
-
-  @ApiProperty({
-    required: false,
-    description: 'ID of recurring occurrence if auto-created'
-  })
-  @IsOptional()
-  @IsString()
-  recurringOccurrenceId?: string;
-
-  @ApiProperty({
-    required: false,
-    example: 'manual',
-    enum: ['manual', 'voice', 'auto'],
-    description: 'How this expense was created. "auto" = recurring auto-created. Defaults to "manual" if not specified.'
-  })
-  @IsOptional()
-  @IsEnum(['manual', 'voice', 'auto'], {
-    message: 'Creation method must be one of: manual, voice, auto'
-  })
-  creationMethod?: 'manual' | 'voice' | 'auto';
-
-  @ApiProperty({
-    required: false,
-    example: 'Kupio sam kafu za 250 dinara',
-    description: 'Original voice transcript if created via voice input (for debugging)'
-  })
-  @IsOptional()
-  @IsString()
-  voiceTranscript?: string;
 }
+
+// Manual creation DTO - user enters data manually
+export class CreateExpenseManualDto extends BaseCreateExpenseDto {
+  creationMethod: 'manual' = 'manual';
+}
+
+// Auto creation DTO - created from recurring template
+export class CreateExpenseAutoDto extends BaseCreateExpenseDto {
+  @ApiProperty({
+    description: 'ID of the recurring template that generated this expense'
+  })
+  @IsString()
+  @MinLength(1)
+  recurringOccurrenceId: string;
+
+  creationMethod: 'auto' = 'auto';
+}
+
+// Voice creation DTO - created from voice input
+export class CreateExpenseVoiceDto extends BaseCreateExpenseDto {
+  @ApiProperty({
+    example: 'Kupio sam kafu za 250 dinara',
+    description: 'Original voice transcript'
+  })
+  @IsString()
+  @MinLength(1)
+  voiceTranscript: string;
+
+  creationMethod: 'voice' = 'voice';
+}
+
+// Union type for all creation methods
+export type CreateExpenseDto = CreateExpenseManualDto | CreateExpenseAutoDto | CreateExpenseVoiceDto;

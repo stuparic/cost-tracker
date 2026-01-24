@@ -141,8 +141,9 @@
 
         <Column header="Izvor" style="min-width: 100px">
           <template #body="{ data }">
-            <Tag v-if="data.recurringOccurrenceId" value="Auto" severity="info" icon="pi pi-replay" />
-            <span v-else class="manual-label">Ručno</span>
+            <Tag v-if="data.creationMethod === 'auto'" value="Auto" severity="info" icon="pi pi-replay" />
+            <Tag v-else-if="data.creationMethod === 'voice'" value="Glasovno" severity="success" icon="pi pi-microphone" />
+            <span v-else class="manual-label">Rucno</span>
           </template>
         </Column>
 

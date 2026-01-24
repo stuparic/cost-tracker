@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { ExpensesService } from './expenses.service';
-import { CreateExpenseDto } from './dto/create-expense.dto';
+import { CreateExpenseManualDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { QueryExpensesDto } from './dto/query-expenses.dto';
 
@@ -20,7 +20,7 @@ export class ExpensesController {
     description: 'Expense successfully created'
   })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
-  create(@Body() createExpenseDto: CreateExpenseDto) {
+  create(@Body() createExpenseDto: CreateExpenseManualDto) {
     return this.expensesService.create(createExpenseDto);
   }
 

@@ -4,6 +4,8 @@ import * as admin from 'firebase-admin';
 import { Expense } from './interfaces/expense.interface';
 import { QueryExpensesDto } from './dto/query-expenses.dto';
 
+type CreateExpenseData = Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>;
+
 @Injectable()
 export class ExpensesRepository {
   private readonly collectionName = 'expenses';
@@ -14,7 +16,7 @@ export class ExpensesRepository {
     return this.firebaseService.getFirestore();
   }
 
-  async create(expenseData: any): Promise<Expense> {
+  async create(expenseData: CreateExpenseData): Promise<Expense> {
     const docRef = this.firestore.collection(this.collectionName).doc();
 
     const firestoreData = {
@@ -132,7 +134,10 @@ export class ExpensesRepository {
       purchaseDate: data.purchaseDate?.toDate().toISOString(),
       createdBy: data.createdBy,
       createdAt: data.createdAt?.toDate().toISOString(),
-      updatedAt: data.updatedAt?.toDate().toISOString()
+      updatedAt: data.updatedAt?.toDate().toISOString(),
+      creationMethod: data.creationMethod,
+      voiceTranscript: data.voiceTranscript,
+      recurringOccurrenceId: data.recurringOccurrenceId
     };
   }
 }

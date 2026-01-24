@@ -39,7 +39,8 @@ export class ExpensesService {
       paymentMethod,
       tags,
       purchaseDate: createExpenseDto.purchaseDate,
-      createdBy: createExpenseDto.createdBy
+      createdBy: createExpenseDto.createdBy,
+      creationMethod: createExpenseDto.creationMethod
     };
 
     return this.expensesRepository.create(expenseData);

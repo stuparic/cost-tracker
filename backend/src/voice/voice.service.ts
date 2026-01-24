@@ -3,7 +3,7 @@ import { VoiceParseDto } from './dto/voice-parse.dto';
 import { GeminiService } from './gemini.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { IncomesService } from '../incomes/incomes.service';
-import { CreateExpenseDto } from '../expenses/dto/create-expense.dto';
+import { CreateExpenseVoiceDto } from '../expenses/dto/create-expense.dto';
 import { CreateIncomeDto } from '../incomes/dto/create-income.dto';
 
 @Injectable()
@@ -26,7 +26,7 @@ export class VoiceService {
     const { type, data } = aiResult;
 
     if (type === 'expense') {
-      const createDto: CreateExpenseDto = {
+      const createDto: CreateExpenseVoiceDto = {
         amount: data.amount,
         currency: data.currency,
         shopName: data.shopOrSource,

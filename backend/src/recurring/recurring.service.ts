@@ -4,6 +4,7 @@ import { RecurringOccurrencesRepository } from './recurring-occurrences.reposito
 import { RecurringOccurrence } from './interfaces/recurring-occurrence.interface';
 import { IncomesService } from '../incomes/incomes.service';
 import { ExpensesService } from '../expenses/expenses.service';
+import { CreateExpenseAutoDto } from '../expenses/dto/create-expense.dto';
 
 @Injectable()
 export class RecurringService {
@@ -69,7 +70,7 @@ export class RecurringService {
   }
 
   private async createExpenseFromOccurrence(occurrence: RecurringOccurrence) {
-    const createDto = {
+    const createDto: CreateExpenseAutoDto = {
       amount: occurrence.amount,
       currency: occurrence.originalCurrency,
       category: occurrence.expenseCategory,
@@ -78,7 +79,7 @@ export class RecurringService {
       createdBy: occurrence.createdBy,
       productDescription: occurrence.description,
       recurringOccurrenceId: occurrence.id,
-      creationMethod: 'auto' as const
+      creationMethod: 'auto'
     };
 
     return this.expensesService.create(createDto);
