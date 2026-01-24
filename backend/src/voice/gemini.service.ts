@@ -20,9 +20,10 @@ export class GeminiService {
   }
 
   async parseVoiceTranscript(transcript: string): Promise<AiParseResult> {
+    const modelName = process.env.GEMINI_MODEL_NAME;
     try {
       const result = await this.genAI.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: modelName,
         contents: this.buildPrompt(transcript)
       });
 
