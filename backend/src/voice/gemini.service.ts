@@ -9,8 +9,13 @@ export class GeminiService {
   private genAI: GoogleGenAI;
 
   constructor() {
+    const apiKey = process.env.GEMINI_API_KEY;
+    this.logger.log(`GEMINI_API_KEY is ${apiKey ? 'SET' : 'NOT SET'}`);
+    if (!apiKey) {
+      this.logger.error('GEMINI_API_KEY environment variable is not set');
+    }
     this.genAI = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY
+      apiKey: apiKey
     });
   }
 
