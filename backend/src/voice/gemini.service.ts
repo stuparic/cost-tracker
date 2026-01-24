@@ -27,6 +27,8 @@ export class GeminiService {
         contents: this.buildPrompt(transcript)
       });
 
+      this.logger.warn("Gemini raw response: " + JSON.stringify(result));
+
       // Parse JSON response
       return this.parseAiResponse(result.text);
     } catch (error) {
