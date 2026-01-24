@@ -9,7 +9,9 @@ export class GeminiService {
   private genAI: GoogleGenAI;
 
   constructor() {
-    this.genAI = new GoogleGenAI({});
+    this.genAI = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY
+    });
   }
 
   async parseVoiceTranscript(transcript: string): Promise<AiParseResult> {
