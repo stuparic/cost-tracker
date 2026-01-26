@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { VoiceParseDto } from './dto/voice-parse.dto';
 import { GeminiService } from './gemini.service';
 import { ExpensesService } from '../expenses/expenses.service';
@@ -8,8 +8,6 @@ import { CreateIncomeDto } from '../incomes/dto/create-income.dto';
 
 @Injectable()
 export class VoiceService {
-  private readonly logger = new Logger(VoiceService.name);
-
   constructor(
     private readonly geminiService: GeminiService,
     private readonly expensesService: ExpensesService,
