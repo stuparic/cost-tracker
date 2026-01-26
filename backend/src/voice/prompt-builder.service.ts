@@ -1,9 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EXPENSE_CATEGORIES, INCOME_TYPES } from '../constants/categories';
 import { SERBIAN_SHOPS } from '../constants/serbian-shops';
 
 @Injectable()
 export class PromptBuilderService {
+  private readonly logger = new Logger(PromptBuilderService.name);
+
+  constructor() {
+    // Log the state of imported constants at startup
+    this.logger.log(`SERBIAN_SHOPS loaded: ${SERBIAN_SHOPS ? 'YES' : 'NO'}, count: ${SERBIAN_SHOPS?.length || 0}`);
+    this.logger.log(`EXPENSE_CATEGORIES loaded: ${EXPENSE_CATEGORIES ? 'YES' : 'NO'}, count: ${EXPENSE_CATEGORIES?.length || 0}`);
+    this.logger.log(`INCOME_TYPES loaded: ${INCOME_TYPES ? 'YES' : 'NO'}, count: ${INCOME_TYPES?.length || 0}`);
+  }
   /**
    * Builds the AI prompt for parsing voice transcript
    * @param transcript The voice transcript to parse
@@ -62,6 +70,10 @@ Rules:
    * Formats the shop list for inclusion in the prompt
    */
   private formatShopList(): string {
+    if (!SERBIAN_SHOPS || !Array.isArray(SERBIAN_SHOPS)) {
+      console.error('SERBIAN_SHOPS is undefined or not an array:', SERBIAN_SHOPS);
+      return 'Other';
+    }
     return SERBIAN_SHOPS.join(', ');
   }
 
@@ -69,6 +81,10 @@ Rules:
    * Formats expense categories for inclusion in the prompt
    */
   private formatCategories(): string {
+    if (!EXPENSE_CATEGORIES || !Array.isArray(EXPENSE_CATEGORIES)) {
+      console.error('EXPENSE_CATEGORIES is undefined or not an array:', EXPENSE_CATEGORIES);
+      return 'Other';
+    }
     return EXPENSE_CATEGORIES.join(', ');
   }
 
@@ -76,6 +92,10 @@ Rules:
    * Formats income types for inclusion in the prompt
    */
   private formatIncomeTypes(): string {
+    if (!INCOME_TYPES || !Array.isArray(INCOME_TYPES)) {
+      console.error('INCOME_TYPES is undefined or not an array:', INCOME_TYPES);
+      return 'Other';
+    }
     return INCOME_TYPES.join(', ');
   }
 }
