@@ -58,10 +58,11 @@ function handlePressStart(): void {
   startRecording();
 }
 
-function handleTextProcessingEnd(): void {
+async function handleTextProcessingEnd(): Promise<void> {
   if (!isRecording.value) return;
 
-  const text: string = stopRecording();
+  // Wait for the recognition to finish and get the transcript
+  const text: string = await stopRecording();
 
   if (!text || text.trim() === '') {
     errorMessage.value = 'Nije detektovan govor';

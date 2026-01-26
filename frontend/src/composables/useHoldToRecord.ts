@@ -13,6 +13,15 @@ export function useHoldToRecord() {
 
   let recognition: any = null;
   let finalTranscript = '';
+  let stopResolve: ((transcript: string) => void) | null = null;
+
+  // Helper to safely resolve and cleanup
+  const resolveAndCleanup = (transcript: string) => {
+    if (stopResolve) {
+      stopResolve(transcript);
+      stopResolve = null;
+    }
+  };
 
   // Initialize recognition
   recognition = new SpeechRecognition();
@@ -47,10 +56,15 @@ export function useHoldToRecord() {
     }
 
     isRecording.value = false;
+    resolveAndCleanup('');
   };
 
   recognition.onend = () => {
     isRecording.value = false;
+
+    const result = finalTranscript.trim();
+    finalTranscript = '';
+    resolveAndCleanup(result);
   };
 
   function startRecording(): boolean {
@@ -68,24 +82,26 @@ export function useHoldToRecord() {
     }
   }
 
-  function stopRecording(): string {
-    try {
-      recognition.stop();
-      isRecording.value = false;
+  function stopRecording(): Promise<string> {
+    return new Promise((resolve) => {
+      try {
+        // Store the resolve function to be called in onend
+        stopResolve = resolve;
 
-      // Return the final transcript
-      const result = finalTranscript.trim();
-      finalTranscript = '';
-      return result;
-    } catch (err) {
-      console.error('Failed to stop recording:', err);
-      isRecording.value = false;
-      return '';
-    }
+        // Stop the recognition (will trigger onend event)
+        recognition.stop();
+      } catch (err) {
+        console.error('Failed to stop recording:', err);
+        isRecording.value = false;
+        stopResolve = null;
+        resolve('');
+      }
+    });
   }
 
   function cancelRecording(): void {
     try {
+      resolveAndCleanup('');
       recognition.stop();
       isRecording.value = false;
       finalTranscript = '';
@@ -96,6 +112,7 @@ export function useHoldToRecord() {
 
   function cleanup(): void {
     try {
+      resolveAndCleanup('');
       recognition.stop();
     } catch (err) {
       // Ignore errors during cleanup
