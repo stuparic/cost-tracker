@@ -3,13 +3,6 @@
     <Toast />
     <UserSelectionDialog v-model:visible="showUserDialog" />
 
-    <!-- Voice Transcript Bubble -->
-    <Transition name="slide-up">
-      <div v-if="voiceTranscriptBubble.visible" class="voice-bubble">
-        <i class="pi pi-microphone"></i>
-        <span class="voice-bubble-text">{{ voiceTranscriptBubble.text }}</span>
-      </div>
-    </Transition>
     <Sidebar v-model:visible="sidebarVisible" position="left" class="theme-sidebar">
       <template #header>
         <h2 class="sidebar-title">Podešavanja</h2>
@@ -48,7 +41,7 @@
       <!-- Main Section Navigation -->
       <nav class="main-nav">
         <div class="main-tab voice-tab">
-          <VoiceRecorder @transcript="handleVoiceTranscript" />
+          <HoldToRecordButton />
         </div>
         <router-link to="/add" class="main-tab expense-tab">
           <i class="pi pi-shopping-cart"></i>
@@ -95,27 +88,16 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
+import { useRoute } from 'vue-router';
 import Toast from 'primevue/toast';
 import Sidebar from 'primevue/sidebar';
 import ThemeSelector from './components/ThemeSelector.vue';
 import UserSelectionDialog from './components/UserSelectionDialog.vue';
-import VoiceRecorder from './components/shared/VoiceRecorder.vue';
-import { useVoiceInput } from './composables/useVoiceInput';
+import HoldToRecordButton from './components/shared/HoldToRecordButton.vue';
 
 const route = useRoute();
-const router = useRouter();
-const toast = useToast();
 const sidebarVisible = ref(false);
 const manualDialogVisible = ref(false);
-
-// Voice transcript bubble state
-const voiceTranscriptBubble = ref({
-  visible: false,
-  text: ''
-});
-let bubbleTimeout: ReturnType<typeof setTimeout> | null = null;
 
 // Initialize stores on app load
 import { useThemeStore } from './stores/theme';
@@ -125,7 +107,6 @@ import { useUserStore } from './stores/user';
 useThemeStore(); // Initialize theme
 const userStore = useUserStore();
 // const balanceStore = useBalanceStore();
-const { sendTranscript } = useVoiceInput();
 
 // Preload balance data in background on app start
 onMounted(() => {
@@ -165,66 +146,6 @@ const isIncomeRoute = computed(() => {
 // Function to allow switching users
 function switchUser() {
   manualDialogVisible.value = true;
-}
-
-// Show voice transcript bubble
-function showVoiceTranscriptBubble(text: string) {
-  // Clear existing timeout
-  if (bubbleTimeout) {
-    clearTimeout(bubbleTimeout);
-  }
-
-  // Show bubble with text
-  voiceTranscriptBubble.value = {
-    visible: true,
-    text
-  };
-
-  // Hide after 5 seconds
-  bubbleTimeout = setTimeout(() => {
-    voiceTranscriptBubble.value.visible = false;
-  }, 5000);
-}
-
-// Voice input handler - AI will determine if it's expense or income
-async function handleVoiceTranscript(text: string) {
-  // Show bubble immediately
-  showVoiceTranscriptBubble(text);
-
-  try {
-    // Call AI parsing endpoint
-    const result = await sendTranscript(text);
-
-    if (!result.success) {
-      toast.add({
-        severity: 'error',
-        summary: 'Greška',
-        detail: result.errorMessage || 'Nije moguće analizirati glasovni unos',
-        life: 5000
-      });
-      return;
-    }
-    
-    if(result.type == 'expense') {
-      await router.push('/list');
-    } else if(result.type == 'income') {
-      await router.push('/income/list');
-    }
-
-    toast.add({
-      severity: 'success',
-      summary: 'Uspešno',
-      life: 3000
-    });
-  } catch (error) {
-    console.error('Failed to process voice input:', error);
-    toast.add({
-      severity: 'error',
-      summary: 'Greška',
-      detail: 'Nije moguće poslati glasovni unos',
-      life: 3000
-    });
-  }
 }
 </script>
 
@@ -331,30 +252,10 @@ body {
   justify-content: center;
 }
 
-.voice-tab :deep(.voice-button) {
+.voice-tab :deep(.record-button) {
   width: 48px;
   height: 48px;
   font-size: 1.5rem;
-}
-
-.voice-tab :deep(.voice-button.idle) {
-  background: var(--primary-light);
-  color: var(--primary-color);
-}
-
-.voice-tab :deep(.voice-button.idle:hover:not(:disabled)) {
-  background: var(--primary-color);
-  color: white;
-}
-
-.voice-tab :deep(.voice-button.listening) {
-  background: #ef4444;
-  color: white;
-}
-
-.voice-tab :deep(.voice-button.processing) {
-  background: var(--primary-color);
-  color: white;
 }
 
 .header-center {
@@ -655,84 +556,5 @@ body {
 
 .sidebar-link i {
   font-size: 1.125rem;
-}
-
-/* Voice Transcript Bubble */
-.voice-bubble {
-  position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(10px);
-  color: white;
-  border-radius: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-
-  max-width: 90%;
-  width: auto;
-}
-
-.voice-bubble i {
-  font-size: 1.25rem;
-  color: #10b981;
-  flex-shrink: 0;
-}
-
-.voice-bubble-text {
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-/* Slide up animation */
-.slide-up-enter-active {
-  animation: slideUp 0.3s ease-out;
-}
-
-.slide-up-leave-active {
-  animation: slideDown 0.3s ease-in;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(-50%) translateY(20px);
-  }
-}
-
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  .voice-bubble {
-    bottom: 1rem;
-    padding: 0.875rem 1.25rem;
-    max-width: calc(100% - 2rem);
-  }
-
-  .voice-bubble-text {
-    font-size: 0.875rem;
-  }
 }
 </style>
