@@ -42,7 +42,7 @@
       <div class="action-buttons">
         <Button
           v-if="!isRecording"
-          label="Pokreni snimanje"
+          label="Start"
           icon="pi pi-microphone"
           class="mic-button"
           :disabled="isProcessing || isSending"
@@ -50,8 +50,8 @@
         />
         <Button
           v-else
-          label="Zaustavi snimanje"
-          icon="pi pi-stop"
+          label="Stop"
+          icon="pi pi-stop-circle"
           class="mic-button recording-active"
           @click="handleStopRecording"
         />
