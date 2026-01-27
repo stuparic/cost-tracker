@@ -14,14 +14,14 @@ export const useUserStore = defineStore('user', () => {
     dejan: 'green'
   };
 
-  // Set user and apply corresponding theme
+  // Set user and apply corresponding accent
   function setUser(user: User) {
     selectedUser.value = user;
     localStorage.setItem('user', user);
 
-    // Automatically set the corresponding theme
+    // Automatically set the corresponding accent color
     const themeStore = useThemeStore();
-    themeStore.setTheme(userThemeMap[user]);
+    themeStore.setAccent(userThemeMap[user]);
   }
 
   return {

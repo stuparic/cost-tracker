@@ -152,39 +152,74 @@ function switchUser() {
 </script>
 
 <style>
-/* CSS Variables for Themes */
-:root[data-theme='green'] {
+/* CSS Variables for Accent Colors */
+:root[data-accent='green'] {
   --primary-color: #10b981;
   --primary-dark: #059669;
   --primary-light: #ecfdf5;
   --primary-shadow: rgba(16, 185, 129, 0.25);
 }
 
-:root[data-theme='purple'] {
+:root[data-accent='purple'] {
   --primary-color: #a855f7;
   --primary-dark: #7c3aed;
   --primary-light: #faf5ff;
   --primary-shadow: rgba(168, 85, 247, 0.25);
 }
 
-:root[data-theme='blue'] {
+:root[data-accent='blue'] {
   --primary-color: #3b82f6;
   --primary-dark: #2563eb;
   --primary-light: #eff6ff;
   --primary-shadow: rgba(59, 130, 246, 0.25);
 }
 
+/* Light Mode (Default) */
 :root {
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
   --border-color: #e5e7eb;
   --background: #f8fafb;
+  --surface-card: #ffffff;
+  --surface-hover: #f9fafb;
+  --surface-border: #d1d5db;
 
   /* Income Colors */
   --income-color: #0891b2;
   --income-dark: #0e7490;
   --income-light: #ecfeff;
   --income-shadow: rgba(8, 145, 178, 0.25);
+}
+
+/* Dark Mode */
+:root.dark-mode {
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --border-color: #374151;
+  --background: #111827;
+  --surface-card: #1f2937;
+  --surface-hover: #374151;
+  --surface-border: #4b5563;
+
+  /* Adjust primary colors for dark mode */
+  --primary-light: rgba(16, 185, 129, 0.15);
+  --income-light: rgba(8, 145, 178, 0.15);
+
+  /* Income colors for dark mode */
+  --income-color: #06b6d4;
+  --income-dark: #0891b2;
+}
+
+:root[data-accent='green'].dark-mode {
+  --primary-light: rgba(16, 185, 129, 0.15);
+}
+
+:root[data-accent='purple'].dark-mode {
+  --primary-light: rgba(168, 85, 247, 0.15);
+}
+
+:root[data-accent='blue'].dark-mode {
+  --primary-light: rgba(59, 130, 246, 0.15);
 }
 
 * {
@@ -362,7 +397,7 @@ body {
 /* Main Navigation (Troškovi/Prihodi) */
 .main-nav {
   display: flex;
-  background: white;
+  background: var(--surface-card);
   border-bottom: 2px solid var(--border-color);
   position: sticky;
   top: 0;
@@ -417,7 +452,7 @@ body {
 /* Sub Navigation (Dodaj/Lista) */
 .tab-nav {
   display: flex;
-  background: white;
+  background: var(--surface-card);
   border-bottom: 2px solid var(--border-color);
   position: sticky;
   top: 0;
@@ -476,7 +511,7 @@ body {
 /* Mobile-first: Full-screen experience */
 @media (max-width: 768px) {
   body {
-    background: white;
+    background: var(--surface-card);
   }
 
   .app-header {
@@ -498,7 +533,7 @@ body {
 
   .app-main {
     padding: 0;
-    background: white;
+    background: var(--surface-card);
   }
 
   .main-tab {
