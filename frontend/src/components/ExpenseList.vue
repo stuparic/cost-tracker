@@ -706,8 +706,7 @@ onMounted(() => {
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
 }
 
 .expenses-table {
@@ -926,7 +925,7 @@ onMounted(() => {
   }
 
   /* Mobile Landscape: Optimize table for horizontal space */
-  @media (orientation: landscape) {
+  @media (orientation: landscape) and (max-height: 500px) {
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -1061,6 +1060,19 @@ onMounted(() => {
       width: 1.75rem;
       height: 1.75rem;
     }
+  }
+}
+
+/* Landscape mode for all devices - enable horizontal scrolling */
+@media (orientation: landscape) and (max-height: 500px) {
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .expenses-table :deep(.p-datatable-wrapper) {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 }
 </style>

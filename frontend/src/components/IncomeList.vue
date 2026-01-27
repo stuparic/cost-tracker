@@ -548,8 +548,7 @@ onMounted(() => {
 .incomes-table {
   background: white;
   border-radius: 0.75rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -858,6 +857,19 @@ onMounted(() => {
       width: 1.75rem;
       height: 1.75rem;
     }
+  }
+}
+
+/* Landscape mode for all devices - enable horizontal scrolling */
+@media (orientation: landscape) and (max-height: 500px) {
+  .incomes-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .incomes-table :deep(.p-datatable-wrapper) {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 }
 </style>
