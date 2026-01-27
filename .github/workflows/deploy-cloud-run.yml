@@ -57,17 +57,31 @@ jobs:
           docker push $IMAGE:${{ github.sha }}
           docker push $IMAGE:latest
 
-      - name: Create Firebase service account secret
+      - name: Check if Firebase secret exists
+        id: check-secret
         run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/service-account.json
-          gcloud secrets create firebase-service-account --data-file=/tmp/service-account.json --replication-policy="automatic" || true
-          gcloud secrets versions add firebase-service-account --data-file=/tmp/service-account.json
-          rm /tmp/service-account.json
+          if gcloud secrets describe firebase-service-account &>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Secret already exists, skipping creation"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Secret does not exist, will create"
+          fi
+
+      - name: Create Firebase service account secret
+        if: steps.check-secret.outputs.exists == 'false'
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' | gcloud secrets create firebase-service-account \
+            --data-file=- \
+            --replication-policy="automatic"
 
       - name: Grant secret access to Cloud Run service account
         run: |
           PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
           gcloud secrets add-iam-policy-binding firebase-service-account \
+            --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
+            --role=roles/secretmanager.secretAccessor
+          gcloud secrets add-iam-policy-binding gemini-api-key \
             --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
             --role=roles/secretmanager.secretAccessor
 
@@ -81,7 +95,9 @@ jobs:
             --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
             --set-env-vars FIXED_EUR_TO_RSD_RATE=117.0 \
             --set-env-vars NODE_ENV=production \
+            --set-env-vars GEMINI_MODEL_NAME=gemini-2.5-flash-lite \
             --update-secrets=/secrets/serviceAccountKey.json=firebase-service-account:latest \
+            --update-secrets=GEMINI_API_KEY=gemini-api-key:latest \
             --min-instances 0 \
             --max-instances 1 \
             --memory 512Mi \
