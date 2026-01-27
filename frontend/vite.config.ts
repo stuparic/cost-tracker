@@ -14,26 +14,26 @@ export default defineConfig({
         name: 'Troškić',
         short_name: 'Troškić',
         description: 'Pratite troškove domaćinstva',
-        id: '/?v=5',
+        id: '/?v=6',
         theme_color: '#10b981',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'any',
         scope: '/',
-        start_url: '/?v=5',
+        start_url: '/?v=6',
         icons: [
           {
-            src: 'pwa-64x64.png?v=5',
+            src: 'pwa-64x64.png?v=6',
             sizes: '64x64',
             type: 'image/png'
           },
           {
-            src: 'pwa-192x192.png?v=5',
+            src: 'pwa-192x192.png?v=6',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png?v=5',
+            src: 'pwa-512x512.png?v=6',
             sizes: '512x512',
             type: 'image/png'
           }
