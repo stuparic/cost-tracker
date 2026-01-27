@@ -157,10 +157,12 @@
           </template>
         </Column>
 
-        <Column header="Akcije">
+        <Column header="Akcije" style="min-width: 100px">
           <template #body="{ data }">
-            <Button v-tooltip.top="'Izmeni'" icon="pi pi-pencil" severity="secondary" text rounded @click="openEditDialog(data)" />
-            <Button v-tooltip.top="'Obriši'" icon="pi pi-trash" severity="danger" text rounded @click="confirmDelete(data)" />
+            <div class="action-buttons">
+              <Button v-tooltip.top="'Izmeni'" icon="pi pi-pencil" severity="secondary" text rounded @click="openEditDialog(data)" />
+              <Button v-tooltip.top="'Obriši'" icon="pi pi-trash" severity="danger" text rounded @click="confirmDelete(data)" />
+            </div>
           </template>
         </Column>
       </DataTable>
@@ -769,6 +771,14 @@ onMounted(() => {
   color: var(--text-secondary);
 }
 
+.action-buttons {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+}
+
 .category-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -916,6 +926,16 @@ onMounted(() => {
 
   /* Mobile Landscape: Optimize table for horizontal space */
   @media (orientation: landscape) {
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .expenses-table :deep(.p-datatable-wrapper) {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+
     .list-title {
       font-size: 1rem;
       padding: 0 0.375rem;

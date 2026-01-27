@@ -629,7 +629,9 @@ onMounted(() => {
 .action-buttons {
   display: flex;
   gap: 0.25rem;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 .manual-label {
@@ -737,6 +739,16 @@ onMounted(() => {
 
   /* Mobile Landscape: Optimize table for horizontal space */
   @media (orientation: landscape) {
+    .table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .incomes-table :deep(.p-datatable-wrapper) {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+
     .page-title {
       font-size: 1rem;
       padding: 0 0.375rem;
