@@ -197,11 +197,13 @@ function stopRecordingTimer() {
 }
 
 // Handlers
-function handleStartRecording() {
+async function handleStartRecording() {
   errorMessage.value = '';
-  speechRecognition.start();
-  startRecordingTimer();
-  animateWaveform();
+  const started = await speechRecognition.start();
+  if (started) {
+    startRecordingTimer();
+    animateWaveform();
+  }
 }
 
 async function handleStopRecording() {
