@@ -116,15 +116,15 @@
           </div>
         </template>
 
-        <Column field="purchaseDate" header="Datum" :sortable="true">
+        <Column field="purchaseDate" header="Datum" :sortable="true" style="min-width: 110px">
           <template #body="{ data }">
             {{ formatDate(data.purchaseDate) }}
           </template>
         </Column>
 
-        <Column field="shopName" header="Prodavnica" :sortable="true" />
+        <Column field="shopName" header="Prodavnica" :sortable="true" style="min-width: 150px" />
 
-        <Column field="amount" header="Iznos" :sortable="true">
+        <Column field="amount" header="Iznos" :sortable="true" style="min-width: 130px">
           <template #body="{ data }">
             <div class="amount-cell">
               <span class="amount-primary">{{ formatAmount(data.rsdAmount, false) }} RSD</span>
@@ -133,7 +133,7 @@
           </template>
         </Column>
 
-        <Column field="category" header="Kategorija" :sortable="true">
+        <Column field="category" header="Kategorija" :sortable="true" style="min-width: 120px">
           <template #body="{ data }">
             <span class="category-badge">{{ data.category }}</span>
           </template>
@@ -147,9 +147,9 @@
           </template>
         </Column>
 
-        <Column field="productDescription" header="Opis" />
+        <Column field="productDescription" header="Opis" style="min-width: 150px" />
 
-        <Column field="createdBy" header="Osoba" :sortable="true">
+        <Column field="createdBy" header="Osoba" :sortable="true" style="min-width: 100px">
           <template #body="{ data }">
             <span class="person-badge" :class="data.createdBy ? data.createdBy.toLowerCase() : 'unknown'">
               {{ data.createdBy || 'Nepoznato' }}
@@ -706,7 +706,8 @@ onMounted(() => {
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   width: 100%;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .expenses-table {
@@ -714,7 +715,7 @@ onMounted(() => {
 }
 
 .expenses-table :deep(table) {
-  min-width: 900px;
+  min-width: 1100px;
   width: 100%;
 }
 

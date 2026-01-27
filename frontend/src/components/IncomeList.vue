@@ -548,7 +548,8 @@ onMounted(() => {
 .incomes-table {
   background: white;
   border-radius: 0.75rem;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
