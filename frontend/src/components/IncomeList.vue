@@ -862,6 +862,11 @@ onMounted(() => {
 
 /* Landscape mode for all devices - enable horizontal scrolling */
 @media (orientation: landscape) and (max-height: 500px) {
+  .income-list {
+    min-width: 900px;
+    max-width: none;
+  }
+
   .incomes-table {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;

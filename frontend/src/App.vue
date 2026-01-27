@@ -234,6 +234,13 @@ body {
   overflow-x: hidden;
 }
 
+@media (orientation: landscape) and (max-height: 500px) {
+  html,
+  body {
+    overflow-x: auto;
+  }
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: var(--background);
@@ -404,7 +411,7 @@ body {
   z-index: 91;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: auto;
 }
 
 .main-tab {

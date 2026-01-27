@@ -1065,6 +1065,11 @@ onMounted(() => {
 
 /* Landscape mode for all devices - enable horizontal scrolling */
 @media (orientation: landscape) and (max-height: 500px) {
+  .expense-list {
+    min-width: 1100px;
+    max-width: none;
+  }
+
   .table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
