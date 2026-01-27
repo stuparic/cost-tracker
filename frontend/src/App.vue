@@ -2,6 +2,7 @@
   <div id="app">
     <Toast />
     <UserSelectionDialog v-model:visible="showUserDialog" />
+    <QuickInputDialog v-model:visible="quickInputVisible" />
 
     <Sidebar v-model:visible="sidebarVisible" position="left" class="theme-sidebar">
       <template #header>
@@ -40,9 +41,9 @@
       </header>
       <!-- Main Section Navigation -->
       <nav class="main-nav">
-        <div class="main-tab voice-tab">
-          <HoldToRecordButton />
-        </div>
+        <button class="main-tab voice-tab" @click="quickInputVisible = true">
+          <i class="pi pi-microphone"></i>
+        </button>
         <router-link to="/add" class="main-tab expense-tab">
           <i class="pi pi-shopping-cart"></i>
           <span>Troškovi</span>
@@ -93,11 +94,12 @@ import Toast from 'primevue/toast';
 import Sidebar from 'primevue/sidebar';
 import ThemeSelector from './components/ThemeSelector.vue';
 import UserSelectionDialog from './components/UserSelectionDialog.vue';
-import HoldToRecordButton from './components/shared/HoldToRecordButton.vue';
+import QuickInputDialog from './components/QuickInputDialog.vue';
 
 const route = useRoute();
 const sidebarVisible = ref(false);
 const manualDialogVisible = ref(false);
+const quickInputVisible = ref(false);
 
 // Initialize stores on app load
 import { useThemeStore } from './stores/theme';
@@ -246,16 +248,24 @@ body {
 /* Voice Tab in Main Navigation */
 .voice-tab {
   flex: 0 0 auto;
-  padding: 0.5rem;
+  padding: 0.5rem 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-secondary);
 }
 
-.voice-tab :deep(.record-button) {
-  width: 48px;
-  height: 48px;
-  font-size: 1.5rem;
+.voice-tab:hover {
+  background: var(--background);
+  color: var(--primary-color);
+}
+
+.voice-tab i {
+  font-size: 1.75rem;
 }
 
 .header-center {
