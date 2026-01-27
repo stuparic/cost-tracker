@@ -234,13 +234,6 @@ body {
   overflow-x: hidden;
 }
 
-@media (orientation: landscape) and (max-height: 500px) {
-  html,
-  body {
-    overflow-x: auto;
-  }
-}
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: var(--background);
@@ -411,7 +404,7 @@ body {
   z-index: 91;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 .main-tab {
@@ -513,6 +506,14 @@ body {
   flex-direction: column;
   padding: 0;
   background: var(--background);
+  overflow-x: hidden;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .app-main {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* Mobile-first: Full-screen experience */
