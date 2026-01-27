@@ -84,7 +84,7 @@
 import { ref, computed, watch, nextTick, onUnmounted } from 'vue';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
-import { useHoldToRecord } from '@/composables/useHoldToRecord';
+import { useSpeechRecognition } from '@/composables/useSpeechRecognition';
 import { useUserStore } from '@/stores/user';
 import { useToast } from 'primevue/usetoast';
 import apiClient from '@/api/client';
@@ -96,15 +96,10 @@ const visible = defineModel<boolean>('visible', { required: true });
 const userStore = useUserStore();
 const toast = useToast();
 
-// Recording composable
-const {
-  isRecording,
-  error: recordingError,
-  startRecording,
-  stopRecording,
-  cancelRecording,
-  cleanup
-} = useHoldToRecord();
+// Speech recognition
+const speechRecognition = useSpeechRecognition();
+const isRecording = speechRecognition.isRecording;
+const recognitionError = speechRecognition.error;
 
 // Local state
 const inputText = ref('');
@@ -204,7 +199,7 @@ function stopRecordingTimer() {
 // Handlers
 function handleStartRecording() {
   errorMessage.value = '';
-  startRecording();
+  speechRecognition.start();
   startRecordingTimer();
   animateWaveform();
 }
@@ -222,7 +217,7 @@ async function handleStopRecording() {
   isProcessing.value = true;
 
   try {
-    const text = await stopRecording();
+    const text = await speechRecognition.stop();
 
     if (!text || text.trim() === '') {
       errorMessage.value = 'Nije detektovan govor';
@@ -295,12 +290,12 @@ function resetDialog() {
     waveAnimationFrame = null;
   }
   if (isRecording.value) {
-    cancelRecording();
+    speechRecognition.stop(); // Don't await, just cleanup
   }
 }
 
-// Watch for recording errors
-watch(recordingError, (newError) => {
+// Watch for recognition errors
+watch(recognitionError, (newError) => {
   if (newError) {
     errorMessage.value = newError;
     stopRecordingTimer();
@@ -310,14 +305,16 @@ watch(recordingError, (newError) => {
     }
     setTimeout(() => {
       errorMessage.value = '';
-      recordingError.value = null;
+      recognitionError.value = null;
     }, 3000);
   }
 });
 
 // Cleanup
 onUnmounted(() => {
-  cleanup();
+  if (isRecording.value) {
+    speechRecognition.stop(); // Don't await, just cleanup
+  }
   stopRecordingTimer();
   if (waveAnimationFrame) {
     cancelAnimationFrame(waveAnimationFrame);
