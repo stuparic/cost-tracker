@@ -41,16 +41,19 @@
       <!-- Action buttons -->
       <div class="action-buttons">
         <Button
-          :label="micButtonLabel"
+          v-if="!isRecording"
+          label="Pokreni snimanje"
           icon="pi pi-microphone"
-          :class="['mic-button', { 'recording-active': isRecording }]"
+          class="mic-button"
           :disabled="isProcessing || isSending"
-          @mousedown="handleMicPress"
-          @mouseup="handleMicRelease"
-          @mouseleave="handleMicCancel"
-          @touchstart.prevent="handleMicPress"
-          @touchend.prevent="handleMicRelease"
-          @touchcancel.prevent="handleMicCancel"
+          @click="handleStartRecording"
+        />
+        <Button
+          v-else
+          label="Zaustavi snimanje"
+          icon="pi pi-stop"
+          class="mic-button recording-active"
+          @click="handleStopRecording"
         />
         <Button
           label="Pošalji"
@@ -135,7 +138,7 @@ const dialogHeader = computed(() => {
 const textareaPlaceholder = computed(() => {
   if (isRecording.value) return '';
   if (isProcessing.value) return '';
-  return 'Opišite trošak ili držite dugme za glasovni unos...';
+  return 'Opišite trošak ili koristite glasovni unos...';
 });
 
 const textareaWrapperClass = computed(() => ({
@@ -144,17 +147,12 @@ const textareaWrapperClass = computed(() => ({
   'ready-state': inputText.value.trim() && !isRecording.value && !isProcessing.value
 }));
 
-const micButtonLabel = computed(() => {
-  if (isRecording.value) return 'Snimam...';
-  return 'Drži glas';
-});
-
 const canSend = computed(() => {
-  return inputText.value.trim() && !isProcessing.value && !isSending.value;
+  return inputText.value.trim() && !isProcessing.value && !isSending.value && !isRecording.value;
 });
 
 const hintText = computed(() => {
-  if (isRecording.value) return 'Pustite za prepoznavanje govora';
+  if (isRecording.value) return 'Kliknite "Zaustavi snimanje" kada završite';
   return '';
 });
 
@@ -204,14 +202,14 @@ function stopRecordingTimer() {
 }
 
 // Handlers
-async function handleMicPress() {
+function handleStartRecording() {
   errorMessage.value = '';
   startRecording();
   startRecordingTimer();
   animateWaveform();
 }
 
-async function handleMicRelease() {
+async function handleStopRecording() {
   if (!isRecording.value) return;
 
   stopRecordingTimer();
@@ -243,17 +241,6 @@ async function handleMicRelease() {
     }, 3000);
   } finally {
     isProcessing.value = false;
-  }
-}
-
-function handleMicCancel() {
-  if (isRecording.value) {
-    stopRecordingTimer();
-    if (waveAnimationFrame) {
-      cancelAnimationFrame(waveAnimationFrame);
-      waveAnimationFrame = null;
-    }
-    cancelRecording();
   }
 }
 
