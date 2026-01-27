@@ -547,4 +547,48 @@ onUnmounted(() => {
     transform: translateY(0);
   }
 }
+
+/* Mobile Landscape: Optimize dialog for horizontal orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+  .dialog-content {
+    gap: 0.625rem;
+  }
+
+  .textarea-wrapper {
+    min-height: 80px;
+  }
+
+  .input-textarea {
+    min-height: 80px;
+    padding: 0.5rem;
+    font-size: 0.9375rem;
+  }
+
+  .action-buttons .p-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .hint-text {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem;
+  }
+
+  .error-message {
+    padding: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .waveform-container {
+    gap: 0.5rem;
+  }
+
+  .recording-indicator {
+    font-size: 1.25rem;
+  }
+
+  .recording-timer {
+    font-size: 0.8125rem;
+  }
+}
 </style>

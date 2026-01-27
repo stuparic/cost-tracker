@@ -516,6 +516,66 @@ body {
   }
 }
 
+/* Mobile Landscape: Optimize for horizontal orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+  .app-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .app-title {
+    margin-bottom: 0;
+  }
+
+  .app-title h1 {
+    font-size: 1.125rem;
+  }
+
+  .app-title i {
+    font-size: 1.25rem;
+  }
+
+  .app-subtitle {
+    display: none; /* Hide subtitle to save space */
+  }
+
+  .user-badge {
+    margin-top: 0;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .main-tab {
+    padding: 0.625rem 0.25rem;
+    gap: 0.25rem;
+    font-size: 0.8125rem;
+  }
+
+  .main-tab i {
+    font-size: 1.125rem;
+  }
+
+  .main-tab span {
+    font-size: 0.75rem;
+  }
+
+  .tab-link {
+    padding: 0.625rem;
+    font-size: 0.875rem;
+  }
+
+  .tab-link i {
+    font-size: 1rem;
+  }
+
+  .voice-tab {
+    padding: 0.375rem 0.75rem;
+  }
+
+  .voice-tab i {
+    font-size: 1.5rem;
+  }
+}
+
 /* Desktop: Centered card layout */
 @media (min-width: 769px) {
   .app-main {

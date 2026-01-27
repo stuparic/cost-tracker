@@ -913,5 +913,133 @@ onMounted(() => {
   .amount-cell {
     white-space: nowrap;
   }
+
+  /* Mobile Landscape: Optimize table for horizontal space */
+  @media (orientation: landscape) {
+    .list-title {
+      font-size: 1rem;
+      padding: 0 0.375rem;
+    }
+
+    .monthly-summaries {
+      padding: 0.375rem 0.5rem;
+      gap: 0.5rem;
+    }
+
+    .summary-card {
+      padding: 0.5rem;
+      min-width: 90px;
+    }
+
+    .summary-month {
+      font-size: 0.6875rem;
+      margin-bottom: 0.125rem;
+    }
+
+    .summary-amount {
+      font-size: 0.875rem;
+    }
+
+    .summary-currency {
+      font-size: 0.625rem;
+    }
+
+    .summary-amount-secondary {
+      font-size: 0.5625rem;
+    }
+
+    .quick-filters {
+      padding: 0.375rem;
+      gap: 0.375rem;
+    }
+
+    .month-navigation {
+      gap: 0.125rem;
+    }
+
+    .month-nav-btn {
+      padding: 0.125rem;
+      width: 2rem;
+      height: 2rem;
+    }
+
+    .current-month {
+      font-size: 0.6875rem;
+      min-width: 70px;
+    }
+
+    .person-pill {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.6875rem;
+    }
+
+    .expenses-table {
+      font-size: 0.75rem;
+    }
+
+    .expenses-table :deep(.p-datatable-header),
+    .expenses-table :deep(.p-datatable-thead > tr > th) {
+      padding: 0.375rem 0.5rem;
+      font-size: 0.6875rem;
+    }
+
+    .expenses-table :deep(.p-datatable-tbody > tr > td) {
+      padding: 0.375rem 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    .expenses-table :deep(.p-button) {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+
+    .expenses-table :deep(.p-button .p-icon) {
+      font-size: 0.75rem;
+    }
+
+    .amount-primary {
+      font-size: 0.75rem;
+    }
+
+    .amount-secondary {
+      font-size: 0.625rem;
+    }
+
+    .category-badge {
+      padding: 0.125rem 0.375rem;
+      font-size: 0.625rem;
+    }
+
+    .person-badge {
+      padding: 0.125rem 0.375rem;
+      font-size: 0.625rem;
+    }
+
+    .expenses-table :deep(.p-tag) {
+      padding: 0.125rem 0.375rem;
+      font-size: 0.625rem;
+    }
+
+    .expenses-table :deep(.p-tag .p-tag-icon) {
+      font-size: 0.625rem;
+      margin-right: 0.125rem;
+    }
+
+    .expenses-table :deep(.p-paginator) {
+      padding: 0.375rem;
+      font-size: 0.6875rem;
+    }
+
+    .expenses-table :deep(.p-paginator .p-paginator-pages .p-paginator-page) {
+      min-width: 1.75rem;
+      height: 1.75rem;
+      font-size: 0.6875rem;
+    }
+
+    .expenses-table :deep(.p-paginator .p-paginator-icon) {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+  }
 }
 </style>

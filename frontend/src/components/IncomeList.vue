@@ -734,5 +734,117 @@ onMounted(() => {
   .filters-sidebar {
     width: 90vw;
   }
+
+  /* Mobile Landscape: Optimize table for horizontal space */
+  @media (orientation: landscape) {
+    .page-title {
+      font-size: 1rem;
+      padding: 0 0.375rem;
+    }
+
+    .summaries {
+      padding: 0.375rem 0.5rem;
+      gap: 0.5rem;
+    }
+
+    .summary-card {
+      padding: 0.5rem;
+      min-width: 90px;
+    }
+
+    .month-name {
+      font-size: 0.6875rem;
+      margin-bottom: 0.125rem;
+    }
+
+    .amount-primary {
+      font-size: 0.875rem;
+    }
+
+    .currency-label {
+      font-size: 0.625rem;
+    }
+
+    .amount-secondary {
+      font-size: 0.5625rem;
+    }
+
+    .filters-row {
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .month-nav {
+      gap: 0.125rem;
+    }
+
+    .month-nav-btn {
+      padding: 0.125rem;
+      width: 2rem;
+      height: 2rem;
+    }
+
+    .current-month {
+      font-size: 0.6875rem;
+    }
+
+    .person-pill {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.6875rem;
+    }
+
+    .incomes-table {
+      font-size: 0.75rem;
+    }
+
+    .incomes-table :deep(.p-datatable-header),
+    .incomes-table :deep(.p-datatable-thead > tr > th) {
+      padding: 0.375rem 0.5rem;
+      font-size: 0.6875rem;
+    }
+
+    .incomes-table :deep(.p-datatable-tbody > tr > td) {
+      padding: 0.375rem 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    .incomes-table :deep(.p-button) {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+
+    .incomes-table :deep(.p-button .p-icon) {
+      font-size: 0.75rem;
+    }
+
+    .amount-cell .amount-primary {
+      font-size: 0.75rem;
+    }
+
+    .amount-cell .amount-secondary {
+      font-size: 0.625rem;
+    }
+
+    .person-badge {
+      padding: 0.125rem 0.375rem;
+      font-size: 0.625rem;
+    }
+
+    .incomes-table :deep(.p-paginator) {
+      padding: 0.375rem;
+      font-size: 0.6875rem;
+    }
+
+    .incomes-table :deep(.p-paginator .p-paginator-pages .p-paginator-page) {
+      min-width: 1.75rem;
+      height: 1.75rem;
+      font-size: 0.6875rem;
+    }
+
+    .incomes-table :deep(.p-paginator .p-paginator-icon) {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+  }
 }
 </style>
