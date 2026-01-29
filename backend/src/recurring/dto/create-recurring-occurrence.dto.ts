@@ -25,7 +25,7 @@ export class CreateRecurringOccurrenceDto {
   source?: string;
 
   @IsOptional()
-  @IsEnum(['Salary', 'Freelance', 'Investment', 'Gift', 'Other'])
+  @IsEnum(['Salary', 'Freelance', 'Investment', 'Gift', 'Other', 'Rent'])
   incomeType?: string;
 
   // Expense-specific

@@ -14,6 +14,12 @@ export class RecurringOccurrencesRepository {
     return this.firebaseService.getFirestore();
   }
 
+  private getDefaultRecurringUntil() {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() + 3);
+    return date.toISOString();
+  }
+
   async create(dto: CreateRecurringOccurrenceDto): Promise<RecurringOccurrence> {
     const docRef = this.firestore.collection(this.collectionName).doc();
 
@@ -34,8 +40,8 @@ export class RecurringOccurrencesRepository {
 
       // Recurrence
       frequency: dto.frequency as any,
-      recurringAt: dto.recurringAt,
-      recurringUntil: dto.recurringUntil,
+      recurringAt: dto.recurringAt ?? new Date().toISOString(),
+      recurringUntil: dto.recurringUntil ?? this.getDefaultRecurringUntil(),
       nextOccurrenceDate: dto.startDate,
 
       isActive: true,

@@ -120,6 +120,18 @@
         <DatePicker id="startDate" v-model="form.startDate" date-format="dd.mm.yy" placeholder="Odaberi datum..." class="w-full" />
       </div>
 
+      <!-- Recurring At (optional) -->
+      <div v-if="form.isRecurring" class="form-field">
+        <label for="recurringAt" class="field-label">Datum ponavljanja (opciono)</label>
+        <DatePicker
+          id="recurringAt"
+          v-model="form.recurringAt"
+          date-format="dd.mm.yy"
+          placeholder="Ako nije odabrano, koristi se današnji datum..."
+          class="w-full"
+        />
+      </div>
+
       <!-- Recurring Until (optional) -->
       <div v-if="form.isRecurring" class="form-field">
         <label for="recurringUntil" class="field-label">Ponavljaj do (opciono)</label>
@@ -188,6 +200,7 @@ const form = reactive({
   isRecurring: false,
   recurringFrequency: 'monthly' as RecurringFrequency,
   startDate: new Date(),
+  recurringAt: null as Date | null,
   recurringUntil: null as Date | null
 });
 
@@ -241,6 +254,7 @@ async function handleSubmit() {
         description: form.description?.trim() || '',
         frequency: form.recurringFrequency,
         startDate: form.startDate.toISOString(),
+        recurringAt: form.recurringAt?.toISOString(),
         recurringUntil: form.recurringUntil?.toISOString(),
         createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan'
       };
@@ -302,6 +316,7 @@ function resetForm() {
   form.isRecurring = false;
   form.recurringFrequency = 'monthly';
   form.startDate = new Date();
+  form.recurringAt = null;
   form.recurringUntil = null;
   dateReceived.value = new Date();
 }
