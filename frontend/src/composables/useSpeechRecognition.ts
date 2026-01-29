@@ -70,12 +70,8 @@ export class SpeechRecognition {
     }
   }
 
-  public async start(): Promise<boolean> {
+  public start(): boolean {
     try {
-      // First, explicitly request microphone permission
-      // This ensures the permission prompt appears on all devices/browsers
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-
       this.transcript = '';
       this.error.value = null;
       this.recognition.start();
@@ -83,16 +79,7 @@ export class SpeechRecognition {
       return true;
     } catch (err: any) {
       console.error('Failed to start recording:', err);
-
-      // Handle permission denied specifically
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        this.error.value = 'Dozvola za mikrofon nije data';
-      } else if (err.name === 'NotFoundError') {
-        this.error.value = 'Mikrofon nije pronađen';
-      } else {
-        this.error.value = 'Nije moguće pokrenuti snimanje';
-      }
-
+      this.error.value = 'Nije moguće pokrenuti snimanje';
       this.isRecording.value = false;
       return false;
     }

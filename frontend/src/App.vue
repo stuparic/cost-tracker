@@ -31,11 +31,12 @@
               <i class="pi pi-wallet"></i>
               <h1>Troškić</h1>
             </div>
-            <p class="app-subtitle">Pratite troškove domaćinstva</p>
           </div>
-          <div v-if="userStore.selectedUser" class="user-badge" @click="switchUser">
-            <i class="pi pi-user"></i>
-            <span>{{ userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan' }}</span>
+          <div class="header-right">
+            <div v-if="userStore.selectedUser" class="user-badge" @click="switchUser">
+              <i class="pi pi-user"></i>
+              <span class="user-name">{{ userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan' }}</span>
+            </div>
           </div>
         </div>
       </header>
@@ -266,18 +267,24 @@ body {
 }
 
 .header-content {
-  max-width: 600px;
+  max-width: 100%;
   margin: 0 auto;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 /* Voice Tab in Main Navigation */
@@ -343,55 +350,47 @@ body {
 .app-title {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   justify-content: center;
-  margin-bottom: 0.25rem;
 }
 
 .app-title i {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
 }
 
 .app-title h1 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.025em;
-}
-
-.app-subtitle {
-  text-align: center;
-  font-size: 0.875rem;
-  opacity: 0.9;
-  font-weight: 400;
-  margin: 0;
+  white-space: nowrap;
 }
 
 .user-badge {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-  padding: 0.5rem 1rem;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 2rem;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
+  white-space: nowrap;
 }
 
 .user-badge:hover {
   background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
 }
 
 .user-badge i {
-  font-size: 1rem;
+  font-size: 0.875rem;
+}
+
+.user-name {
+  display: inline;
 }
 
 /* Main Navigation (Troškovi/Prihodi) */
@@ -562,29 +561,46 @@ body {
 /* Mobile Landscape: Optimize for horizontal orientation */
 @media (max-width: 768px) and (orientation: landscape) {
   .app-header {
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .header-content {
+    gap: 0.375rem;
+  }
+
+  .hamburger-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hamburger-btn i {
+    font-size: 1.125rem;
   }
 
   .app-title {
     margin-bottom: 0;
+    gap: 0.375rem;
   }
 
   .app-title h1 {
-    font-size: 1.125rem;
+    font-size: 1rem;
   }
 
   .app-title i {
-    font-size: 1.25rem;
-  }
-
-  .app-subtitle {
-    display: none; /* Hide subtitle to save space */
+    font-size: 1.125rem;
   }
 
   .user-badge {
-    margin-top: 0;
-    padding: 0.375rem 0.75rem;
-    font-size: 0.8125rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+
+  .user-badge i {
+    font-size: 0.75rem;
+  }
+
+  .user-name {
+    display: none;
   }
 
   .main-tab {
@@ -621,6 +637,28 @@ body {
 
 /* Desktop: Centered card layout */
 @media (min-width: 769px) {
+  .header-content {
+    max-width: 1200px;
+    padding: 0 1rem;
+  }
+
+  .app-title h1 {
+    font-size: 1.5rem;
+  }
+
+  .app-title i {
+    font-size: 1.75rem;
+  }
+
+  .user-badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .user-badge i {
+    font-size: 1rem;
+  }
+
   .app-main {
     padding: 2rem 1rem;
     justify-content: flex-start;

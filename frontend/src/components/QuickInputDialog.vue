@@ -197,9 +197,9 @@ function stopRecordingTimer() {
 }
 
 // Handlers
-async function handleStartRecording() {
+function handleStartRecording() {
   errorMessage.value = '';
-  const started = await speechRecognition.start();
+  const started = speechRecognition.start();
   if (started) {
     startRecordingTimer();
     animateWaveform();

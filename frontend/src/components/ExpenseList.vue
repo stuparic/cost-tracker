@@ -59,7 +59,7 @@
 
       <div class="advanced-filters-content">
         <div class="filter-field">
-          <label class="filter-label">Prodavnica</label>
+          <label class="filter-label">Prodavnica/Usluga</label>
           <AutoComplete
             v-model="filters.shopName"
             :suggestions="shopSuggestions"
