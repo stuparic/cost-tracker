@@ -205,6 +205,8 @@ export const SERBIAN_SHOPS = [
   'Kalenić',
   'Bajloni pijaca',
   'Bajloni',
+  'Kivi',
+  "Kiwi",
 
   // Utilities & Services
   'Pošta',
