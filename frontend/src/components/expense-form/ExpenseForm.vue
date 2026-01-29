@@ -55,7 +55,7 @@
           id="shopName"
           v-model="form.shopName"
           :suggestions="shopSuggestions"
-          placeholder="Npr. Maxi, Lidl, IKEA..."
+          placeholder="Npr. Maxi, Lidl, IKEA, Netflix..."
           class="shop-input"
           :class="{ 'p-invalid': errors.shopName }"
           complete-on-focus

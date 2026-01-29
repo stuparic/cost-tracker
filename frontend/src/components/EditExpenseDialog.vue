@@ -33,7 +33,7 @@
 
       <!-- Shop Name -->
       <div class="form-field">
-        <label for="edit-shop" class="field-label">Prodavnica *</label>
+        <label for="edit-shop" class="field-label">Prodavnica/Usluga *</label>
         <AutoComplete
           id="edit-shop"
           v-model="form.shopName"
