@@ -10,12 +10,20 @@ export class FirebaseService implements OnModuleInit {
   constructor(private configService: ConfigService) {}
 
   onModuleInit() {
-    const credentialsPath = this.configService.get<string>('firebase.credentialsPath');
     const projectId = this.configService.get<string>('firebase.projectId');
+    const isProduction = this.configService.get<string>('firebase.isProduction');
 
     if (!admin.apps.length) {
+      // Production (Cloud Run): Use Application Default Credentials (FREE)
+      // Local Dev: Use service account JSON file
+      const credential = isProduction
+        ? admin.credential.applicationDefault()
+        : admin.credential.cert(
+            this.configService.get<string>('firebase.credentialsPath')
+          );
+
       admin.initializeApp({
-        credential: admin.credential.cert(credentialsPath),
+        credential: credential,
         projectId: projectId
       });
     }
