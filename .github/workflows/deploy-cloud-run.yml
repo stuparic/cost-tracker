@@ -31,19 +31,6 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Create Artifact Registry repository
-        run: |
-          if ! gcloud artifacts repositories describe $REPOSITORY --location=$REGION --project=$PROJECT_ID &>/dev/null; then
-            echo "Creating Artifact Registry repository..."
-            gcloud artifacts repositories create $REPOSITORY \
-              --repository-format=docker \
-              --location=$REGION \
-              --description="Docker repository for Cost Tracker" \
-              --project=$PROJECT_ID
-          else
-            echo "Repository already exists"
-          fi
-
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker $REGION-docker.pkg.dev
 
@@ -57,34 +44,6 @@ jobs:
           docker push $IMAGE:${{ github.sha }}
           docker push $IMAGE:latest
 
-      - name: Check if Firebase secret exists
-        id: check-secret
-        run: |
-          if gcloud secrets describe firebase-service-account &>/dev/null; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "Secret already exists, skipping creation"
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "Secret does not exist, will create"
-          fi
-
-      - name: Create Firebase service account secret
-        if: steps.check-secret.outputs.exists == 'false'
-        run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' | gcloud secrets create firebase-service-account \
-            --data-file=- \
-            --replication-policy="automatic"
-
-      - name: Grant secret access to Cloud Run service account
-        run: |
-          PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
-          gcloud secrets add-iam-policy-binding firebase-service-account \
-            --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
-            --role=roles/secretmanager.secretAccessor
-          gcloud secrets add-iam-policy-binding gemini-api-key \
-            --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
-            --role=roles/secretmanager.secretAccessor
-
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy $SERVICE_NAME \
@@ -92,11 +51,7 @@ jobs:
             --platform managed \
             --region $REGION \
             --allow-unauthenticated \
-            --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
-            --set-env-vars FIXED_EUR_TO_RSD_RATE=117.0 \
-            --set-env-vars NODE_ENV=production \
-            --set-env-vars GEMINI_MODEL_NAME=gemini-2.5-flash-lite \
-            --update-secrets=/secrets/serviceAccountKey.json=firebase-service-account:latest \
+            --set-env-vars "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }},FIXED_EUR_TO_RSD_RATE=117.0,NODE_ENV=production,GEMINI_MODEL_NAME=gemini-2.5-flash-lite" \
             --update-secrets=GEMINI_API_KEY=gemini-api-key:latest \
             --min-instances 0 \
             --max-instances 1 \
