@@ -19,6 +19,13 @@ export const SERBIAN_SHOPS = [
   'Gomex',
   'DP Market',
   'Nectar',
+  'Mikro Market',
+  'Mikro',
+  'Mikromarket',
+  'Micro Market',
+  'Micromarket',
+  'Mini Market',
+  'Minimarket',
 
   // Tech & Electronics
   'Gigatron',
