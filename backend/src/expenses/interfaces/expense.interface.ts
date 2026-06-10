@@ -15,6 +15,8 @@ export interface Expense {
   createdAt: string;
   updatedAt: string;
   recurringOccurrenceId?: string;
-  creationMethod?: 'manual' | 'voice' | 'auto';
+  creationMethod?: 'manual' | 'voice' | 'auto' | 'statement';
   voiceTranscript?: string;
+  /** Bank transaction reference (from imported statements) — used for duplicate detection */
+  bankRef?: string;
 }

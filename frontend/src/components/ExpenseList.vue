@@ -4,7 +4,12 @@
 
     <!-- Monthly Summaries -->
     <div class="monthly-summaries">
-      <div v-for="summary in monthlySummaries" :key="summary.month" class="summary-card" :class="{ loading: loadingSummaries }">
+      <div
+        v-for="summary in monthlySummaries"
+        :key="summary.month"
+        class="summary-card"
+        :class="{ loading: loadingSummaries, active: summary.month === viewedMonthKey }"
+      >
         <div class="summary-month">{{ summary.monthName }}</div>
         <div class="summary-amount-row">
           <span class="summary-amount">{{ formatAmount(summary.totalRsd, false) }}</span>
@@ -93,6 +98,69 @@
       </div>
     </Sidebar>
 
+    <!-- Mobile card list (shown instead of the table on phones) -->
+    <div class="mobile-cards">
+      <template v-if="expensesStore.loading">
+        <div v-for="n in 4" :key="n" class="mobile-card skeleton-card">
+          <div class="skeleton-line w-40"></div>
+          <div class="skeleton-line w-70"></div>
+          <div class="skeleton-line w-55"></div>
+        </div>
+      </template>
+      <div v-else-if="expensesStore.expenses.length === 0" class="empty-state">
+        <i class="pi pi-inbox"></i>
+        <p>Nema troškova za {{ currentMonthLabel }}</p>
+        <router-link to="/add">
+          <Button label="Dodaj trošak" icon="pi pi-plus" size="small" />
+        </router-link>
+      </div>
+      <template v-else>
+        <div
+          v-for="expense in expensesStore.expenses"
+          :key="expense.id"
+          class="mobile-card"
+          :class="`card-${(expense.createdBy || 'unknown').toLowerCase()}`"
+        >
+          <div class="mobile-card-top">
+            <span class="mobile-card-shop">{{ expense.shopName }}</span>
+            <span class="mobile-card-amount">{{ formatAmount(expense.rsdAmount, false) }} RSD</span>
+          </div>
+          <div class="mobile-card-mid">
+            <span class="mobile-card-date">{{ formatDate(expense.purchaseDate) }}</span>
+            <span class="category-badge">{{ expense.category }}</span>
+            <span class="mobile-card-eur">{{ formatAmount(expense.eurAmount, true) }} EUR</span>
+          </div>
+          <div class="mobile-card-bottom">
+            <span class="mobile-card-desc">{{ expense.productDescription }}</span>
+            <div class="mobile-card-actions">
+              <span class="person-badge" :class="(expense.createdBy || 'unknown').toLowerCase()">{{ expense.createdBy }}</span>
+              <Button icon="pi pi-pencil" severity="secondary" text rounded size="small" aria-label="Izmeni" @click="openEditDialog(expense)" />
+              <Button icon="pi pi-trash" severity="danger" text rounded size="small" aria-label="Obriši" @click="confirmDelete(expense)" />
+            </div>
+          </div>
+        </div>
+        <div v-if="expensesStore.pagination.totalPages > 1" class="mobile-pagination">
+          <Button
+            icon="pi pi-chevron-left"
+            text
+            rounded
+            :disabled="expensesStore.pagination.page <= 1"
+            aria-label="Prethodna strana"
+            @click="fetchExpenses(expensesStore.pagination.page - 1)"
+          />
+          <span>{{ expensesStore.pagination.page }} / {{ expensesStore.pagination.totalPages }}</span>
+          <Button
+            icon="pi pi-chevron-right"
+            text
+            rounded
+            :disabled="expensesStore.pagination.page >= expensesStore.pagination.totalPages"
+            aria-label="Sledeća strana"
+            @click="fetchExpenses(expensesStore.pagination.page + 1)"
+          />
+        </div>
+      </template>
+    </div>
+
     <!-- Data Table -->
     <div class="table-wrapper">
       <DataTable
@@ -112,7 +180,10 @@
         <template #empty>
           <div class="empty-state">
             <i class="pi pi-inbox"></i>
-            <p>Nema troškova za prikaz</p>
+            <p>Nema troškova za {{ currentMonthLabel }}</p>
+            <router-link to="/add">
+              <Button label="Dodaj trošak" icon="pi pi-plus" size="small" />
+            </router-link>
           </div>
         </template>
 
@@ -217,6 +288,9 @@ const currentMonthLabel = computed(() => {
   return getMonthNameLatin(currentMonth.value);
 });
 
+// Key of the currently viewed month, matches MonthlySummary.month
+const viewedMonthKey = computed(() => `${currentMonth.value.getFullYear()}-${currentMonth.value.getMonth() + 1}`);
+
 // Filters
 const filters = reactive({
   createdBy: '',
@@ -274,6 +348,11 @@ watch(
   },
   { deep: true, immediate: false }
 );
+
+// Summary cards follow the month being viewed
+watch(currentMonth, () => {
+  fetchMonthlySummaries();
+});
 
 async function fetchExpenses(page = 1) {
   const params: QueryExpensesDto = {
@@ -433,11 +512,11 @@ async function fetchMonthlySummaries() {
   loadingSummaries.value = true;
   try {
     const summaries: MonthlySummary[] = [];
-    const today = new Date();
+    const base = currentMonth.value;
 
-    // Get last 3 months
+    // Viewed month plus the two months before it
     for (let i = 0; i < 3; i++) {
-      const monthDate = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthDate = new Date(base.getFullYear(), base.getMonth() - i, 1);
       const startDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
       const endDate = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59);
 
@@ -1079,6 +1158,150 @@ onMounted(() => {
   .expenses-table :deep(.p-datatable-wrapper) {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
+  }
+}
+/* === Active (viewed) month summary card === */
+.summary-card {
+  border-radius: var(--radius-md, 12px);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.summary-card.active {
+  outline: 3px solid rgba(255, 255, 255, 0.65);
+  outline-offset: -3px;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* === Mobile card list === */
+.mobile-cards {
+  display: none;
+}
+
+.mobile-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--primary-color);
+  border-radius: var(--radius-md, 12px);
+  padding: 0.875rem 1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: var(--shadow-card);
+}
+
+.mobile-card.card-svetla {
+  border-left-color: #a855f7;
+}
+
+.mobile-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.mobile-card-shop {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-card-amount {
+  font-weight: 700;
+  font-size: 1rem;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.mobile-card-mid {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.mobile-card-eur {
+  margin-left: auto;
+  font-size: 0.75rem;
+}
+
+.mobile-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+}
+
+.mobile-card-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.mobile-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.mobile-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.5rem 0 0;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* === Loading skeletons === */
+.skeleton-card .skeleton-line {
+  height: 0.875rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--border-color) 25%, var(--surface-hover) 50%, var(--border-color) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite;
+  margin-bottom: 0.625rem;
+}
+
+.skeleton-line.w-40 {
+  width: 40%;
+}
+
+.skeleton-line.w-55 {
+  width: 55%;
+}
+
+.skeleton-line.w-70 {
+  width: 70%;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Phones: cards instead of a horizontally scrolling table */
+@media (max-width: 640px) {
+  .mobile-cards {
+    display: block;
+  }
+
+  .table-wrapper {
+    display: none;
   }
 }
 </style>

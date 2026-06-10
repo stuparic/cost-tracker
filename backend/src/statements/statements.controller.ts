@@ -1,0 +1,52 @@
+import { BadRequestException, Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { StatementsService } from './statements.service';
+import { ImportStatementDto } from './dto/import-statement.dto';
+
+const MAX_STATEMENT_SIZE_BYTES = 15 * 1024 * 1024;
+
+@ApiTags('statements')
+@Controller('statements')
+export class StatementsController {
+  constructor(private readonly statementsService: StatementsService) {}
+
+  @Post('parse')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_STATEMENT_SIZE_BYTES } }))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Parse an uploaded bank statement PDF',
+    description:
+      'Extracts transactions from the PDF and flags duplicates against already-recorded expenses (by bank reference, then by amount + date proximity).'
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } }
+    }
+  })
+  async parse(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded (expected multipart field "file")');
+    }
+    if (file.mimetype !== 'application/pdf' && !file.originalname?.toLowerCase().endsWith('.pdf')) {
+      throw new BadRequestException('Only PDF bank statements are supported');
+    }
+
+    try {
+      return await this.statementsService.parseAndMatch(file.buffer);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to parse the statement';
+      throw new BadRequestException(message);
+    }
+  }
+
+  @Post('import')
+  @ApiOperation({
+    summary: 'Import reviewed statement transactions as expenses',
+    description: 'Creates an expense per transaction. Transactions whose bank reference was already imported are skipped.'
+  })
+  async import(@Body() dto: ImportStatementDto) {
+    return this.statementsService.import(dto);
+  }
+}

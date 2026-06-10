@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsEnum, IsString, MinLength, IsArray, IsDateString, Min, IsOptional } from 'class-validator';
+import { Allow, IsNumber, IsEnum, IsString, MinLength, IsArray, IsDateString, Min, IsOptional } from 'class-validator';
 
 // Base class with common fields
 export class BaseCreateExpenseDto {
@@ -80,6 +80,9 @@ export class BaseCreateExpenseDto {
 
 // Manual creation DTO - user enters data manually
 export class CreateExpenseManualDto extends BaseCreateExpenseDto {
+  // @Allow keeps the whitelist ValidationPipe (forbidNonWhitelisted) from
+  // rejecting this self-initialized field as a non-whitelisted property
+  @Allow()
   creationMethod = 'manual' as const;
 }
 
@@ -92,6 +95,9 @@ export class CreateExpenseAutoDto extends BaseCreateExpenseDto {
   @MinLength(1)
   recurringOccurrenceId: string;
 
+  // @Allow keeps the whitelist ValidationPipe (forbidNonWhitelisted) from
+  // rejecting this self-initialized field as a non-whitelisted property
+  @Allow()
   creationMethod = 'auto' as const;
 }
 
@@ -105,8 +111,27 @@ export class CreateExpenseVoiceDto extends BaseCreateExpenseDto {
   @MinLength(1)
   voiceTranscript: string;
 
+  // @Allow keeps the whitelist ValidationPipe (forbidNonWhitelisted) from
+  // rejecting this self-initialized field as a non-whitelisted property
+  @Allow()
   creationMethod = 'voice' as const;
 }
 
+// Statement creation DTO - imported from a bank statement
+export class CreateExpenseStatementDto extends BaseCreateExpenseDto {
+  @ApiProperty({
+    example: '94735212551001',
+    description: 'Bank transaction reference from the statement (used for duplicate detection)'
+  })
+  @IsString()
+  @MinLength(1)
+  bankRef: string;
+
+  // @Allow keeps the whitelist ValidationPipe (forbidNonWhitelisted) from
+  // rejecting this self-initialized field as a non-whitelisted property
+  @Allow()
+  creationMethod = 'statement' as const;
+}
+
 // Union type for all creation methods
-export type CreateExpenseDto = CreateExpenseManualDto | CreateExpenseAutoDto | CreateExpenseVoiceDto;
+export type CreateExpenseDto = CreateExpenseManualDto | CreateExpenseAutoDto | CreateExpenseVoiceDto | CreateExpenseStatementDto;

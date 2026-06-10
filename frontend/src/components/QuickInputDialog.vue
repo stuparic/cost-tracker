@@ -231,7 +231,7 @@ async function handleStopRecording() {
       await nextTick();
       textareaRef.value?.focus();
     }
-  } catch (err) {
+  } catch {
     errorMessage.value = 'Greška pri prepoznavanju govora';
     setTimeout(() => {
       errorMessage.value = '';

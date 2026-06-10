@@ -9,6 +9,7 @@ import { AutocompleteModule } from './autocomplete/autocomplete.module';
 import { HealthModule } from './health/health.module';
 import { RecurringModule } from './recurring/recurring.module';
 import { VoiceModule } from './voice/voice.module';
+import { StatementsModule } from './statements/statements.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import firebaseConfig from './config/firebase.config';
 
@@ -25,7 +26,8 @@ import firebaseConfig from './config/firebase.config';
     AutocompleteModule,
     HealthModule,
     RecurringModule,
-    VoiceModule
+    VoiceModule,
+    StatementsModule
   ],
   controllers: [AppController],
   providers: [AppService]

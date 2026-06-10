@@ -73,6 +73,11 @@ export class ExpensesRepository {
     return { data, total };
   }
 
+  async existsByBankRef(bankRef: string): Promise<boolean> {
+    const snapshot = await this.firestore.collection(this.collectionName).where('bankRef', '==', bankRef).limit(1).get();
+    return !snapshot.empty;
+  }
+
   async findById(id: string): Promise<Expense> {
     const doc = await this.firestore.collection(this.collectionName).doc(id).get();
 
@@ -137,7 +142,8 @@ export class ExpensesRepository {
       updatedAt: data.updatedAt?.toDate().toISOString(),
       creationMethod: data.creationMethod,
       voiceTranscript: data.voiceTranscript,
-      recurringOccurrenceId: data.recurringOccurrenceId
+      recurringOccurrenceId: data.recurringOccurrenceId,
+      bankRef: data.bankRef
     };
   }
 }

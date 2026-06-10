@@ -2,7 +2,12 @@
   <div class="income-list">
     <!-- Monthly Summaries -->
     <div class="monthly-summaries">
-      <div v-for="month in monthlySummaries" :key="month.month" class="summary-card income-card">
+      <div
+        v-for="month in monthlySummaries"
+        :key="month.month"
+        class="summary-card income-card"
+        :class="{ active: month.month === viewedMonthKey }"
+      >
         <div class="month-name">{{ month.monthName }}</div>
         <div class="amount-row">
           <span class="amount-primary">{{ formatRSD(month.totalRSD) }}</span>
@@ -37,6 +42,69 @@
       </div>
     </div>
 
+    <!-- Mobile card list (shown instead of the table on phones) -->
+    <div class="mobile-cards">
+      <template v-if="incomesStore.loading">
+        <div v-for="n in 4" :key="n" class="mobile-card skeleton-card">
+          <div class="skeleton-line w-40"></div>
+          <div class="skeleton-line w-70"></div>
+          <div class="skeleton-line w-55"></div>
+        </div>
+      </template>
+      <div v-else-if="incomesStore.incomes.length === 0" class="empty-state">
+        <i class="pi pi-inbox"></i>
+        <p>Nema prihoda za {{ currentMonthDisplay }}</p>
+        <router-link to="/income/add">
+          <Button label="Dodaj prihod" icon="pi pi-plus" size="small" class="income-button" />
+        </router-link>
+      </div>
+      <template v-else>
+        <div
+          v-for="income in incomesStore.incomes"
+          :key="income.id"
+          class="mobile-card"
+          :class="`card-${(income.createdBy || 'unknown').toLowerCase()}`"
+        >
+          <div class="mobile-card-top">
+            <span class="mobile-card-source">{{ income.source }}</span>
+            <span class="mobile-card-amount">{{ formatRSD(income.rsdAmount) }} RSD</span>
+          </div>
+          <div class="mobile-card-mid">
+            <span>{{ formatDate(income.dateReceived) }}</span>
+            <span class="type-chip">{{ incomeTypeLabels[income.incomeType as IncomeType] || income.incomeType }}</span>
+            <span class="mobile-card-eur">{{ formatEUR(income.eurAmount) }} EUR</span>
+          </div>
+          <div class="mobile-card-bottom">
+            <span class="mobile-card-desc">{{ income.description || '-' }}</span>
+            <div class="mobile-card-actions">
+              <span class="person-badge" :class="`person-${income.createdBy?.toLowerCase()}`">{{ income.createdBy }}</span>
+              <Button icon="pi pi-pencil" text rounded size="small" aria-label="Izmeni" @click="editIncome(income)" />
+              <Button icon="pi pi-trash" text rounded severity="danger" size="small" aria-label="Obriši" @click="confirmDelete(income)" />
+            </div>
+          </div>
+        </div>
+        <div v-if="incomesStore.pagination.totalPages > 1" class="mobile-pagination">
+          <Button
+            icon="pi pi-chevron-left"
+            text
+            rounded
+            :disabled="incomesStore.pagination.page <= 1"
+            aria-label="Prethodna strana"
+            @click="applyFilters(incomesStore.pagination.page - 1)"
+          />
+          <span>{{ incomesStore.pagination.page }} / {{ incomesStore.pagination.totalPages }}</span>
+          <Button
+            icon="pi pi-chevron-right"
+            text
+            rounded
+            :disabled="incomesStore.pagination.page >= incomesStore.pagination.totalPages"
+            aria-label="Sledeća strana"
+            @click="applyFilters(incomesStore.pagination.page + 1)"
+          />
+        </div>
+      </template>
+    </div>
+
     <!-- Data Table -->
     <DataTable
       :value="incomesStore.incomes"
@@ -46,6 +114,16 @@
       :row-class="getRowClass"
       responsive-layout="scroll"
     >
+      <template #empty>
+        <div class="empty-state">
+          <i class="pi pi-inbox"></i>
+          <p>Nema prihoda za {{ currentMonthDisplay }}</p>
+          <router-link to="/income/add">
+            <Button label="Dodaj prihod" icon="pi pi-plus" size="small" class="income-button" />
+          </router-link>
+        </div>
+      </template>
+
       <Column field="dateReceived" header="Datum" :sortable="true" style="min-width: 120px">
         <template #body="{ data }">
           <div class="date-cell">
@@ -165,7 +243,7 @@ import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-import Paginator from 'primevue/paginator';
+import Paginator, { type PageState } from 'primevue/paginator';
 import Sidebar from 'primevue/sidebar';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
@@ -226,9 +304,9 @@ async function fetchMonthlySummaries() {
   try {
     const summaries: MonthlySummary[] = [];
 
+    // Viewed month plus the two months before it
     for (let i = 0; i < 3; i++) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
+      const date = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth() - i, 1);
 
       const startDate = new Date(date.getFullYear(), date.getMonth(), 1);
       const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
@@ -269,23 +347,32 @@ const currentMonthDisplay = computed(() => {
   return currentMonth.value.toLocaleDateString('sr-Latn', { month: 'long', year: 'numeric' });
 });
 
+// Key of the currently viewed month, matches MonthlySummary.month
+const viewedMonthKey = computed(
+  () => `${currentMonth.value.getFullYear()}-${String(currentMonth.value.getMonth() + 1).padStart(2, '0')}`
+);
+
 // Navigation
 function previousMonth() {
   currentMonth.value = new Date(currentMonth.value.setMonth(currentMonth.value.getMonth() - 1));
   applyFilters();
+  fetchMonthlySummaries();
 }
 
 function nextMonth() {
   currentMonth.value = new Date(currentMonth.value.setMonth(currentMonth.value.getMonth() + 1));
   applyFilters();
+  fetchMonthlySummaries();
 }
 
 // Filters
-function applyFilters() {
+function applyFilters(page = 1) {
   const startDate = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth(), 1);
   const endDate = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth() + 1, 0, 23, 59, 59);
 
   const params: QueryIncomesDto = {
+    page,
+    limit: 20,
     startDate: startDate.toISOString(),
     endDate: endDate.toISOString(),
     sortBy: 'dateReceived',
@@ -330,12 +417,13 @@ function resetFilters() {
   selectedPerson.value = 'all';
   currentMonth.value = new Date();
   applyFilters();
+  fetchMonthlySummaries();
   filtersVisible.value = false;
 }
 
 // Pagination
-function onPageChange() {
-  applyFilters();
+function onPageChange(event: PageState) {
+  applyFilters(event.page + 1);
 }
 
 // CRUD operations
@@ -351,6 +439,8 @@ function confirmDelete(income: Income) {
     icon: 'pi pi-exclamation-triangle',
     acceptLabel: 'Da, obriši',
     rejectLabel: 'Otkaži',
+    acceptProps: { severity: 'danger' },
+    rejectProps: { severity: 'secondary', outlined: true },
     accept: async () => {
       try {
         await incomesStore.deleteIncome(income.id);
@@ -875,6 +965,179 @@ onMounted(() => {
   .incomes-table :deep(.p-datatable-wrapper) {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
+  }
+}
+/* === Active (viewed) month summary card === */
+.summary-card {
+  border-radius: var(--radius-md, 12px);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.summary-card.active {
+  outline: 3px solid rgba(255, 255, 255, 0.65);
+  outline-offset: -3px;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* === Empty state === */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1rem;
+  color: var(--text-secondary);
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  color: var(--surface-border);
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+/* === Mobile card list === */
+.mobile-cards {
+  display: none;
+}
+
+.mobile-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--income-color);
+  border-radius: var(--radius-md, 12px);
+  padding: 0.875rem 1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: var(--shadow-card);
+}
+
+.mobile-card.card-svetla {
+  border-left-color: #a855f7;
+}
+
+.mobile-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.mobile-card-source {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-card-amount {
+  font-weight: 700;
+  font-size: 1rem;
+  white-space: nowrap;
+  color: var(--income-dark);
+}
+
+.mobile-card-mid {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.type-chip {
+  background: var(--income-light);
+  color: var(--income-dark);
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.mobile-card-eur {
+  margin-left: auto;
+  font-size: 0.75rem;
+}
+
+.mobile-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+}
+
+.mobile-card-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.mobile-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.mobile-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.5rem 0 0;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* === Loading skeletons === */
+.skeleton-card .skeleton-line {
+  height: 0.875rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--border-color) 25%, var(--surface-hover) 50%, var(--border-color) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite;
+  margin-bottom: 0.625rem;
+}
+
+.skeleton-line.w-40 {
+  width: 40%;
+}
+
+.skeleton-line.w-55 {
+  width: 55%;
+}
+
+.skeleton-line.w-70 {
+  width: 70%;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Phones: cards instead of a horizontally scrolling table */
+@media (max-width: 640px) {
+  .mobile-cards {
+    display: block;
+  }
+
+  .incomes-table,
+  .income-paginator {
+    display: none;
   }
 }
 </style>
