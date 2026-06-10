@@ -100,20 +100,13 @@
 
     <!-- Mobile card list (shown instead of the table on phones) -->
     <div class="mobile-cards">
-      <template v-if="expensesStore.loading">
-        <div v-for="n in 4" :key="n" class="mobile-card skeleton-card">
-          <div class="skeleton-line w-40"></div>
-          <div class="skeleton-line w-70"></div>
-          <div class="skeleton-line w-55"></div>
-        </div>
-      </template>
-      <div v-else-if="expensesStore.expenses.length === 0" class="empty-state">
-        <i class="pi pi-inbox"></i>
-        <p>Nema troškova za {{ currentMonthLabel }}</p>
-        <router-link to="/add">
-          <Button label="Dodaj trošak" icon="pi pi-plus" size="small" />
-        </router-link>
-      </div>
+      <SkeletonCards v-if="expensesStore.loading" />
+      <ListEmptyState
+        v-else-if="expensesStore.expenses.length === 0"
+        :message="`Nema troškova za ${currentMonthLabel}`"
+        cta-to="/add"
+        cta-label="Dodaj trošak"
+      />
       <template v-else>
         <div
           v-for="expense in expensesStore.expenses"
@@ -139,25 +132,11 @@
             </div>
           </div>
         </div>
-        <div v-if="expensesStore.pagination.totalPages > 1" class="mobile-pagination">
-          <Button
-            icon="pi pi-chevron-left"
-            text
-            rounded
-            :disabled="expensesStore.pagination.page <= 1"
-            aria-label="Prethodna strana"
-            @click="fetchExpenses(expensesStore.pagination.page - 1)"
-          />
-          <span>{{ expensesStore.pagination.page }} / {{ expensesStore.pagination.totalPages }}</span>
-          <Button
-            icon="pi pi-chevron-right"
-            text
-            rounded
-            :disabled="expensesStore.pagination.page >= expensesStore.pagination.totalPages"
-            aria-label="Sledeća strana"
-            @click="fetchExpenses(expensesStore.pagination.page + 1)"
-          />
-        </div>
+        <MobilePagination
+          :page="expensesStore.pagination.page"
+          :total-pages="expensesStore.pagination.totalPages"
+          @change="fetchExpenses"
+        />
       </template>
     </div>
 
@@ -178,13 +157,7 @@
         @page="onPageChange"
       >
         <template #empty>
-          <div class="empty-state">
-            <i class="pi pi-inbox"></i>
-            <p>Nema troškova za {{ currentMonthLabel }}</p>
-            <router-link to="/add">
-              <Button label="Dodaj trošak" icon="pi pi-plus" size="small" />
-            </router-link>
-          </div>
+          <ListEmptyState :message="`Nema troškova za ${currentMonthLabel}`" cta-to="/add" cta-label="Dodaj trošak" />
         </template>
 
         <Column field="purchaseDate" header="Datum" :sortable="true" style="min-width: 110px">
@@ -269,9 +242,15 @@ import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
 import Sidebar from 'primevue/sidebar';
 import EditExpenseDialog from './EditExpenseDialog.vue';
+import ListEmptyState from './shared/ListEmptyState.vue';
+import SkeletonCards from './shared/SkeletonCards.vue';
+import MobilePagination from './shared/MobilePagination.vue';
+import { useTransactionFormatting } from '@/composables/useTransactionFormatting';
+import { useMonthlySummaries } from '@/composables/useMonthlySummaries';
 
 const toast = useToast();
 const expensesStore = useExpensesStore();
+const { formatRelativeDate: formatDate, formatNumber: formatAmount, formatMonthYear } = useTransactionFormatting();
 
 // Current month tracking
 const currentMonth = ref(new Date());
@@ -284,12 +263,7 @@ const dateRange = computed(() => {
 });
 
 // Current month label
-const currentMonthLabel = computed(() => {
-  return getMonthNameLatin(currentMonth.value);
-});
-
-// Key of the currently viewed month, matches MonthlySummary.month
-const viewedMonthKey = computed(() => `${currentMonth.value.getFullYear()}-${currentMonth.value.getMonth() + 1}`);
+const currentMonthLabel = computed(() => formatMonthYear(currentMonth.value));
 
 // Filters
 const filters = reactive({
@@ -318,16 +292,19 @@ const deleting = ref(false);
 const editDialogVisible = ref(false);
 const expenseToEdit = ref<Expense | null>(null);
 
-// Monthly summaries
-interface MonthlySummary {
-  month: string;
-  monthName: string;
-  totalRsd: number;
-  totalEur: number;
-}
-
-const monthlySummaries = ref<MonthlySummary[]>([]);
-const loadingSummaries = ref(false);
+// Monthly summaries (shared with IncomeList via composable)
+const {
+  summaries: monthlySummaries,
+  loading: loadingSummaries,
+  viewedMonthKey,
+  refresh: fetchMonthlySummaries
+} = useMonthlySummaries(currentMonth, async (startDate, endDate) => {
+  const response = await expenseApi.getAll({ startDate, endDate, limit: 1000 });
+  return {
+    rsd: response.data.reduce((sum, expense) => sum + expense.rsdAmount, 0),
+    eur: response.data.reduce((sum, expense) => sum + expense.eurAmount, 0)
+  };
+});
 
 // Advanced filters sidebar
 const advancedFiltersVisible = ref(false);
@@ -348,11 +325,6 @@ watch(
   },
   { deep: true, immediate: false }
 );
-
-// Summary cards follow the month being viewed
-watch(currentMonth, () => {
-  fetchMonthlySummaries();
-});
 
 async function fetchExpenses(page = 1) {
   const params: QueryExpensesDto = {
@@ -422,48 +394,6 @@ async function searchCategories(event: AutoCompleteCompleteEvent) {
   }
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  const dayBeforeYesterday = new Date(today);
-  dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2);
-
-  const compareDate = new Date(date);
-  compareDate.setHours(0, 0, 0, 0);
-
-  if (compareDate.getTime() === today.getTime()) {
-    return 'Danas';
-  } else if (compareDate.getTime() === yesterday.getTime()) {
-    return 'Juče';
-  } else if (compareDate.getTime() === dayBeforeYesterday.getTime()) {
-    return 'Prekjuče';
-  }
-
-  return date.toLocaleDateString('sr-RS', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
-}
-
-function formatAmount(amount: number, showDecimals: boolean = true): string {
-  return amount.toLocaleString('sr-RS', {
-    minimumFractionDigits: showDecimals ? 2 : 0,
-    maximumFractionDigits: showDecimals ? 2 : 0
-  });
-}
-
-function getMonthNameLatin(date: Date): string {
-  const monthNames = ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'];
-
-  return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-}
-
 function openEditDialog(expense: Expense) {
   expenseToEdit.value = expense;
   editDialogVisible.value = true;
@@ -505,46 +435,6 @@ async function deleteExpense() {
     });
   } finally {
     deleting.value = false;
-  }
-}
-
-async function fetchMonthlySummaries() {
-  loadingSummaries.value = true;
-  try {
-    const summaries: MonthlySummary[] = [];
-    const base = currentMonth.value;
-
-    // Viewed month plus the two months before it
-    for (let i = 0; i < 3; i++) {
-      const monthDate = new Date(base.getFullYear(), base.getMonth() - i, 1);
-      const startDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
-      const endDate = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59);
-
-      const params = {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        limit: 1000 // Get all expenses for the month
-      };
-
-      // Use direct API call to avoid modifying the store
-      const response = await expenseApi.getAll(params);
-
-      const totalRsd = response.data.reduce((sum, expense) => sum + expense.rsdAmount, 0);
-      const totalEur = response.data.reduce((sum, expense) => sum + expense.eurAmount, 0);
-
-      summaries.push({
-        month: `${monthDate.getFullYear()}-${monthDate.getMonth() + 1}`,
-        monthName: getMonthNameLatin(monthDate),
-        totalRsd,
-        totalEur
-      });
-    }
-
-    monthlySummaries.value = summaries;
-  } catch (error) {
-    console.error('Failed to load monthly summaries:', error);
-  } finally {
-    loadingSummaries.value = false;
   }
 }
 
@@ -1251,47 +1141,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.125rem;
-}
-
-.mobile-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 0.5rem 0 0;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-/* === Loading skeletons === */
-.skeleton-card .skeleton-line {
-  height: 0.875rem;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--border-color) 25%, var(--surface-hover) 50%, var(--border-color) 75%);
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.4s infinite;
-  margin-bottom: 0.625rem;
-}
-
-.skeleton-line.w-40 {
-  width: 40%;
-}
-
-.skeleton-line.w-55 {
-  width: 55%;
-}
-
-.skeleton-line.w-70 {
-  width: 70%;
-}
-
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 /* Phones: cards instead of a horizontally scrolling table */

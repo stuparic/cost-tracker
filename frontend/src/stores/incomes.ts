@@ -38,11 +38,15 @@ export const useIncomesStore = defineStore('incomes', () => {
     }
   }
 
+  let fetchToken = 0;
+
   async function fetchIncomes(params?: QueryIncomesDto): Promise<void> {
     loading.value = true;
     error.value = null;
+    const token = ++fetchToken;
     try {
       const response: IncomeListResponse = await incomeApi.getAll(params);
+      if (token !== fetchToken) return; // a newer request superseded this one
       incomes.value = response.data;
       pagination.value = response.pagination;
     } catch (err) {

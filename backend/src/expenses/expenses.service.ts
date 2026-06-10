@@ -7,6 +7,7 @@ import { QueryExpensesDto } from './dto/query-expenses.dto';
 import { Expense } from './interfaces/expense.interface';
 import { CategoryInferenceService } from '../category-inference/category-inference.service';
 import { Pagination } from '../common/interfaces/pagination.interface';
+import { normalizeCreatedBy } from '../common/utils/normalize-created-by';
 
 @Injectable()
 export class ExpensesService {
@@ -40,7 +41,7 @@ export class ExpensesService {
       paymentMethod,
       tags,
       purchaseDate: createExpenseDto.purchaseDate,
-      createdBy: createExpenseDto.createdBy,
+      createdBy: normalizeCreatedBy(createExpenseDto.createdBy),
       creationMethod: createExpenseDto.creationMethod,
       voiceTranscript: 'voiceTranscript' in createExpenseDto ? createExpenseDto.voiceTranscript : undefined,
       recurringOccurrenceId: 'recurringOccurrenceId' in createExpenseDto ? createExpenseDto.recurringOccurrenceId : undefined,

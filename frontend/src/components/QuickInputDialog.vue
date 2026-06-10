@@ -86,6 +86,7 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import { useSpeechRecognition } from '@/composables/useSpeechRecognition';
 import { useUserStore } from '@/stores/user';
+import { USERS } from '@/constants/app';
 import { useToast } from 'primevue/usetoast';
 import apiClient from '@/api/client';
 
@@ -244,7 +245,8 @@ async function handleStopRecording() {
 async function handleSend() {
   if (!canSend.value) return;
 
-  const user = userStore.selectedUser;
+  // The user store keeps lowercase ids ('dejan'); records store proper names
+  const user = userStore.selectedUser && (USERS.find(u => u.value.toLowerCase() === userStore.selectedUser)?.value ?? null);
   if (!user) {
     errorMessage.value = 'Nema izabranog korisnika';
     setTimeout(() => {

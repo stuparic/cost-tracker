@@ -6,6 +6,7 @@ import { UpdateIncomeDto } from './dto/update-income.dto';
 import { QueryIncomesDto } from './dto/query-incomes.dto';
 import { Income } from './interfaces/income.interface';
 import { Pagination } from '../common/interfaces/pagination.interface';
+import { normalizeCreatedBy } from '../common/utils/normalize-created-by';
 
 @Injectable()
 export class IncomesService {
@@ -30,7 +31,7 @@ export class IncomesService {
       description,
       incomeType: createIncomeDto.incomeType,
       dateReceived: createIncomeDto.dateReceived,
-      createdBy: createIncomeDto.createdBy,
+      createdBy: normalizeCreatedBy(createIncomeDto.createdBy),
       creationMethod: createIncomeDto.creationMethod || 'manual',
       voiceTranscript: createIncomeDto.voiceTranscript,
       recurringOccurrenceId: createIncomeDto.recurringOccurrenceId

@@ -38,11 +38,15 @@ export const useExpensesStore = defineStore('expenses', () => {
     }
   }
 
+  let fetchToken = 0;
+
   async function fetchExpenses(params?: QueryExpensesDto): Promise<void> {
     loading.value = true;
     error.value = null;
+    const token = ++fetchToken;
     try {
       const response: ExpenseListResponse = await expenseApi.getAll(params);
+      if (token !== fetchToken) return; // a newer request superseded this one
       expenses.value = response.data;
       pagination.value = response.pagination;
     } catch (err) {

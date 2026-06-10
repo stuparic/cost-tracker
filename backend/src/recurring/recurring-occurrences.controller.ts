@@ -1,13 +1,32 @@
-import { Controller, Post, Get, Patch, Delete, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Controller, Post, Get, Patch, Delete, Body, Param, Query, Headers, UnauthorizedException } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiHeader } from '@nestjs/swagger';
 import { RecurringOccurrencesRepository } from './recurring-occurrences.repository';
+import { RecurringService } from './recurring.service';
 import { CreateRecurringOccurrenceDto } from './dto/create-recurring-occurrence.dto';
 import { UpdateRecurringOccurrenceDto } from './dto/update-recurring-occurrence.dto';
 
 @ApiTags('recurring-occurrences')
 @Controller('recurring-occurrences')
 export class RecurringOccurrencesController {
-  constructor(private repository: RecurringOccurrencesRepository) {}
+  constructor(
+    private repository: RecurringOccurrencesRepository,
+    private recurringService: RecurringService
+  ) {}
+
+  @Post('process-due')
+  @ApiOperation({
+    summary: 'Process all due recurring occurrences',
+    description:
+      'Invoked by Cloud Scheduler (in-process cron does not fire on scale-to-zero Cloud Run). Creates one record per missed period, dated with its occurrence date. Guarded by the x-cron-secret header when CRON_SECRET is configured.'
+  })
+  @ApiHeader({ name: 'x-cron-secret', required: false })
+  async processDue(@Headers('x-cron-secret') cronSecret?: string) {
+    const expected = process.env.CRON_SECRET;
+    if (expected && cronSecret !== expected) {
+      throw new UnauthorizedException('Invalid cron secret');
+    }
+    return this.recurringService.processRecurringOccurrences();
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a new recurring occurrence template' })

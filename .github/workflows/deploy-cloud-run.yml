@@ -51,7 +51,7 @@ jobs:
             --platform managed \
             --region $REGION \
             --allow-unauthenticated \
-            --set-env-vars "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }},FIXED_EUR_TO_RSD_RATE=117.0,NODE_ENV=production,GEMINI_MODEL_NAME=gemini-2.5-flash-lite" \
+            --set-env-vars "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }},FIXED_EUR_TO_RSD_RATE=117.0,NODE_ENV=production,GEMINI_MODEL_NAME=gemini-2.5-flash-lite,CRON_SECRET=${{ secrets.CRON_SECRET }}" \
             --set-secrets=GEMINI_API_KEY=gemini-api-key:latest \
             --min-instances 0 \
             --max-instances 1 \
@@ -62,5 +62,28 @@ jobs:
       - name: Get service URL
         run: |
           SERVICE_URL=$(gcloud run services describe $SERVICE_NAME --region $REGION --format='value(status.url)')
+          echo "SERVICE_URL=$SERVICE_URL" >> $GITHUB_ENV
           echo "Service deployed to: $SERVICE_URL"
           echo "Swagger UI: $SERVICE_URL/api"
+
+      - name: Ensure Cloud Scheduler triggers recurring processing daily
+        # In-process cron never fires on scale-to-zero Cloud Run, so a
+        # Scheduler job calls the process-due endpoint every morning.
+        # Non-fatal: if the deploy SA lacks Cloud Scheduler permissions,
+        # create the job manually (see DEPLOYMENT.md).
+        continue-on-error: true
+        run: |
+          gcloud scheduler jobs update http cost-tracker-recurring \
+            --location $REGION \
+            --schedule "0 9 * * *" \
+            --time-zone "Europe/Belgrade" \
+            --uri "$SERVICE_URL/api/v1/recurring-occurrences/process-due" \
+            --http-method POST \
+            --update-headers "x-cron-secret=${{ secrets.CRON_SECRET }}" \
+          || gcloud scheduler jobs create http cost-tracker-recurring \
+            --location $REGION \
+            --schedule "0 9 * * *" \
+            --time-zone "Europe/Belgrade" \
+            --uri "$SERVICE_URL/api/v1/recurring-occurrences/process-due" \
+            --http-method POST \
+            --headers "x-cron-secret=${{ secrets.CRON_SECRET }}"

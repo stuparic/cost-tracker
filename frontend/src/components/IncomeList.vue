@@ -10,10 +10,10 @@
       >
         <div class="month-name">{{ month.monthName }}</div>
         <div class="amount-row">
-          <span class="amount-primary">{{ formatRSD(month.totalRSD) }}</span>
+          <span class="amount-primary">{{ formatRSD(month.totalRsd) }}</span>
           <span class="currency-label">RSD</span>
         </div>
-        <div class="amount-secondary">{{ formatEUR(month.totalEUR) }} EUR</div>
+        <div class="amount-secondary">{{ formatEUR(month.totalEur) }} EUR</div>
       </div>
     </div>
 
@@ -44,20 +44,14 @@
 
     <!-- Mobile card list (shown instead of the table on phones) -->
     <div class="mobile-cards">
-      <template v-if="incomesStore.loading">
-        <div v-for="n in 4" :key="n" class="mobile-card skeleton-card">
-          <div class="skeleton-line w-40"></div>
-          <div class="skeleton-line w-70"></div>
-          <div class="skeleton-line w-55"></div>
-        </div>
-      </template>
-      <div v-else-if="incomesStore.incomes.length === 0" class="empty-state">
-        <i class="pi pi-inbox"></i>
-        <p>Nema prihoda za {{ currentMonthDisplay }}</p>
-        <router-link to="/income/add">
-          <Button label="Dodaj prihod" icon="pi pi-plus" size="small" class="income-button" />
-        </router-link>
-      </div>
+      <SkeletonCards v-if="incomesStore.loading" />
+      <ListEmptyState
+        v-else-if="incomesStore.incomes.length === 0"
+        :message="`Nema prihoda za ${currentMonthDisplay}`"
+        cta-to="/income/add"
+        cta-label="Dodaj prihod"
+        button-class="income-button"
+      />
       <template v-else>
         <div
           v-for="income in incomesStore.incomes"
@@ -83,25 +77,11 @@
             </div>
           </div>
         </div>
-        <div v-if="incomesStore.pagination.totalPages > 1" class="mobile-pagination">
-          <Button
-            icon="pi pi-chevron-left"
-            text
-            rounded
-            :disabled="incomesStore.pagination.page <= 1"
-            aria-label="Prethodna strana"
-            @click="applyFilters(incomesStore.pagination.page - 1)"
-          />
-          <span>{{ incomesStore.pagination.page }} / {{ incomesStore.pagination.totalPages }}</span>
-          <Button
-            icon="pi pi-chevron-right"
-            text
-            rounded
-            :disabled="incomesStore.pagination.page >= incomesStore.pagination.totalPages"
-            aria-label="Sledeća strana"
-            @click="applyFilters(incomesStore.pagination.page + 1)"
-          />
-        </div>
+        <MobilePagination
+          :page="incomesStore.pagination.page"
+          :total-pages="incomesStore.pagination.totalPages"
+          @change="applyFilters"
+        />
       </template>
     </div>
 
@@ -115,13 +95,12 @@
       responsive-layout="scroll"
     >
       <template #empty>
-        <div class="empty-state">
-          <i class="pi pi-inbox"></i>
-          <p>Nema prihoda za {{ currentMonthDisplay }}</p>
-          <router-link to="/income/add">
-            <Button label="Dodaj prihod" icon="pi pi-plus" size="small" class="income-button" />
-          </router-link>
-        </div>
+        <ListEmptyState
+          :message="`Nema prihoda za ${currentMonthDisplay}`"
+          cta-to="/income/add"
+          cta-label="Dodaj prihod"
+          button-class="income-button"
+        />
       </template>
 
       <Column field="dateReceived" header="Datum" :sortable="true" style="min-width: 120px">
@@ -250,6 +229,11 @@ import Select from 'primevue/select';
 import Tag from 'primevue/tag';
 import ConfirmDialog from 'primevue/confirmdialog';
 import EditIncomeDialog from './EditIncomeDialog.vue';
+import ListEmptyState from './shared/ListEmptyState.vue';
+import SkeletonCards from './shared/SkeletonCards.vue';
+import MobilePagination from './shared/MobilePagination.vue';
+import { useTransactionFormatting } from '@/composables/useTransactionFormatting';
+import { useMonthlySummaries } from '@/composables/useMonthlySummaries';
 import { useIncomesStore } from '@/stores/incomes';
 import { incomeApi } from '@/api/incomes';
 import type { Income, IncomeType, QueryIncomesDto } from '@/types/income';
@@ -258,6 +242,7 @@ import { incomeTypeLabels } from '@/types/income';
 const incomesStore = useIncomesStore();
 const confirm = useConfirm();
 const toast = useToast();
+const { formatRelativeDate: formatDate, formatNumber, formatMonthYear } = useTransactionFormatting();
 
 // Current month filter
 const currentMonth = ref(new Date());
@@ -287,82 +272,30 @@ const incomeTypeOptions = [
   ...Object.entries(incomeTypeLabels).map(([value, label]) => ({ label, value }))
 ];
 
-// Monthly summaries (last 3 months)
-interface MonthlySummary {
-  month: string;
-  monthName: string;
-  totalRSD: number;
-  totalEUR: number;
-}
-
-const monthlySummaries = ref<MonthlySummary[]>([]);
-const loadingSummaries = ref(false);
-
-// Fetch monthly summaries for the last 3 months
-async function fetchMonthlySummaries() {
-  loadingSummaries.value = true;
-  try {
-    const summaries: MonthlySummary[] = [];
-
-    // Viewed month plus the two months before it
-    for (let i = 0; i < 3; i++) {
-      const date = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth() - i, 1);
-
-      const startDate = new Date(date.getFullYear(), date.getMonth(), 1);
-      const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
-
-      // Fetch incomes for this month
-      const response = await incomeApi.getAll({
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        limit: 1000 // Get all for this month
-      });
-
-      // Calculate totals
-      let totalRSD = 0;
-      let totalEUR = 0;
-
-      response.data.forEach((income: Income) => {
-        totalRSD += income.rsdAmount;
-        totalEUR += income.eurAmount;
-      });
-
-      summaries.push({
-        month: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
-        monthName: date.toLocaleDateString('sr-Latn', { month: 'long', year: 'numeric' }),
-        totalRSD,
-        totalEUR
-      });
-    }
-
-    monthlySummaries.value = summaries;
-  } catch (error) {
-    console.error('Failed to load monthly summaries:', error);
-  } finally {
-    loadingSummaries.value = false;
-  }
-}
-
-const currentMonthDisplay = computed(() => {
-  return currentMonth.value.toLocaleDateString('sr-Latn', { month: 'long', year: 'numeric' });
+// Monthly summaries (shared with ExpenseList via composable)
+const {
+  summaries: monthlySummaries,
+  viewedMonthKey,
+  refresh: fetchMonthlySummaries
+} = useMonthlySummaries(currentMonth, async (startDate, endDate) => {
+  const response = await incomeApi.getAll({ startDate, endDate, limit: 1000 });
+  return {
+    rsd: response.data.reduce((sum, income) => sum + income.rsdAmount, 0),
+    eur: response.data.reduce((sum, income) => sum + income.eurAmount, 0)
+  };
 });
 
-// Key of the currently viewed month, matches MonthlySummary.month
-const viewedMonthKey = computed(
-  () => `${currentMonth.value.getFullYear()}-${String(currentMonth.value.getMonth() + 1).padStart(2, '0')}`
-);
+const currentMonthDisplay = computed(() => formatMonthYear(currentMonth.value));
 
 // Navigation
 function previousMonth() {
-  currentMonth.value = new Date(currentMonth.value.setMonth(currentMonth.value.getMonth() - 1));
+  currentMonth.value = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth() - 1, 1);
   applyFilters();
-  fetchMonthlySummaries();
 }
 
 function nextMonth() {
-  currentMonth.value = new Date(currentMonth.value.setMonth(currentMonth.value.getMonth() + 1));
+  currentMonth.value = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth() + 1, 1);
   applyFilters();
-  fetchMonthlySummaries();
 }
 
 // Filters
@@ -417,7 +350,6 @@ function resetFilters() {
   selectedPerson.value = 'all';
   currentMonth.value = new Date();
   applyFilters();
-  fetchMonthlySummaries();
   filtersVisible.value = false;
 }
 
@@ -470,33 +402,9 @@ function onIncomeUpdated() {
   fetchMonthlySummaries();
 }
 
-// Formatting
-function formatRSD(amount: number): string {
-  return Math.round(amount).toLocaleString('sr-RS');
-}
-
-function formatEUR(amount: number): string {
-  return amount.toFixed(2);
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const dayBeforeYesterday = new Date(today);
-  dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2);
-
-  if (date.toDateString() === today.toDateString()) {
-    return 'Danas';
-  } else if (date.toDateString() === yesterday.toDateString()) {
-    return 'Juče';
-  } else if (date.toDateString() === dayBeforeYesterday.toDateString()) {
-    return 'Prekjuče';
-  }
-
-  return date.toLocaleDateString('sr-Latn', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+// Formatting (shared helpers; RSD shown without decimals, EUR with)
+const formatRSD = (amount: number) => formatNumber(amount, false);
+const formatEUR = (amount: number) => formatNumber(amount, true);
 
 function getRowClass(data: Income) {
   if (!data.createdBy) return 'row-unknown';
@@ -981,25 +889,6 @@ onMounted(() => {
   box-shadow: var(--shadow-card-hover);
 }
 
-/* === Empty state === */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 2.5rem 1rem;
-  color: var(--text-secondary);
-}
-
-.empty-state i {
-  font-size: 2.5rem;
-  color: var(--surface-border);
-}
-
-.empty-state p {
-  margin: 0;
-}
-
 /* === Mobile card list === */
 .mobile-cards {
   display: none;
@@ -1086,47 +975,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.125rem;
-}
-
-.mobile-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 0.5rem 0 0;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-/* === Loading skeletons === */
-.skeleton-card .skeleton-line {
-  height: 0.875rem;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--border-color) 25%, var(--surface-hover) 50%, var(--border-color) 75%);
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.4s infinite;
-  margin-bottom: 0.625rem;
-}
-
-.skeleton-line.w-40 {
-  width: 40%;
-}
-
-.skeleton-line.w-55 {
-  width: 55%;
-}
-
-.skeleton-line.w-70 {
-  width: 70%;
-}
-
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 /* Phones: cards instead of a horizontally scrolling table */
