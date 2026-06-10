@@ -180,12 +180,13 @@
 </template>
 
 <script setup lang="ts">
+import { getApiErrorMessage } from '@/api/client';
 import { ref, reactive, computed, watch } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
-import AutoComplete from 'primevue/autocomplete';
+import AutoComplete, { type AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import Textarea from 'primevue/textarea';
 import Chips from 'primevue/chips';
 import DatePicker from 'primevue/datepicker';
@@ -287,7 +288,7 @@ const isFormValid = computed(() => {
 });
 
 // Autocomplete handlers
-async function searchShops(event: any) {
+async function searchShops(event: AutoCompleteCompleteEvent) {
   try {
     const response = await autocompleteApi.getShops(event.query);
     shopSuggestions.value = response.suggestions.map(s => s.value);
@@ -297,7 +298,7 @@ async function searchShops(event: any) {
   }
 }
 
-async function searchCategories(event: any) {
+async function searchCategories(event: AutoCompleteCompleteEvent) {
   try {
     const response = await autocompleteApi.getCategories(event.query);
     categorySuggestions.value = response.suggestions.map(s => s.value);
@@ -403,11 +404,11 @@ async function handleSubmit() {
 
     // Reset form
     resetForm();
-  } catch (error: any) {
+  } catch (error) {
     toast.add({
       severity: 'error',
       summary: 'Greška',
-      detail: error.response?.data?.message || 'Nije moguće sačuvati trošak',
+      detail: getApiErrorMessage(error, 'Nije moguće sačuvati trošak'),
       life: 5000
     });
   } finally {

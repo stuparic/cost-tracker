@@ -69,7 +69,7 @@ export class HealthService {
     } catch (error) {
       return {
         status: 'disconnected',
-        message: error.message || 'Failed to connect to Firestore'
+        message: error instanceof Error ? error.message : 'Failed to connect to Firestore'
       };
     }
   }

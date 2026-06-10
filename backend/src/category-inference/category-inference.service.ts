@@ -5,7 +5,7 @@ export class CategoryInferenceService {
   private readonly shopPatterns: Record<string, RegExp> = {
     Groceries: /(maxi|lidl|mercator|idea|tempo|aman|dis|persu|mikro market|market)/i,
     Home: /(ikea|jysk|emezeta|pepco)/i,
-    Transport: /(nis|petrol|mol|lukoil|omv|parking|taxi|bolt|car|avia|pumpa|gorivo|)/i,
+    Transport: /(nis|petrol|mol|lukoil|omv|parking|taxi|bolt|car|avia|pumpa|gorivo)/i,
     Health: /(apoteka|pharmacy|lilly|benu|zegin|jankovic)/i,
     Electronics: /(gigatron|tehnomanija|comtrade|mediamarkt|tech|tahnologija)/i,
     Dining: /(restoran|restaurant|cafe|kafana|pizza|burger|mcdon|hrana)/i,

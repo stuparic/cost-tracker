@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsEnum, IsString, MinLength, IsDateString, Min, IsOptional } from 'class-validator';
+import { OccurrenceType, RecurringFrequency } from '../interfaces/recurring-occurrence.interface';
 
 export class CreateRecurringOccurrenceDto {
   @ApiProperty({ example: 'income', enum: ['income', 'expense'] })
   @IsEnum(['income', 'expense'])
-  occurrenceType: string;
+  occurrenceType: OccurrenceType;
 
   @ApiProperty({ example: 50000, description: 'Amount in the specified currency' })
   @IsNumber()
@@ -13,7 +14,7 @@ export class CreateRecurringOccurrenceDto {
 
   @ApiProperty({ example: 'RSD', enum: ['EUR', 'RSD'] })
   @IsEnum(['EUR', 'RSD'])
-  currency: string;
+  currency: 'EUR' | 'RSD';
 
   @IsOptional()
   @IsString()
@@ -26,7 +27,7 @@ export class CreateRecurringOccurrenceDto {
 
   @IsOptional()
   @IsEnum(['Salary', 'Freelance', 'Investment', 'Gift', 'Other', 'Rent'])
-  incomeType?: string;
+  incomeType?: 'Salary' | 'Freelance' | 'Investment' | 'Gift' | 'Other' | 'Rent';
 
   // Expense-specific
   @IsOptional()
@@ -44,7 +45,7 @@ export class CreateRecurringOccurrenceDto {
     description: 'Frequency of recurrence'
   })
   @IsEnum(['monthly', 'weekly', 'biweekly', 'yearly'])
-  frequency: string;
+  frequency: RecurringFrequency;
 
   @IsOptional()
   @IsString()

@@ -6,6 +6,7 @@ import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { QueryExpensesDto } from './dto/query-expenses.dto';
 import { Expense } from './interfaces/expense.interface';
 import { CategoryInferenceService } from '../category-inference/category-inference.service';
+import { Pagination } from '../common/interfaces/pagination.interface';
 
 @Injectable()
 export class ExpensesService {
@@ -40,13 +41,15 @@ export class ExpensesService {
       tags,
       purchaseDate: createExpenseDto.purchaseDate,
       createdBy: createExpenseDto.createdBy,
-      creationMethod: createExpenseDto.creationMethod
+      creationMethod: createExpenseDto.creationMethod,
+      voiceTranscript: 'voiceTranscript' in createExpenseDto ? createExpenseDto.voiceTranscript : undefined,
+      recurringOccurrenceId: 'recurringOccurrenceId' in createExpenseDto ? createExpenseDto.recurringOccurrenceId : undefined
     };
 
     return this.expensesRepository.create(expenseData);
   }
 
-  async findAll(query: QueryExpensesDto): Promise<{ data: Expense[]; pagination: any }> {
+  async findAll(query: QueryExpensesDto): Promise<{ data: Expense[]; pagination: Pagination }> {
     const { data, total } = await this.expensesRepository.findAll(query);
 
     const pagination = {

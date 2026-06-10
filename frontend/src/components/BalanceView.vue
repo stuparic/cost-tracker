@@ -94,7 +94,7 @@ import Button from 'primevue/button';
 import { useListFormatting } from '@/composables/useListFormatting';
 import { USERS } from '@/constants/app';
 import DoughnutChart from '@/components/shared/DoughnutChart.vue';
-import { useBalanceStore } from '@/stores/balance';
+import { useBalanceStore, type BalanceQueryParams } from '@/stores/balance';
 
 const { formatRSD, formatMonthYear } = useListFormatting();
 const balanceStore = useBalanceStore();
@@ -201,7 +201,7 @@ function formatBalance(amount: number): string {
 
 // Fetch data
 async function fetchData() {
-  const params: any = {
+  const params: BalanceQueryParams = {
     startDate: dateRange.value.start.toISOString(),
     endDate: dateRange.value.end.toISOString(),
     limit: 1000

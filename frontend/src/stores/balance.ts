@@ -2,8 +2,11 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { expenseApi } from '@/api/expenses';
 import { incomeApi } from '@/api/incomes';
-import type { Expense } from '@/types/expense';
-import type { Income } from '@/types/income';
+import { getApiErrorMessage } from '@/api/client';
+import type { Expense, QueryExpensesDto } from '@/types/expense';
+import type { Income, QueryIncomesDto } from '@/types/income';
+
+export type BalanceQueryParams = QueryExpensesDto & QueryIncomesDto;
 
 export const useBalanceStore = defineStore('balance', () => {
   // State
@@ -12,10 +15,10 @@ export const useBalanceStore = defineStore('balance', () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
   const lastFetchTime = ref<Date | null>(null);
-  const lastFetchParams = ref<any>(null);
+  const lastFetchParams = ref<BalanceQueryParams | null>(null);
 
   // Actions
-  async function fetchBalanceData(params: any): Promise<void> {
+  async function fetchBalanceData(params: BalanceQueryParams): Promise<void> {
     loading.value = true;
     error.value = null;
     try {
@@ -25,8 +28,8 @@ export const useBalanceStore = defineStore('balance', () => {
       incomes.value = incomesResponse.data;
       lastFetchTime.value = new Date();
       lastFetchParams.value = params;
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Greška pri učitavanju podataka bilansa';
+    } catch (err) {
+      error.value = getApiErrorMessage(err, 'Greška pri učitavanju podataka bilansa');
       console.error('Failed to fetch balance data:', err);
       expenses.value = [];
       incomes.value = [];

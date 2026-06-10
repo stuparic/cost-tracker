@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { incomeApi } from '@/api/incomes';
-import type { Income, CreateIncomeDto, IncomeListResponse } from '@/types/income';
+import type { Income, CreateIncomeDto, QueryIncomesDto, IncomeListResponse } from '@/types/income';
 import { useBalanceStore } from './balance';
+import { getApiErrorMessage } from '@/api/client';
 
 export const useIncomesStore = defineStore('incomes', () => {
   // State
@@ -29,23 +30,23 @@ export const useIncomesStore = defineStore('incomes', () => {
       balanceStore.invalidateCache();
 
       return income;
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Greška pri kreiranju prihoda';
+    } catch (err) {
+      error.value = getApiErrorMessage(err, 'Greška pri kreiranju prihoda');
       throw err;
     } finally {
       loading.value = false;
     }
   }
 
-  async function fetchIncomes(params?: any): Promise<void> {
+  async function fetchIncomes(params?: QueryIncomesDto): Promise<void> {
     loading.value = true;
     error.value = null;
     try {
       const response: IncomeListResponse = await incomeApi.getAll(params);
       incomes.value = response.data;
       pagination.value = response.pagination;
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Greška pri učitavanju prihoda';
+    } catch (err) {
+      error.value = getApiErrorMessage(err, 'Greška pri učitavanju prihoda');
       throw err;
     } finally {
       loading.value = false;
@@ -62,8 +63,8 @@ export const useIncomesStore = defineStore('incomes', () => {
       // Invalidate balance cache
       const balanceStore = useBalanceStore();
       balanceStore.invalidateCache();
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Greška pri brisanju prihoda';
+    } catch (err) {
+      error.value = getApiErrorMessage(err, 'Greška pri brisanju prihoda');
       throw err;
     } finally {
       loading.value = false;

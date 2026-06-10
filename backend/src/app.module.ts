@@ -16,6 +16,7 @@ import firebaseConfig from './config/firebase.config';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env', '.env.local'],
       load: [firebaseConfig]
     }),
     FirebaseModule,

@@ -188,11 +188,12 @@ import { useExpensesStore } from '@/stores/expenses';
 import { useToast } from 'primevue/usetoast';
 import { autocompleteApi } from '@/api/autocomplete';
 import { expenseApi } from '@/api/expenses';
-import type { Expense } from '@/types/expense';
-import DataTable from 'primevue/datatable';
+import type { Expense, QueryExpensesDto } from '@/types/expense';
+import { getApiErrorMessage } from '@/api/client';
+import DataTable, { type DataTablePageEvent } from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-import AutoComplete from 'primevue/autocomplete';
+import AutoComplete, { type AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
 import Sidebar from 'primevue/sidebar';
@@ -275,7 +276,7 @@ watch(
 );
 
 async function fetchExpenses(page = 1) {
-  const params: any = {
+  const params: QueryExpensesDto = {
     page,
     limit: 20
   };
@@ -301,7 +302,7 @@ async function fetchExpenses(page = 1) {
   await expensesStore.fetchExpenses(params);
 }
 
-function onPageChange(event: any) {
+function onPageChange(event: DataTablePageEvent) {
   fetchExpenses(event.page + 1);
 }
 
@@ -322,20 +323,20 @@ function getRowClass(data: Expense) {
   return `row-${data.createdBy.toLowerCase()}`;
 }
 
-async function searchShops(event: any) {
+async function searchShops(event: AutoCompleteCompleteEvent) {
   try {
     const response = await autocompleteApi.getShops(event.query);
-    shopSuggestions.value = response.suggestions.map((s: any) => s.value);
+    shopSuggestions.value = response.suggestions.map(s => s.value);
   } catch (error) {
     console.error('Failed to load shop suggestions:', error);
     shopSuggestions.value = [];
   }
 }
 
-async function searchCategories(event: any) {
+async function searchCategories(event: AutoCompleteCompleteEvent) {
   try {
     const response = await autocompleteApi.getCategories(event.query);
-    categorySuggestions.value = response.suggestions.map((s: any) => s.value);
+    categorySuggestions.value = response.suggestions.map(s => s.value);
   } catch (error) {
     console.error('Failed to load category suggestions:', error);
     categorySuggestions.value = [];
@@ -416,11 +417,11 @@ async function deleteExpense() {
     deleteDialogVisible.value = false;
     expenseToDelete.value = null;
     fetchExpenses();
-  } catch (error: any) {
+  } catch (error) {
     toast.add({
       severity: 'error',
       summary: 'Greška',
-      detail: error.response?.data?.message || 'Nije moguće obrisati trošak',
+      detail: getApiErrorMessage(error, 'Nije moguće obrisati trošak'),
       life: 5000
     });
   } finally {

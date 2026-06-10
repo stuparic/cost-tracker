@@ -120,7 +120,7 @@ export const SERBIAN_SHOPS = [
   'Pan Pek',
 
   // Restaurants & Fast Food
-  'McDonald\'s',
+  "McDonald's",
   'KFC',
   'Pizza Hut',
   'Subway',
@@ -213,7 +213,7 @@ export const SERBIAN_SHOPS = [
   'Bajloni pijaca',
   'Bajloni',
   'Kivi',
-  "Kiwi",
+  'Kiwi',
 
   // Utilities & Services
   'Pošta',
@@ -241,9 +241,7 @@ export function normalizeShopName(input: string): string {
   const normalized = input.trim();
 
   // Find exact match (case-insensitive)
-  const match = SERBIAN_SHOPS.find(
-    shop => shop.toLowerCase() === normalized.toLowerCase()
-  );
+  const match = SERBIAN_SHOPS.find(shop => shop.toLowerCase() === normalized.toLowerCase());
 
   if (match) {
     return match;

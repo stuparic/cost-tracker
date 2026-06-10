@@ -1,5 +1,6 @@
 import { useToast } from 'primevue/usetoast';
 import { TOAST_DURATION } from '@/constants/app';
+import { getApiErrorMessage } from '@/api/client';
 
 export function useAppToast() {
   const toast = useToast();
@@ -13,8 +14,8 @@ export function useAppToast() {
     });
   };
 
-  const showError = (detail: string, error?: any) => {
-    const message = error?.response?.data?.message || detail;
+  const showError = (detail: string, error?: unknown) => {
+    const message = getApiErrorMessage(error, detail);
     toast.add({
       severity: 'error',
       summary: 'Greška',

@@ -174,7 +174,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import EditIncomeDialog from './EditIncomeDialog.vue';
 import { useIncomesStore } from '@/stores/incomes';
 import { incomeApi } from '@/api/incomes';
-import type { Income, IncomeType } from '@/types/income';
+import type { Income, IncomeType, QueryIncomesDto } from '@/types/income';
 import { incomeTypeLabels } from '@/types/income';
 
 const incomesStore = useIncomesStore();
@@ -285,7 +285,7 @@ function applyFilters() {
   const startDate = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth(), 1);
   const endDate = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth() + 1, 0, 23, 59, 59);
 
-  const params: any = {
+  const params: QueryIncomesDto = {
     startDate: startDate.toISOString(),
     endDate: endDate.toISOString(),
     sortBy: 'dateReceived',
@@ -303,7 +303,7 @@ function applyAdvancedFilters() {
   const startDate = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth(), 1);
   const endDate = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth() + 1, 0, 23, 59, 59);
 
-  const params: any = {
+  const params: QueryIncomesDto = {
     startDate: startDate.toISOString(),
     endDate: endDate.toISOString(),
     sortBy: 'dateReceived',

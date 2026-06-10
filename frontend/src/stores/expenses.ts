@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { expenseApi } from '@/api/expenses';
-import type { Expense, CreateExpenseDto, ExpenseListResponse } from '@/types/expense';
+import type { Expense, CreateExpenseDto, QueryExpensesDto, ExpenseListResponse } from '@/types/expense';
 import { useBalanceStore } from './balance';
+import { getApiErrorMessage } from '@/api/client';
 
 export const useExpensesStore = defineStore('expenses', () => {
   // State
@@ -29,23 +30,23 @@ export const useExpensesStore = defineStore('expenses', () => {
       balanceStore.invalidateCache();
 
       return expense;
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Greška pri kreiranju troška';
+    } catch (err) {
+      error.value = getApiErrorMessage(err, 'Greška pri kreiranju troška');
       throw err;
     } finally {
       loading.value = false;
     }
   }
 
-  async function fetchExpenses(params?: any): Promise<void> {
+  async function fetchExpenses(params?: QueryExpensesDto): Promise<void> {
     loading.value = true;
     error.value = null;
     try {
       const response: ExpenseListResponse = await expenseApi.getAll(params);
       expenses.value = response.data;
       pagination.value = response.pagination;
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Greška pri učitavanju troškova';
+    } catch (err) {
+      error.value = getApiErrorMessage(err, 'Greška pri učitavanju troškova');
       throw err;
     } finally {
       loading.value = false;
@@ -62,8 +63,8 @@ export const useExpensesStore = defineStore('expenses', () => {
       // Invalidate balance cache
       const balanceStore = useBalanceStore();
       balanceStore.invalidateCache();
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Greška pri brisanju troška';
+    } catch (err) {
+      error.value = getApiErrorMessage(err, 'Greška pri brisanju troška');
       throw err;
     } finally {
       loading.value = false;

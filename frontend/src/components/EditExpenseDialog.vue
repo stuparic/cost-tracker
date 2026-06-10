@@ -208,7 +208,7 @@ async function handleSubmit() {
 
     showSuccess('Trošak je izmenjen');
     emit('success');
-  } catch (error: any) {
+  } catch (error) {
     showError('Nije moguće izmeniti trošak', error);
   } finally {
     loading.value = false;
