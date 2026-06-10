@@ -117,5 +117,21 @@ export class CreateExpenseVoiceDto extends BaseCreateExpenseDto {
   creationMethod = 'voice' as const;
 }
 
+// Statement creation DTO - imported from a bank statement
+export class CreateExpenseStatementDto extends BaseCreateExpenseDto {
+  @ApiProperty({
+    example: '94735212551001',
+    description: 'Bank transaction reference from the statement (used for duplicate detection)'
+  })
+  @IsString()
+  @MinLength(1)
+  bankRef: string;
+
+  // @Allow keeps the whitelist ValidationPipe (forbidNonWhitelisted) from
+  // rejecting this self-initialized field as a non-whitelisted property
+  @Allow()
+  creationMethod = 'statement' as const;
+}
+
 // Union type for all creation methods
-export type CreateExpenseDto = CreateExpenseManualDto | CreateExpenseAutoDto | CreateExpenseVoiceDto;
+export type CreateExpenseDto = CreateExpenseManualDto | CreateExpenseAutoDto | CreateExpenseVoiceDto | CreateExpenseStatementDto;

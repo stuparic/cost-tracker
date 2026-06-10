@@ -15,6 +15,10 @@
           <i class="pi pi-replay"></i>
           <span>Ponavljajuće stavke</span>
         </router-link>
+        <router-link to="/import" class="sidebar-link" @click="sidebarVisible = false">
+          <i class="pi pi-file-import"></i>
+          <span>Uvoz izvoda</span>
+        </router-link>
       </div>
     </Sidebar>
 
@@ -69,6 +73,10 @@
           <i class="pi pi-list"></i>
           <span>Lista</span>
         </router-link>
+        <router-link to="/import" class="tab-link">
+          <i class="pi pi-file-import"></i>
+          <span>Uvoz</span>
+        </router-link>
       </nav>
 
       <nav v-if="isIncomeRoute && !isBalanceRoute" class="tab-nav income-subnav">
@@ -121,7 +129,7 @@ const showUserDialog = computed({
 
 // Detect current route section
 const isExpenseRoute = computed(() => {
-  return route.path === '/add' || route.path === '/list';
+  return route.path === '/add' || route.path === '/list' || route.path === '/import';
 });
 
 const isBalanceRoute = computed(() => {

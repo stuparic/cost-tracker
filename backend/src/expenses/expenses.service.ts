@@ -43,7 +43,8 @@ export class ExpensesService {
       createdBy: createExpenseDto.createdBy,
       creationMethod: createExpenseDto.creationMethod,
       voiceTranscript: 'voiceTranscript' in createExpenseDto ? createExpenseDto.voiceTranscript : undefined,
-      recurringOccurrenceId: 'recurringOccurrenceId' in createExpenseDto ? createExpenseDto.recurringOccurrenceId : undefined
+      recurringOccurrenceId: 'recurringOccurrenceId' in createExpenseDto ? createExpenseDto.recurringOccurrenceId : undefined,
+      bankRef: 'bankRef' in createExpenseDto ? createExpenseDto.bankRef : undefined
     };
 
     return this.expensesRepository.create(expenseData);
@@ -64,6 +65,10 @@ export class ExpensesService {
 
   async findOne(id: string): Promise<Expense> {
     return this.expensesRepository.findById(id);
+  }
+
+  async existsByBankRef(bankRef: string): Promise<boolean> {
+    return this.expensesRepository.existsByBankRef(bankRef);
   }
 
   async update(id: string, updateExpenseDto: UpdateExpenseDto): Promise<Expense> {

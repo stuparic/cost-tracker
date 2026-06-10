@@ -5,6 +5,7 @@ import BalanceView from '@/components/BalanceView.vue';
 import IncomeForm from '@/components/income-form/IncomeForm.vue';
 import IncomeList from '@/components/IncomeList.vue';
 import RecurringOccurrencesList from '@/components/RecurringOccurrencesList.vue';
+import StatementImport from '@/components/StatementImport.vue';
 
 const routes = [
   {
@@ -40,6 +41,11 @@ const routes = [
     path: '/recurring',
     name: 'RecurringOccurrences',
     component: RecurringOccurrencesList
+  },
+  {
+    path: '/import',
+    name: 'StatementImport',
+    component: StatementImport
   }
 ];
 
