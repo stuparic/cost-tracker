@@ -2,6 +2,7 @@ import { Controller, Post, Get, Patch, Delete, Body, Param, Query } from '@nestj
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { RecurringOccurrencesRepository } from './recurring-occurrences.repository';
 import { CreateRecurringOccurrenceDto } from './dto/create-recurring-occurrence.dto';
+import { UpdateRecurringOccurrenceDto } from './dto/update-recurring-occurrence.dto';
 
 @ApiTags('recurring-occurrences')
 @Controller('recurring-occurrences')
@@ -28,7 +29,7 @@ export class RecurringOccurrencesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a recurring occurrence (e.g., disable)' })
-  async update(@Param('id') id: string, @Body() updates: any) {
+  async update(@Param('id') id: string, @Body() updates: UpdateRecurringOccurrenceDto) {
     await this.repository.update(id, updates);
     return { success: true };
   }

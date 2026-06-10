@@ -24,22 +24,22 @@ export class RecurringOccurrencesRepository {
     const docRef = this.firestore.collection(this.collectionName).doc();
 
     const occurrence: Omit<RecurringOccurrence, 'id'> = {
-      occurrenceType: dto.occurrenceType as 'income' | 'expense',
+      occurrenceType: dto.occurrenceType,
       amount: dto.amount,
-      originalCurrency: dto.currency as 'EUR' | 'RSD',
+      originalCurrency: dto.currency,
       description: dto.description || '',
       createdBy: dto.createdBy,
 
       // Income fields
       source: dto.source,
-      incomeType: dto.incomeType as 'Salary' | 'Freelance' | 'Investment' | 'Gift' | 'Other',
+      incomeType: dto.incomeType,
 
       // Expense fields
       expenseCategory: dto.expenseCategory,
       store: dto.store,
 
       // Recurrence
-      frequency: dto.frequency as any,
+      frequency: dto.frequency,
       recurringAt: dto.recurringAt ?? new Date().toISOString(),
       recurringUntil: dto.recurringUntil ?? this.getDefaultRecurringUntil(),
       nextOccurrenceDate: dto.startDate,
@@ -65,7 +65,7 @@ export class RecurringOccurrencesRepository {
         ({
           id: doc.id,
           ...doc.data()
-        } as RecurringOccurrence)
+        }) as RecurringOccurrence
     );
   }
 
@@ -91,7 +91,7 @@ export class RecurringOccurrencesRepository {
         ({
           id: doc.id,
           ...doc.data()
-        } as RecurringOccurrence)
+        }) as RecurringOccurrence
     );
   }
 

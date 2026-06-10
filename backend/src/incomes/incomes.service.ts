@@ -5,10 +5,14 @@ import { CreateIncomeDto } from './dto/create-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
 import { QueryIncomesDto } from './dto/query-incomes.dto';
 import { Income } from './interfaces/income.interface';
+import { Pagination } from '../common/interfaces/pagination.interface';
 
 @Injectable()
 export class IncomesService {
-  constructor(private currencyService: CurrencyService, private incomesRepository: IncomesRepository) {}
+  constructor(
+    private currencyService: CurrencyService,
+    private incomesRepository: IncomesRepository
+  ) {}
 
   async create(createIncomeDto: CreateIncomeDto): Promise<Income> {
     const { eurAmount, rsdAmount, exchangeRate } = this.currencyService.convertAmount(createIncomeDto.amount, createIncomeDto.currency);
@@ -26,13 +30,16 @@ export class IncomesService {
       description,
       incomeType: createIncomeDto.incomeType,
       dateReceived: createIncomeDto.dateReceived,
-      createdBy: createIncomeDto.createdBy
+      createdBy: createIncomeDto.createdBy,
+      creationMethod: createIncomeDto.creationMethod || 'manual',
+      voiceTranscript: createIncomeDto.voiceTranscript,
+      recurringOccurrenceId: createIncomeDto.recurringOccurrenceId
     };
 
     return this.incomesRepository.create(incomeData);
   }
 
-  async findAll(query: QueryIncomesDto): Promise<{ data: Income[]; pagination: any }> {
+  async findAll(query: QueryIncomesDto): Promise<{ data: Income[]; pagination: Pagination }> {
     const { data, total } = await this.incomesRepository.findAll(query);
 
     const pagination = {

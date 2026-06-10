@@ -13,7 +13,7 @@ export interface RecurringOccurrence {
 
   // Income-specific (when occurrenceType === 'income')
   source?: string;
-  incomeType?: 'Salary' | 'Freelance' | 'Investment' | 'Gift' | 'Other';
+  incomeType?: 'Salary' | 'Freelance' | 'Investment' | 'Gift' | 'Other' | 'Rent';
 
   // Expense-specific (when occurrenceType === 'expense')
   expenseCategory?: string;

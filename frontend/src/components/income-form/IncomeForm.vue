@@ -151,6 +151,7 @@
 </template>
 
 <script setup lang="ts">
+import { getApiErrorMessage } from '@/api/client';
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import InputNumber from 'primevue/inputnumber';
@@ -295,11 +296,11 @@ async function handleSubmit() {
 
     // Reset form
     resetForm();
-  } catch (error: any) {
+  } catch (error) {
     toast.add({
       severity: 'error',
       summary: 'Greška',
-      detail: error.response?.data?.message || 'Nije moguće sačuvati prihod',
+      detail: getApiErrorMessage(error, 'Nije moguće sačuvati prihod'),
       life: 5000
     });
   } finally {

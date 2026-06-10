@@ -80,7 +80,7 @@ export class BaseCreateExpenseDto {
 
 // Manual creation DTO - user enters data manually
 export class CreateExpenseManualDto extends BaseCreateExpenseDto {
-  creationMethod: 'manual' = 'manual';
+  creationMethod = 'manual' as const;
 }
 
 // Auto creation DTO - created from recurring template
@@ -92,7 +92,7 @@ export class CreateExpenseAutoDto extends BaseCreateExpenseDto {
   @MinLength(1)
   recurringOccurrenceId: string;
 
-  creationMethod: 'auto' = 'auto';
+  creationMethod = 'auto' as const;
 }
 
 // Voice creation DTO - created from voice input
@@ -105,7 +105,7 @@ export class CreateExpenseVoiceDto extends BaseCreateExpenseDto {
   @MinLength(1)
   voiceTranscript: string;
 
-  creationMethod: 'voice' = 'voice';
+  creationMethod = 'voice' as const;
 }
 
 // Union type for all creation methods

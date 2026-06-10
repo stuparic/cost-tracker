@@ -40,4 +40,18 @@ apiClient.interceptors.response.use(
   }
 );
 
+/**
+ * Extracts a user-facing message from an API error, falling back to the
+ * provided default when the error has no response payload.
+ */
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError(error)) {
+    const message = (error.response?.data as ApiError | undefined)?.message;
+    if (typeof message === 'string' && message.length > 0) {
+      return message;
+    }
+  }
+  return fallback;
+}
+
 export default apiClient;

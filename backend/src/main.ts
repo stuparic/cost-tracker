@@ -1,7 +1,10 @@
 import * as crypto from 'crypto';
-(global as any).crypto = crypto;
+// Polyfill for Node < 19 where globalThis.crypto is not defined (needed by @nestjs/schedule)
+if (!globalThis.crypto) {
+  (globalThis as Record<string, unknown>).crypto = crypto;
+}
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
@@ -9,14 +12,15 @@ import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS
+  // Enable CORS (override allowed origins via comma-separated CORS_ORIGINS env var)
+  const corsOrigins = process.env.CORS_ORIGINS?.split(',').map(origin => origin.trim()) || [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://moneyflow-832f4.web.app',
+    'https://moneyflow-832f4.firebaseapp.com'
+  ];
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'https://moneyflow-832f4.web.app',
-      'https://moneyflow-832f4.firebaseapp.com'
-    ],
+    origin: corsOrigins,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true
   });
@@ -50,6 +54,6 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
-  console.log(`Application is running on: http://localhost:${port}`);
+  Logger.log(`Application is running on: http://localhost:${port}`, 'Bootstrap');
 }
 bootstrap();

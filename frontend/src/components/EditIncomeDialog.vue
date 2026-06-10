@@ -177,7 +177,7 @@ async function handleSubmit() {
 
     showSuccess('Prihod je izmenjen');
     emit('success');
-  } catch (error: any) {
+  } catch (error) {
     showError('Nije moguće izmeniti prihod', error);
   } finally {
     loading.value = false;
