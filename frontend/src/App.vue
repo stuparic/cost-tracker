@@ -48,6 +48,7 @@
       <nav class="main-nav">
         <button class="main-tab voice-tab" @click="quickInputVisible = true">
           <i class="pi pi-microphone"></i>
+          <span class="voice-label">Glasovno</span>
         </button>
         <router-link to="/add" class="main-tab expense-tab">
           <i class="pi pi-shopping-cart"></i>
@@ -171,6 +172,14 @@ function switchUser() {
 
 /* Light Mode (Default) */
 :root {
+  /* Design tokens */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0 6px 20px rgba(0, 0, 0, 0.1);
+  --shadow-nav: 0 -4px 16px rgba(0, 0, 0, 0.08);
+
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
   --border-color: #e5e7eb;
@@ -302,6 +311,10 @@ body {
 
 .voice-tab i {
   font-size: 1.75rem;
+}
+
+.voice-tab .voice-label {
+  display: none;
 }
 
 .header-center {
@@ -549,6 +562,79 @@ body {
 
   .main-tab span {
     font-size: 0.8125rem;
+  }
+}
+
+/* Mobile: main navigation becomes a fixed bottom bar (thumb-friendly) */
+@media (max-width: 768px) {
+  .main-nav {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-bottom: none;
+    border-top: 1px solid var(--border-color);
+    box-shadow: var(--shadow-nav);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 110;
+  }
+
+  .main-tab,
+  .voice-tab {
+    flex: 1;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.5rem 0.25rem 0.55rem;
+    border-bottom: none;
+    border-top: 3px solid transparent;
+  }
+
+  .main-tab i,
+  .voice-tab i {
+    font-size: 1.35rem;
+  }
+
+  .main-tab span,
+  .voice-tab .voice-label {
+    display: inline;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .main-tab.expense-tab.router-link-active {
+    border-top-color: var(--primary-color);
+    border-bottom-color: transparent;
+  }
+
+  .main-tab.income-tab.router-link-active {
+    border-top-color: var(--income-color);
+    border-bottom-color: transparent;
+  }
+
+  .main-tab.balance-tab.router-link-active {
+    border-top-color: #f59e0b;
+    border-bottom-color: transparent;
+  }
+
+  /* Keep content clear of the bottom bar */
+  .app-main {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Mobile: dialogs become bottom sheets (easier one-handed use) */
+@media (max-width: 640px) {
+  .p-dialog-mask {
+    align-items: flex-end !important;
+  }
+
+  .p-dialog {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 92vh !important;
+    margin: 0 !important;
+    border-radius: var(--radius-lg, 16px) var(--radius-lg, 16px) 0 0 !important;
   }
 }
 

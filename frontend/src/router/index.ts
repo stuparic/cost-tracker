@@ -1,12 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import ExpenseForm from '@/components/expense-form/ExpenseForm.vue';
-import ExpenseList from '@/components/ExpenseList.vue';
-import BalanceView from '@/components/BalanceView.vue';
-import IncomeForm from '@/components/income-form/IncomeForm.vue';
-import IncomeList from '@/components/IncomeList.vue';
-import RecurringOccurrencesList from '@/components/RecurringOccurrencesList.vue';
-import StatementImport from '@/components/StatementImport.vue';
 
+// Routes are lazy-loaded so each view (and heavy deps like chart.js)
+// lands in its own chunk instead of one large bundle.
 const routes = [
   {
     path: '/',
@@ -15,37 +10,37 @@ const routes = [
   {
     path: '/add',
     name: 'AddExpense',
-    component: ExpenseForm
+    component: () => import('@/components/expense-form/ExpenseForm.vue')
   },
   {
     path: '/list',
     name: 'ExpenseList',
-    component: ExpenseList
+    component: () => import('@/components/ExpenseList.vue')
   },
   {
     path: '/balance',
     name: 'Balance',
-    component: BalanceView
+    component: () => import('@/components/BalanceView.vue')
   },
   {
     path: '/income/add',
     name: 'AddIncome',
-    component: IncomeForm
+    component: () => import('@/components/income-form/IncomeForm.vue')
   },
   {
     path: '/income/list',
     name: 'IncomeList',
-    component: IncomeList
+    component: () => import('@/components/IncomeList.vue')
   },
   {
     path: '/recurring',
     name: 'RecurringOccurrences',
-    component: RecurringOccurrencesList
+    component: () => import('@/components/RecurringOccurrencesList.vue')
   },
   {
     path: '/import',
     name: 'StatementImport',
-    component: StatementImport
+    component: () => import('@/components/StatementImport.vue')
   }
 ];
 

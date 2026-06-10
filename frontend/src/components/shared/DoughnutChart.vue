@@ -1,6 +1,6 @@
 <template>
   <div class="doughnut-chart-container">
-    <Chart type="doughnut" :data="chartData" :options="chartOptions" />
+    <Chart type="doughnut" :data="chartData" :options="chartOptions" :plugins="[centerTextPlugin]" />
   </div>
 </template>
 
@@ -26,7 +26,9 @@ const props = withDefaults(defineProps<Props>(), {
   centerSubtext: ''
 });
 
-// Custom plugin to draw text in the center of doughnut chart
+// Custom plugin to draw text in the center of the doughnut chart.
+// Passed per chart instance (NOT registered globally) so each chart only
+// draws its own center text and theme colors are resolved at draw time.
 const centerTextPlugin: Plugin = {
   id: 'centerText',
   beforeDraw(chart: any) {
@@ -35,6 +37,7 @@ const centerTextPlugin: Plugin = {
     const { ctx, chartArea } = chart;
     const centerX = (chartArea.left + chartArea.right) / 2;
     const centerY = (chartArea.top + chartArea.bottom) / 2;
+    const rootStyle = getComputedStyle(document.documentElement);
 
     ctx.save();
     ctx.textAlign = 'center';
@@ -42,22 +45,19 @@ const centerTextPlugin: Plugin = {
 
     // Draw main text
     ctx.font = 'bold 1.75rem Inter, system-ui, sans-serif';
-    ctx.fillStyle = '#1f2937';
+    ctx.fillStyle = rootStyle.getPropertyValue('--text-primary').trim() || '#1f2937';
     ctx.fillText(props.centerText, centerX, props.centerSubtext ? centerY - 15 : centerY);
 
     // Draw subtext if provided
     if (props.centerSubtext) {
       ctx.font = '0.875rem Inter, system-ui, sans-serif';
-      ctx.fillStyle = '#6b7280';
+      ctx.fillStyle = rootStyle.getPropertyValue('--text-secondary').trim() || '#6b7280';
       ctx.fillText(props.centerSubtext, centerX, centerY + 15);
     }
 
     ctx.restore();
   }
 };
-
-// Register the plugin
-ChartJS.register(centerTextPlugin);
 
 const chartData = computed(() => ({
   labels: props.labels,
