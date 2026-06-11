@@ -403,6 +403,7 @@ function handleEditSuccess() {
   editDialogVisible.value = false;
   expenseToEdit.value = null;
   fetchExpenses();
+  fetchMonthlySummaries();
 }
 
 function confirmDelete(expense: Expense) {
@@ -426,6 +427,7 @@ async function deleteExpense() {
     deleteDialogVisible.value = false;
     expenseToDelete.value = null;
     fetchExpenses();
+    fetchMonthlySummaries();
   } catch (error) {
     toast.add({
       severity: 'error',
