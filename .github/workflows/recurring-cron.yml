@@ -1,0 +1,22 @@
+name: Trigger recurring processing
+
+# Daily trigger for recurring incomes/expenses. Cloud Run scales to zero, so
+# an in-process cron never fires; this workflow (and optionally Cloud
+# Scheduler, see deploy-cloud-run.yml) calls the processing endpoint instead.
+# Processing is idempotent per period, so overlapping triggers are harmless.
+on:
+  schedule:
+    # 07:00 UTC ~ 09:00 Europe/Belgrade (08:00 in winter)
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call process-due endpoint
+        run: |
+          RESPONSE=$(curl -sf -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            https://cost-tracker-utmayd66ga-ew.a.run.app/api/v1/recurring-occurrences/process-due)
+          echo "Result: $RESPONSE"
