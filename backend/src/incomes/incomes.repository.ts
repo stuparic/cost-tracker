@@ -130,7 +130,10 @@ export class IncomesRepository {
       dateReceived: data.dateReceived?.toDate().toISOString(),
       createdBy: data.createdBy,
       createdAt: data.createdAt?.toDate().toISOString(),
-      updatedAt: data.updatedAt?.toDate().toISOString()
+      updatedAt: data.updatedAt?.toDate().toISOString(),
+      creationMethod: data.creationMethod,
+      voiceTranscript: data.voiceTranscript,
+      recurringOccurrenceId: data.recurringOccurrenceId
     };
   }
 }
