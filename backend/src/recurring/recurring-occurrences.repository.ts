@@ -54,19 +54,20 @@ export class RecurringOccurrencesRepository {
   }
 
   async findDueOccurrences(beforeDate: string): Promise<RecurringOccurrence[]> {
-    const snapshot = await this.firestore
-      .collection(this.collectionName)
-      .where('isActive', '==', true)
-      .where('nextOccurrenceDate', '<=', beforeDate)
-      .get();
+    // Filter the date in memory: combining '==' and '<=' requires a composite
+    // Firestore index that was never provisioned (the historical reason this
+    // feature silently failed). Template counts are tiny, so this is cheap.
+    const snapshot = await this.firestore.collection(this.collectionName).where('isActive', '==', true).get();
 
-    return snapshot.docs.map(
-      doc =>
-        ({
-          id: doc.id,
-          ...doc.data()
-        }) as RecurringOccurrence
-    );
+    return snapshot.docs
+      .map(
+        doc =>
+          ({
+            id: doc.id,
+            ...doc.data()
+          }) as RecurringOccurrence
+      )
+      .filter(occurrence => occurrence.nextOccurrenceDate <= beforeDate);
   }
 
   async update(id: string, updates: Partial<RecurringOccurrence>): Promise<void> {

@@ -988,4 +988,36 @@ onMounted(() => {
     display: none;
   }
 }
+/* Phones: summary cards swipe horizontally instead of being squeezed */
+@media (max-width: 640px) {
+  .monthly-summaries {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 1rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.75rem;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding: 0.25rem 1rem;
+  }
+
+  .monthly-summaries::-webkit-scrollbar {
+    display: none;
+  }
+
+  .monthly-summaries .summary-card {
+    flex: 0 0 70%;
+    scroll-snap-align: start;
+  }
+
+  .filters-row {
+    scrollbar-width: none;
+  }
+
+  .filters-row::-webkit-scrollbar {
+    display: none;
+  }
+}
 </style>
