@@ -46,24 +46,41 @@ export class StatementParserService {
     return parsed.filter(tx => this.isValidTransaction(tx)).map(tx => this.normalizeTransaction(tx));
   }
 
-  /** Gemini occasionally returns transient 503s under load - retry with backoff */
-  private async generateWithRetry(prompt: string, attempts = 3) {
+  /**
+   * Gemini occasionally returns transient 503s under load - retry with backoff,
+   * then fall back to an alternative model before giving up. Preview models are
+   * the first to run out of capacity, so the fallback should be a stable one.
+   */
+  private async generateWithRetry(prompt: string) {
+    const primary = process.env.GEMINI_MODEL_NAME || 'gemini-flash-lite-latest';
+    const fallback = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.5-flash';
+    const models = fallback && fallback !== primary ? [primary, fallback] : [primary];
+
     let lastError: unknown;
-    for (let attempt = 1; attempt <= attempts; attempt++) {
-      try {
-        return await this.genAI.models.generateContent({
-          model: process.env.GEMINI_MODEL_NAME,
-          contents: prompt
-        });
-      } catch (error) {
-        lastError = error;
-        const message = error instanceof Error ? error.message : String(error);
-        const transient = /503|UNAVAILABLE|429|RESOURCE_EXHAUSTED|overloaded/i.test(message);
-        if (!transient || attempt === attempts) break;
-        const delayMs = 2000 * attempt;
-        this.logger.warn(`Gemini transient error (attempt ${attempt}/${attempts}), retrying in ${delayMs}ms`);
-        await new Promise(resolve => setTimeout(resolve, delayMs));
+    for (const model of models) {
+      const attempts = model === primary ? 3 : 2;
+      for (let attempt = 1; attempt <= attempts; attempt++) {
+        try {
+          return await this.genAI.models.generateContent({ model, contents: prompt });
+        } catch (error) {
+          lastError = error;
+          const message = error instanceof Error ? error.message : String(error);
+          const transient = /503|UNAVAILABLE|429|RESOURCE_EXHAUSTED|overloaded/i.test(message);
+          if (!transient) throw error;
+          if (attempt === attempts) {
+            this.logger.warn(`Gemini model ${model} unavailable after ${attempts} attempts${model === primary ? ', switching to fallback' : ''}`);
+            break;
+          }
+          const delayMs = 2000 * attempt;
+          this.logger.warn(`Gemini transient error on ${model} (attempt ${attempt}/${attempts}), retrying in ${delayMs}ms`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
       }
+    }
+
+    const lastMessage = lastError instanceof Error ? lastError.message : String(lastError);
+    if (/503|UNAVAILABLE|429|RESOURCE_EXHAUSTED|overloaded/i.test(lastMessage)) {
+      throw new Error('AI servis za čitanje izvoda je trenutno preopterećen. Pokušaj ponovo za nekoliko minuta.');
     }
     throw lastError;
   }

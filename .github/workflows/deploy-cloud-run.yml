@@ -51,7 +51,7 @@ jobs:
             --platform managed \
             --region $REGION \
             --allow-unauthenticated \
-            --set-env-vars "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }},FIXED_EUR_TO_RSD_RATE=117.0,NODE_ENV=production,GEMINI_MODEL_NAME=gemini-2.5-flash-lite,CRON_SECRET=${{ secrets.CRON_SECRET }}" \
+            --set-env-vars "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }},FIXED_EUR_TO_RSD_RATE=117.0,NODE_ENV=production,GEMINI_MODEL_NAME=gemini-flash-lite-latest,CRON_SECRET=${{ secrets.CRON_SECRET }}" \
             --set-secrets=GEMINI_API_KEY=gemini-api-key:latest \
             --min-instances 0 \
             --max-instances 1 \
