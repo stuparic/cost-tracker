@@ -41,7 +41,7 @@ function formatAmount(amount: number, showDecimals: boolean = true): string {
 }
 
 .summary-card {
-  background: white;
+  background: var(--surface-card);
   padding: 1.25rem;
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -60,7 +60,7 @@ function formatAmount(amount: number, showDecimals: boolean = true): string {
 
 .summary-month {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
   margin-bottom: 0.75rem;
 }
@@ -75,18 +75,18 @@ function formatAmount(amount: number, showDecimals: boolean = true): string {
 .summary-amount {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .summary-currency {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
 .summary-amount-secondary {
   font-size: 0.875rem;
-  color: #9ca3af;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {

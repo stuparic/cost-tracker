@@ -4,13 +4,13 @@
     <UserSelectionDialog v-model:visible="showUserDialog" />
     <QuickInputDialog v-model:visible="quickInputVisible" />
 
-    <Sidebar v-model:visible="sidebarVisible" position="left" class="theme-sidebar">
+    <Sidebar v-model:visible="sidebarVisible" position="right" class="theme-sidebar">
       <template #header>
         <h2 class="sidebar-title">Podešavanja</h2>
       </template>
       <ThemeSelector />
       <div class="sidebar-section">
-        <h3 class="sidebar-section-title">Navigacija</h3>
+        <h3 class="sidebar-section-title">Više</h3>
         <router-link to="/recurring" class="sidebar-link" @click="sidebarVisible = false">
           <i class="pi pi-replay"></i>
           <span>Ponavljajuće stavke</span>
@@ -19,77 +19,63 @@
           <i class="pi pi-file-import"></i>
           <span>Uvoz izvoda</span>
         </router-link>
+        <button class="sidebar-link" @click="switchUser(); sidebarVisible = false">
+          <i class="pi pi-users"></i>
+          <span>Promeni korisnika</span>
+        </button>
       </div>
     </Sidebar>
 
     <div class="app-container">
       <header class="app-header">
-        <div class="header-content">
-          <div class="header-left">
-            <button class="hamburger-btn" aria-label="Open menu" @click="sidebarVisible = true">
-              <i class="pi pi-bars"></i>
-            </button>
-          </div>
-          <div class="header-center">
-            <div class="app-title">
-              <i class="pi pi-wallet"></i>
-              <h1>Troškić</h1>
-            </div>
-          </div>
-          <div class="header-right">
-            <div v-if="userStore.selectedUser" class="user-badge" @click="switchUser">
-              <i class="pi pi-user"></i>
-              <span class="user-name">{{ userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan' }}</span>
-            </div>
-          </div>
+        <router-link to="/" class="brand">
+          <span class="brand-mark"><i class="pi pi-wallet"></i></span>
+          <span class="brand-name">Troškić</span>
+        </router-link>
+        <div class="header-actions">
+          <button
+            v-if="userStore.selectedUser"
+            class="avatar-btn"
+            :title="userLabel"
+            aria-label="Promeni korisnika"
+            @click="switchUser"
+          >
+            {{ userInitial }}
+          </button>
+          <button class="icon-btn" aria-label="Podešavanja" @click="sidebarVisible = true">
+            <i class="pi pi-cog"></i>
+          </button>
         </div>
       </header>
-      <!-- Main Section Navigation -->
+
       <nav class="main-nav">
-        <button class="main-tab voice-tab" @click="quickInputVisible = true">
-          <i class="pi pi-microphone"></i>
-          <span class="voice-label">Glasovno</span>
-        </button>
-        <router-link to="/add" class="main-tab expense-tab">
-          <i class="pi pi-shopping-cart"></i>
-          <span>Troškovi</span>
+        <router-link to="/" class="nav-item" :class="{ active: route.path === '/' }">
+          <i class="pi pi-home"></i>
+          <span>Početna</span>
         </router-link>
-        <router-link to="/balance" class="main-tab balance-tab">
+        <router-link to="/list" class="nav-item" :class="{ active: isListRoute }">
+          <i class="pi pi-list"></i>
+          <span>Lista</span>
+        </router-link>
+        <router-link to="/add" class="nav-fab" aria-label="Dodaj stavku">
+          <i class="pi pi-plus"></i>
+          <span class="fab-label">Dodaj</span>
+        </router-link>
+        <router-link to="/balance" class="nav-item" :class="{ active: route.path === '/balance' }">
           <i class="pi pi-chart-pie"></i>
           <span>Bilans</span>
         </router-link>
-        <router-link to="/income/add" class="main-tab income-tab">
-          <i class="pi pi-wallet"></i>
-          <span>Prihodi</span>
-        </router-link>
+        <button class="nav-item" @click="quickInputVisible = true">
+          <i class="pi pi-microphone"></i>
+          <span>Glasovno</span>
+        </button>
       </nav>
 
-      <!-- Sub Navigation -->
-      <nav v-if="isExpenseRoute && !isBalanceRoute" class="tab-nav expense-subnav">
-        <router-link to="/add" class="tab-link">
-          <i class="pi pi-plus-circle"></i>
-          <span>Dodaj</span>
-        </router-link>
-        <router-link to="/list" class="tab-link">
-          <i class="pi pi-list"></i>
-          <span>Lista</span>
-        </router-link>
-        <router-link to="/import" class="tab-link">
-          <i class="pi pi-file-import"></i>
-          <span>Uvoz</span>
-        </router-link>
+      <nav v-if="segment" class="segment-nav" aria-label="Vrsta stavke">
+        <router-link :to="segment.expense" class="segment-link" :class="{ active: !isIncomeRoute }">Trošak</router-link>
+        <router-link :to="segment.income" class="segment-link income" :class="{ active: isIncomeRoute }">Prihod</router-link>
       </nav>
 
-      <nav v-if="isIncomeRoute && !isBalanceRoute" class="tab-nav income-subnav">
-        <router-link to="/income/add" class="tab-link">
-          <i class="pi pi-plus-circle"></i>
-          <span>Dodaj</span>
-        </router-link>
-        <router-link to="/income/list" class="tab-link">
-          <i class="pi pi-list"></i>
-          <span>Lista</span>
-        </router-link>
-      </nav>
       <main class="app-main">
         <router-view />
       </main>
@@ -105,20 +91,17 @@ import Sidebar from 'primevue/sidebar';
 import ThemeSelector from './components/ThemeSelector.vue';
 import UserSelectionDialog from './components/UserSelectionDialog.vue';
 import QuickInputDialog from './components/QuickInputDialog.vue';
+import { useThemeStore } from './stores/theme';
+import { useUserStore } from './stores/user';
 
 const route = useRoute();
 const sidebarVisible = ref(false);
 const manualDialogVisible = ref(false);
 const quickInputVisible = ref(false);
 
-// Initialize stores on app load
-import { useThemeStore } from './stores/theme';
-import { useUserStore } from './stores/user';
-
-useThemeStore(); // Initialize theme
+useThemeStore();
 const userStore = useUserStore();
 
-// Show user selection dialog if no user is selected or manually triggered
 const showUserDialog = computed({
   get: () => userStore.selectedUser === null || manualDialogVisible.value,
   set: value => {
@@ -128,102 +111,141 @@ const showUserDialog = computed({
   }
 });
 
-// Detect current route section
-const isExpenseRoute = computed(() => {
-  return route.path === '/add' || route.path === '/list' || route.path === '/import';
+const userLabel = computed(() => (userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan'));
+const userInitial = computed(() => userLabel.value.charAt(0));
+
+const isIncomeRoute = computed(() => route.path.startsWith('/income'));
+const isListRoute = computed(() => route.path === '/list' || route.path === '/income/list');
+const isAddRoute = computed(() => route.path === '/add' || route.path === '/income/add');
+
+const segment = computed(() => {
+  if (isAddRoute.value) return { expense: '/add', income: '/income/add' };
+  if (isListRoute.value) return { expense: '/list', income: '/income/list' };
+  return null;
 });
 
-const isBalanceRoute = computed(() => {
-  return route.path === '/balance';
-});
-
-const isIncomeRoute = computed(() => {
-  return route.path.startsWith('/income');
-});
-
-// Function to allow switching users
 function switchUser() {
   manualDialogVisible.value = true;
 }
 </script>
 
 <style>
-/* CSS Variables for Accent Colors */
+/* ---------- Design tokens ---------- */
 :root[data-accent='green'] {
-  --primary-color: #10b981;
-  --primary-dark: #059669;
-  --primary-light: #ecfdf5;
-  --primary-shadow: rgba(16, 185, 129, 0.25);
+  --primary-color: #0f9d6e;
+  --primary-dark: #0a7451;
+  --primary-light: #e3f7ee;
+  --primary-shadow: rgba(15, 157, 110, 0.22);
 }
 
-:root[data-accent='purple'] {
-  --primary-color: #a855f7;
-  --primary-dark: #7c3aed;
-  --primary-light: #faf5ff;
-  --primary-shadow: rgba(168, 85, 247, 0.25);
+:root[data-accent='purple'],
+:root {
+  --primary-color: #5b45d6;
+  --primary-dark: #43319f;
+  --primary-light: #eeebfc;
+  --primary-shadow: rgba(91, 69, 214, 0.25);
 }
 
 :root[data-accent='blue'] {
-  --primary-color: #3b82f6;
-  --primary-dark: #2563eb;
-  --primary-light: #eff6ff;
-  --primary-shadow: rgba(59, 130, 246, 0.25);
+  --primary-color: #2f6fe4;
+  --primary-dark: #1e4ea8;
+  --primary-light: #e8f0fd;
+  --primary-shadow: rgba(47, 111, 228, 0.22);
 }
 
-/* Light Mode (Default) */
 :root {
-  /* Design tokens */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.05);
-  --shadow-card-hover: 0 6px 20px rgba(0, 0, 0, 0.1);
-  --shadow-nav: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --shadow-card: 0 1px 2px rgba(20, 20, 18, 0.04), 0 4px 14px rgba(20, 20, 18, 0.04);
+  --shadow-card-hover: 0 6px 20px rgba(20, 20, 18, 0.08);
+  --shadow-nav: 0 -2px 14px rgba(20, 20, 18, 0.07);
 
-  --text-primary: #1f2937;
-  --text-secondary: #6b7280;
-  --border-color: #e5e7eb;
-  --background: #f8fafb;
+  --text-primary: #23233c;
+  --text-secondary: #75758f;
+  --border-color: #e7e7f1;
+  --background: #f6f6fb;
   --surface-card: #ffffff;
-  --surface-hover: #f9fafb;
-  --surface-border: #d1d5db;
+  --surface-hover: #eeeef6;
+  --surface-border: #d5d5e4;
 
-  /* Income Colors */
-  --income-color: #0891b2;
-  --income-dark: #0e7490;
-  --income-light: #ecfeff;
-  --income-shadow: rgba(8, 145, 178, 0.25);
+  /* Hero card (deep navy, Rocket-style) */
+  --hero-bg: #1d1d40;
+  --hero-text: #ffffff;
+  --hero-muted: rgba(255, 255, 255, 0.62);
+  --hero-chip: rgba(255, 255, 255, 0.1);
+
+  /* Income (mint) */
+  --income-color: #0f9d6e;
+  --income-dark: #0a7451;
+  --income-light: #e3f7ee;
+  --income-shadow: rgba(15, 157, 110, 0.22);
+
+  /* Expense amounts (coral) */
+  --expense-color: #d14b34;
+  --expense-dark: #93301e;
+  --expense-light: #fcece8;
+
+  /* User colors */
+  --user-svetla-color: #c23a6f;
+  --user-svetla-light: #fbeaf0;
+  --user-dejan-color: #0f9d6e;
+  --user-dejan-light: #e3f7ee;
+  --user-unknown-color: #6a6a82;
+  --user-unknown-light: #ededf4;
 }
 
-/* Dark Mode */
 :root.dark-mode {
-  --text-primary: #f9fafb;
-  --text-secondary: #d1d5db;
-  --border-color: #374151;
-  --background: #111827;
-  --surface-card: #1f2937;
-  --surface-hover: #374151;
-  --surface-border: #4b5563;
+  --text-primary: #f1f1f7;
+  --text-secondary: #a2a2c0;
+  --border-color: #2c2c52;
+  --background: #14142b;
+  --surface-card: #1d1d3d;
+  --surface-hover: #29294f;
+  --surface-border: #3a3a66;
 
-  /* Adjust primary colors for dark mode */
-  --primary-light: rgba(16, 185, 129, 0.15);
-  --income-light: rgba(8, 145, 178, 0.15);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.25);
+  --shadow-card-hover: 0 6px 20px rgba(0, 0, 0, 0.4);
+  --shadow-nav: 0 -2px 14px rgba(0, 0, 0, 0.35);
 
-  /* Income colors for dark mode */
-  --income-color: #06b6d4;
-  --income-dark: #0891b2;
+  --hero-bg: #24244c;
+  --hero-text: #ffffff;
+  --hero-muted: rgba(255, 255, 255, 0.6);
+  --hero-chip: rgba(255, 255, 255, 0.08);
+
+  --income-color: #45d39c;
+  --income-dark: #8ce7c4;
+  --income-light: rgba(69, 211, 156, 0.13);
+
+  --expense-color: #f2937c;
+  --expense-dark: #f7c0b2;
+  --expense-light: rgba(242, 147, 124, 0.12);
+
+  --user-svetla-color: #ee85ad;
+  --user-svetla-light: rgba(238, 133, 173, 0.14);
+  --user-dejan-color: #45d39c;
+  --user-dejan-light: rgba(69, 211, 156, 0.13);
+  --user-unknown-color: #a2a2c0;
+  --user-unknown-light: rgba(162, 162, 192, 0.14);
+}
+
+:root[data-accent='purple'].dark-mode,
+:root.dark-mode {
+  --primary-color: #a394f2;
+  --primary-dark: #c4baf8;
+  --primary-light: rgba(163, 148, 242, 0.15);
 }
 
 :root[data-accent='green'].dark-mode {
-  --primary-light: rgba(16, 185, 129, 0.15);
-}
-
-:root[data-accent='purple'].dark-mode {
-  --primary-light: rgba(168, 85, 247, 0.15);
+  --primary-color: #45d39c;
+  --primary-dark: #8ce7c4;
+  --primary-light: rgba(69, 211, 156, 0.13);
 }
 
 :root[data-accent='blue'].dark-mode {
-  --primary-light: rgba(59, 130, 246, 0.15);
+  --primary-color: #7aa8f0;
+  --primary-dark: #adc9f6;
+  --primary-light: rgba(122, 168, 240, 0.14);
 }
 
 * {
@@ -259,371 +281,224 @@ body {
   max-width: 100%;
 }
 
+/* ---------- Header ---------- */
 .app-header {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-  color: white;
-  padding: 1.5rem 1rem;
-  box-shadow: 0 2px 12px var(--primary-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1.25rem;
+  background: var(--background);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
-.header-content {
-  max-width: 100%;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-color);
+  color: var(--surface-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-mark i {
+  font-size: 1.05rem;
+}
+
+.brand-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.header-actions {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-/* Voice Tab in Main Navigation */
-.voice-tab {
-  flex: 0 0 auto;
-  padding: 0.5rem 1rem;
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: none;
   cursor: pointer;
-  transition: all 0.2s;
-  color: var(--text-secondary);
+  transition: background 0.15s;
 }
 
-.voice-tab:hover {
-  background: var(--background);
+.icon-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.icon-btn i {
+  font-size: 1.125rem;
+}
+
+.avatar-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: var(--primary-light);
   color: var(--primary-color);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
 }
 
-.voice-tab i {
-  font-size: 1.75rem;
+.avatar-btn:hover {
+  transform: scale(1.06);
 }
 
-.voice-tab .voice-label {
-  display: none;
+/* ---------- Main navigation ---------- */
+.main-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: var(--surface-card);
 }
 
-.header-center {
+.nav-item {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.hamburger-btn {
-  background: rgba(255, 255, 255, 0.2);
+  gap: 0.2rem;
+  padding: 0.5rem 0.25rem 0.6rem;
   border: none;
-  color: white;
-  width: 40px;
-  height: 40px;
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  flex-shrink: 0;
-}
-
-.hamburger-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.hamburger-btn i {
-  font-size: 1.25rem;
-}
-
-.sidebar-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.app-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  justify-content: center;
-}
-
-.app-title i {
-  font-size: 1.5rem;
-}
-
-.app-title h1 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: -0.025em;
-  white-space: nowrap;
-}
-
-.user-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.user-badge:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.user-badge i {
-  font-size: 0.875rem;
-}
-
-.user-name {
-  display: inline;
-}
-
-/* Main Navigation (Troškovi/Prihodi) */
-.main-nav {
-  display: flex;
-  background: var(--surface-card);
-  border-bottom: 2px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  z-index: 91;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  width: 100%;
-  overflow-x: hidden;
-}
-
-.main-tab {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 1rem 0.5rem;
+  background: transparent;
   text-decoration: none;
   color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.7rem;
   font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.2s;
-  border-bottom: 3px solid transparent;
-  min-width: 0;
+  cursor: pointer;
+  transition: color 0.15s;
 }
 
-.main-tab i {
-  font-size: 1.5rem;
+.nav-item i {
+  font-size: 1.3rem;
 }
 
-.main-tab.expense-tab.router-link-active {
+.nav-item.active,
+.nav-item:hover {
   color: var(--primary-color);
-  border-bottom-color: var(--primary-color);
-  background: var(--primary-light);
 }
 
-.main-tab.income-tab.router-link-active {
-  color: var(--income-color);
-  border-bottom-color: var(--income-color);
-  background: var(--income-light);
-}
-
-.main-tab.balance-tab.router-link-active {
-  color: #f59e0b;
-  border-bottom-color: #f59e0b;
-  background: #fffbeb;
-}
-
-.main-tab:hover {
-  background: var(--background);
-}
-
-/* Sub Navigation (Dodaj/Lista) */
-.tab-nav {
-  display: flex;
-  background: var(--surface-card);
-  border-bottom: 2px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  z-index: 90;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.tab-link {
-  flex: 1;
+.nav-fab {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.875rem;
   text-decoration: none;
+  box-shadow: 0 4px 14px var(--primary-shadow);
+  transition: transform 0.15s, background 0.15s;
+}
+
+:root.dark-mode .nav-fab {
+  color: #131316;
+}
+
+.nav-fab:hover {
+  transform: scale(1.05);
+}
+
+.nav-fab i {
+  font-size: 1.35rem;
+}
+
+.fab-label {
+  display: none;
+}
+
+/* ---------- Segment toggle (Trošak / Prihod) ---------- */
+.segment-nav {
+  display: flex;
+  gap: 4px;
+  margin: 0.5rem auto 0;
+  padding: 4px;
+  background: var(--surface-hover);
+  border-radius: 999px;
+  width: min(320px, calc(100% - 2.5rem));
+}
+
+.segment-link {
+  flex: 1;
+  text-align: center;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
   color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 0.9375rem;
-  transition: all 0.2s;
-  border-bottom: 3px solid transparent;
-  position: relative;
+  transition: all 0.15s;
 }
 
-.tab-link i {
-  font-size: 1.125rem;
-}
-
-.expense-subnav .tab-link:hover {
+.segment-link.active {
+  background: var(--surface-card);
   color: var(--primary-color);
-  background: var(--primary-light);
+  box-shadow: var(--shadow-card);
 }
 
-.expense-subnav .tab-link.router-link-active {
-  color: var(--primary-color);
-  border-bottom-color: var(--primary-color);
-}
-
-.income-subnav .tab-link:hover {
+.segment-link.income.active {
   color: var(--income-color);
-  background: var(--income-light);
 }
 
-.income-subnav .tab-link.router-link-active {
-  color: var(--income-color);
-  border-bottom-color: var(--income-color);
-}
-
+/* ---------- Main content ---------- */
 .app-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 0;
   background: var(--background);
   overflow-x: hidden;
 }
 
-@media (orientation: landscape) and (max-height: 500px) {
-  .app-main {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-/* Mobile-first: Full-screen experience */
-@media (max-width: 768px) {
-  body {
-    background: var(--surface-card);
-  }
-
-  .app-header {
-    padding: 1.25rem 1rem;
-    border-radius: 0;
-  }
-
-  .app-title h1 {
-    font-size: 1.375rem;
-  }
-
-  .app-title i {
-    font-size: 1.5rem;
-  }
-
-  .app-subtitle {
-    font-size: 0.8125rem;
-  }
-
-  .app-main {
-    padding: 0;
-    background: var(--surface-card);
-  }
-
-  .main-tab {
-    padding: 0.875rem 0.25rem;
-    gap: 0.375rem;
-    font-size: 0.875rem;
-  }
-
-  .main-tab i {
-    font-size: 1.25rem;
-  }
-
-  .main-tab span {
-    font-size: 0.8125rem;
-  }
-}
-
-/* Mobile: main navigation becomes a fixed bottom bar (thumb-friendly) */
+/* ---------- Mobile ---------- */
 @media (max-width: 768px) {
   .main-nav {
     position: fixed;
-    top: auto;
     bottom: 0;
     left: 0;
     right: 0;
-    border-bottom: none;
     border-top: 1px solid var(--border-color);
     box-shadow: var(--shadow-nav);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding: 0.25rem 0.5rem calc(0.25rem + env(safe-area-inset-bottom));
     z-index: 110;
   }
 
-  .main-tab,
-  .voice-tab {
-    flex: 1;
-    flex-direction: column;
-    gap: 0.2rem;
-    padding: 0.5rem 0.25rem 0.55rem;
-    border-bottom: none;
-    border-top: 3px solid transparent;
+  .nav-fab {
+    margin-top: -22px;
   }
 
-  .main-tab i,
-  .voice-tab i {
-    font-size: 1.35rem;
-  }
-
-  .main-tab span,
-  .voice-tab .voice-label {
-    display: inline;
-    font-size: 0.7rem;
-    font-weight: 600;
-  }
-
-  .main-tab.expense-tab.router-link-active {
-    border-top-color: var(--primary-color);
-    border-bottom-color: transparent;
-  }
-
-  .main-tab.income-tab.router-link-active {
-    border-top-color: var(--income-color);
-    border-bottom-color: transparent;
-  }
-
-  .main-tab.balance-tab.router-link-active {
-    border-top-color: #f59e0b;
-    border-bottom-color: transparent;
-  }
-
-  /* Keep content clear of the bottom bar */
   .app-main {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
   }
 }
 
-/* Mobile: dialogs become bottom sheets (easier one-handed use) */
+/* Mobile: dialogs become bottom sheets */
 @media (max-width: 640px) {
   .p-dialog-mask {
     align-items: flex-end !important;
@@ -634,119 +509,84 @@ body {
     max-width: 100vw !important;
     max-height: 92vh !important;
     margin: 0 !important;
-    border-radius: var(--radius-lg, 16px) var(--radius-lg, 16px) 0 0 !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
   }
 }
 
-/* Mobile Landscape: Optimize for horizontal orientation */
-@media (max-width: 768px) and (orientation: landscape) {
-  .app-header {
-    padding: 0.5rem 0.75rem;
-  }
-
-  .header-content {
-    gap: 0.375rem;
-  }
-
-  .hamburger-btn {
-    width: 36px;
-    height: 36px;
-  }
-
-  .hamburger-btn i {
-    font-size: 1.125rem;
-  }
-
-  .app-title {
-    margin-bottom: 0;
-    gap: 0.375rem;
-  }
-
-  .app-title h1 {
-    font-size: 1rem;
-  }
-
-  .app-title i {
-    font-size: 1.125rem;
-  }
-
-  .user-badge {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.6875rem;
-  }
-
-  .user-badge i {
-    font-size: 0.75rem;
-  }
-
-  .user-name {
-    display: none;
-  }
-
-  .main-tab {
-    padding: 0.625rem 0.25rem;
-    gap: 0.25rem;
-    font-size: 0.8125rem;
-  }
-
-  .main-tab i {
-    font-size: 1.125rem;
-  }
-
-  .main-tab span {
-    font-size: 0.75rem;
-  }
-
-  .tab-link {
-    padding: 0.625rem;
-    font-size: 0.875rem;
-  }
-
-  .tab-link i {
-    font-size: 1rem;
-  }
-
-  .voice-tab {
-    padding: 0.375rem 0.75rem;
-  }
-
-  .voice-tab i {
-    font-size: 1.5rem;
-  }
-}
-
-/* Desktop: Centered card layout */
+/* ---------- Desktop ---------- */
 @media (min-width: 769px) {
-  .header-content {
-    max-width: 1200px;
-    padding: 0 1rem;
+  .app-header {
+    padding: 1rem 2rem;
   }
 
-  .app-title h1 {
-    font-size: 1.5rem;
+  .main-nav {
+    position: sticky;
+    top: 62px;
+    z-index: 99;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--background);
+    padding: 0.25rem 0 0.75rem;
   }
 
-  .app-title i {
-    font-size: 1.75rem;
-  }
-
-  .user-badge {
-    padding: 0.5rem 1rem;
+  .nav-item {
+    flex: 0 0 auto;
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.5rem 1.125rem;
+    border-radius: 999px;
     font-size: 0.875rem;
   }
 
-  .user-badge i {
+  .nav-item i {
     font-size: 1rem;
+  }
+
+  .nav-item.active {
+    background: var(--primary-light);
+  }
+
+  .nav-item:hover {
+    background: var(--surface-hover);
+  }
+
+  .nav-fab {
+    width: auto;
+    height: auto;
+    border-radius: 999px;
+    padding: 0.5rem 1.25rem;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .nav-fab i {
+    font-size: 1rem;
+  }
+
+  .fab-label {
+    display: inline;
   }
 
   .app-main {
-    padding: 2rem 1rem;
-    justify-content: flex-start;
+    padding: 1.5rem 1rem 3rem;
     align-items: center;
+  }
+
+  .app-main > * {
+    width: 100%;
+    max-width: 720px;
   }
 }
 
-/* Sidebar Navigation */
+/* ---------- Sidebar ---------- */
+.sidebar-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
 .sidebar-section {
   margin-top: 2rem;
   padding-top: 1.5rem;
@@ -754,7 +594,7 @@ body {
 }
 
 .sidebar-section-title {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -766,13 +606,19 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.875rem 1rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
   text-decoration: none;
   color: var(--text-primary);
+  font-family: inherit;
   font-weight: 500;
   font-size: 0.9375rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
 }
 
 .sidebar-link:hover {
@@ -782,10 +628,10 @@ body {
 
 .sidebar-link.router-link-active {
   background: var(--primary-color);
-  color: white;
+  color: var(--surface-card);
 }
 
 .sidebar-link i {
-  font-size: 1.125rem;
+  font-size: 1.05rem;
 }
 </style>

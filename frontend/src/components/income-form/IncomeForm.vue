@@ -362,7 +362,7 @@ onMounted(() => {
   max-width: 600px;
   margin: 0 auto;
   padding: 1.5rem;
-  background: white;
+  background: var(--surface-card);
   min-height: 100%;
 }
 
@@ -431,11 +431,11 @@ onMounted(() => {
   flex: 1;
   padding: 0.875rem 1.5rem;
   border: 2px solid #e5e7eb;
-  background: white;
+  background: var(--surface-card);
   border-radius: 0.75rem;
   font-size: 1.125rem;
   font-weight: 700;
-  color: #6b7280;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -462,11 +462,11 @@ onMounted(() => {
 .income-type-pill {
   padding: 0.875rem 1rem;
   border: 2px solid #e5e7eb;
-  background: white;
+  background: var(--surface-card);
   border-radius: 0.75rem;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
@@ -560,11 +560,11 @@ onMounted(() => {
 .frequency-pill {
   padding: 0.875rem 1rem;
   border: 2px solid #e5e7eb;
-  background: white;
+  background: var(--surface-card);
   border-radius: 0.75rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;

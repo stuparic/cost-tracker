@@ -39,7 +39,7 @@
         <DoughnutChart
           :labels="['Prihodi', 'Troškovi']"
           :data="[totalIncome, totalExpense]"
-          :colors="['#10b981', '#ef4444']"
+          :colors="['#1d9e75', '#d85a30']"
           :center-text="formatBalance(netBalance)"
           :center-subtext="netBalance >= 0 ? 'Profit' : 'Deficit'"
         />
@@ -81,7 +81,7 @@
 
     <!-- Empty State -->
     <div v-else class="empty-state">
-      <i class="pi pi-chart-line" style="font-size: 3rem; color: #9ca3af"></i>
+      <i class="pi pi-chart-line empty-icon"></i>
       <h3>Nema podataka za izabrani period</h3>
       <p>Pokušajte da promenite filter ili dodajte nove troškove/prihode</p>
     </div>
@@ -162,7 +162,7 @@ const categoryLabels = computed(() => {
 });
 
 const categoryColors = computed<string[]>(() => {
-  const colors: string[] = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
+  const colors: string[] = ['#1d9e75', '#7f77dd', '#d85a30', '#378add', '#d4537e', '#ef9f27', '#5dcaa5', '#afa9ec', '#f0997b', '#888780'];
   return categoryLabels.value.map((_, index) => colors[index % colors.length]!);
 });
 
@@ -186,7 +186,7 @@ const personLabels = computed(() => {
 const personColors = computed<string[]>(() => {
   return personLabels.value.map(name => {
     const user = USERS.find(u => u.value === name);
-    return (user ? user.color : '#9ca3af') as string;
+    return (user ? user.color : '#888780') as string;
   });
 });
 
@@ -243,77 +243,81 @@ onMounted(() => {
 
 <style scoped>
 .balance-view {
-  max-width: 1400px;
+  width: 100%;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0.5rem 1.25rem 1.5rem;
 }
 
 .balance-title {
-  font-size: 1.875rem;
+  font-size: 1.375rem;
   font-weight: 700;
-  color: var(--text-color);
-  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
 }
 
 /* Filters */
 .balance-filters {
   display: flex;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
 }
 
 .month-navigation {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  background: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  gap: 0.5rem;
+  background: var(--surface-card);
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
 }
 
 .current-month {
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--text-color);
-  min-width: 150px;
+  color: var(--text-primary);
+  min-width: 120px;
   text-align: center;
 }
 
 .month-nav-btn {
-  color: #6b7280 !important;
+  color: var(--text-secondary) !important;
 }
 
 .person-pills {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface-hover);
+  border-radius: 999px;
 }
 
 .person-pill {
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 2rem;
-  background: white;
-  color: #6b7280;
-  font-weight: 500;
-  font-size: 0.875rem;
+  padding: 0.45rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.8125rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
   font-family: inherit;
 }
 
 .person-pill:hover {
-  border-color: #f59e0b;
-  color: #f59e0b;
+  color: var(--primary-color);
 }
 
 .person-pill.active {
-  background: #f59e0b;
-  border-color: #f59e0b;
-  color: white;
+  background: var(--surface-card);
+  color: var(--primary-color);
+  box-shadow: var(--shadow-card);
 }
 
 /* Loading & Empty States */
@@ -327,15 +331,23 @@ onMounted(() => {
   text-align: center;
 }
 
+.empty-icon {
+  font-size: 2.5rem;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
 .loading-state p,
 .empty-state h3 {
   margin-top: 1rem;
-  color: #6b7280;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .empty-state p {
   margin-top: 0.5rem;
-  color: #9ca3af;
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -343,15 +355,16 @@ onMounted(() => {
 .balance-content {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
 /* Chart Sections */
 .chart-section {
-  background: white;
+  background: var(--surface-card);
   padding: 1.5rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
 }
 
 .main-chart-section {
@@ -359,17 +372,17 @@ onMounted(() => {
 }
 
 .chart-title {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
   text-align: center;
 }
 
 .empty-chart {
   text-align: center;
   padding: 3rem 1rem;
-  color: #9ca3af;
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -377,58 +390,71 @@ onMounted(() => {
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-top: 2rem;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
 }
 
 .metric-card {
-  padding: 1.25rem;
-  border-radius: 0.5rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
   text-align: center;
 }
 
 .income-metric {
-  background: #ecfdf5;
-  border: 2px solid #10b981;
+  background: var(--income-light);
+}
+
+.income-metric .metric-value {
+  color: var(--income-dark);
 }
 
 .expense-metric {
-  background: #fef2f2;
-  border: 2px solid #ef4444;
+  background: var(--expense-light);
+}
+
+.expense-metric .metric-value {
+  color: var(--expense-dark);
 }
 
 .balance-metric {
-  border: 2px solid #f59e0b;
+  background: var(--surface-hover);
 }
 
 .balance-metric.positive {
-  background: #ecfdf5;
-  border-color: #10b981;
+  background: var(--income-light);
+}
+
+.balance-metric.positive .metric-value {
+  color: var(--income-dark);
 }
 
 .balance-metric.negative {
-  background: #fef2f2;
-  border-color: #ef4444;
+  background: var(--expense-light);
+}
+
+.balance-metric.negative .metric-value {
+  color: var(--expense-dark);
 }
 
 .metric-label {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.375rem;
+  font-weight: 600;
 }
 
 .metric-value {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-color);
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
 
 /* Secondary Charts */
 .secondary-charts-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 /* Responsive */
@@ -445,11 +471,15 @@ onMounted(() => {
   }
 
   .month-navigation {
-    justify-content: center;
+    justify-content: space-between;
   }
 
   .person-pills {
     justify-content: center;
+  }
+
+  .person-pill {
+    flex: 1;
   }
 
   .metrics-grid {
@@ -457,11 +487,7 @@ onMounted(() => {
   }
 
   .main-chart-section {
-    padding: 1.5rem;
-  }
-
-  .chart-title {
-    font-size: 1.125rem;
+    padding: 1.25rem;
   }
 }
 </style>

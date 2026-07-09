@@ -468,7 +468,7 @@ onUnmounted(() => {
 
 .processing-text {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 /* Action buttons */

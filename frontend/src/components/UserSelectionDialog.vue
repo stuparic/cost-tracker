@@ -60,7 +60,7 @@ function selectUser(user: User) {
   padding: 2rem 1.5rem;
   border: 2px solid #e5e7eb;
   border-radius: 1rem;
-  background: white;
+  background: var(--surface-card);
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -108,13 +108,13 @@ function selectUser(user: User) {
 .user-card h3 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .theme-label {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
 }
 

@@ -183,12 +183,12 @@ onMounted(() => {
 
 .page-subtitle {
   font-size: 1rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .occurrences-container {
-  background: white;
+  background: var(--surface-card);
   border-radius: 1rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   overflow: hidden;
@@ -199,7 +199,7 @@ onMounted(() => {
 }
 
 .description-text {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -211,7 +211,7 @@ onMounted(() => {
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .empty-icon {

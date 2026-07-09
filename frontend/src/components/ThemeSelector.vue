@@ -138,7 +138,7 @@ const themeStore = useThemeStore();
 .toggle-knob {
   width: 20px;
   height: 20px;
-  background: white;
+  background: var(--surface-card);
   border-radius: 50%;
   position: absolute;
   top: 3px;

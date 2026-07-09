@@ -448,14 +448,16 @@ onMounted(() => {
 
 <style scoped>
 .expense-list {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1.5rem 1rem;
+  padding: 0.5rem 1.25rem 1.5rem;
 }
 
 .list-title {
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--text-primary);
   margin-bottom: 1rem;
 }
@@ -494,17 +496,12 @@ onMounted(() => {
 }
 
 .summary-card {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-  color: white;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 12px var(--primary-shadow);
-  transition: transform 0.2s;
-}
-
-.summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px var(--primary-shadow);
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  transition: all 0.15s;
 }
 
 .summary-card.loading {
@@ -513,10 +510,10 @@ onMounted(() => {
 }
 
 .summary-month {
-  font-size: 0.875rem;
-  font-weight: 500;
-  opacity: 0.9;
-  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.375rem;
 }
 
 .summary-amount-row {
@@ -526,22 +523,24 @@ onMounted(() => {
 }
 
 .summary-amount {
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .summary-currency {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .summary-amount-secondary {
-  font-size: 0.875rem;
-  opacity: 0.8;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
 }
 
 .filters-section {
-  background: white;
+  background: var(--surface-card);
   padding: 1.5rem;
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -566,23 +565,23 @@ onMounted(() => {
 .quick-filters {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 1.5rem;
-  padding: 0.75rem;
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.25rem;
 }
 
 .month-navigation {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 0.2rem 0.375rem;
 }
 
 .month-nav-btn {
-  color: var(--primary-color);
+  color: var(--text-secondary);
 }
 
 .current-month {
@@ -595,32 +594,33 @@ onMounted(() => {
 
 .person-pills {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface-hover);
+  border-radius: 999px;
 }
 
 .person-pill {
-  padding: 0.5rem 1rem;
-  border: 2px solid var(--border-color);
-  border-radius: 2rem;
-  background: white;
+  padding: 0.4rem 0.875rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
   color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 0.875rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
   font-family: inherit;
 }
 
 .person-pill:hover {
-  border-color: var(--primary-color);
   color: var(--primary-color);
 }
 
 .person-pill.active {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-  color: white;
+  background: var(--surface-card);
+  color: var(--primary-color);
+  box-shadow: var(--shadow-card);
 }
 
 .more-filters-btn {
@@ -674,9 +674,10 @@ onMounted(() => {
 }
 
 .table-wrapper {
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
   width: 100%;
   overflow: hidden;
 }
@@ -696,15 +697,15 @@ onMounted(() => {
 }
 
 .expenses-table :deep(.row-svetla td:first-child) {
-  border-left: 4px solid #a855f7 !important;
+  border-left: 3px solid var(--user-svetla-color) !important;
 }
 
 .expenses-table :deep(.row-dejan td:first-child) {
-  border-left: 4px solid #10b981 !important;
+  border-left: 3px solid var(--user-dejan-color) !important;
 }
 
 .expenses-table :deep(.row-unknown td:first-child) {
-  border-left: 4px solid #9ca3af !important;
+  border-left: 3px solid var(--user-unknown-color) !important;
 }
 
 .empty-state {
@@ -770,18 +771,18 @@ onMounted(() => {
 }
 
 .person-badge.svetla {
-  background: #faf5ff;
-  color: #7c3aed;
+  background: var(--user-svetla-light);
+  color: var(--user-svetla-color);
 }
 
 .person-badge.dejan {
-  background: #ecfdf5;
-  color: #059669;
+  background: var(--user-dejan-light);
+  color: var(--user-dejan-color);
 }
 
 .person-badge.unknown {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--user-unknown-light);
+  color: var(--user-unknown-color);
 }
 
 .manual-label {
@@ -803,12 +804,7 @@ onMounted(() => {
   }
 
   .summary-card {
-    padding: 0.5rem 0.375rem;
-    box-shadow: 0 2px 8px var(--primary-shadow);
-  }
-
-  .summary-card:hover {
-    transform: none;
+    padding: 0.625rem 0.75rem;
   }
 
   .summary-month {
@@ -1053,17 +1049,13 @@ onMounted(() => {
   }
 }
 /* === Active (viewed) month summary card === */
-.summary-card {
-  border-radius: var(--radius-md, 12px);
-  box-shadow: var(--shadow-card);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+.summary-card.active {
+  border-color: var(--primary-color);
+  background: var(--primary-light);
 }
 
-.summary-card.active {
-  outline: 3px solid rgba(255, 255, 255, 0.65);
-  outline-offset: -3px;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
+.summary-card.active .summary-amount {
+  color: var(--primary-dark);
 }
 
 /* === Mobile card list === */
@@ -1074,15 +1066,14 @@ onMounted(() => {
 .mobile-card {
   background: var(--surface-card);
   border: 1px solid var(--border-color);
-  border-left: 4px solid var(--primary-color);
+  border-left: 3px solid var(--user-dejan-color);
   border-radius: var(--radius-md, 12px);
   padding: 0.875rem 1rem;
   margin-bottom: 0.75rem;
-  box-shadow: var(--shadow-card);
 }
 
 .mobile-card.card-svetla {
-  border-left-color: #a855f7;
+  border-left-color: var(--user-svetla-color);
 }
 
 .mobile-card-top {
@@ -1105,7 +1096,7 @@ onMounted(() => {
   font-weight: 700;
   font-size: 1rem;
   white-space: nowrap;
-  color: var(--text-primary);
+  color: var(--expense-color);
 }
 
 .mobile-card-mid {

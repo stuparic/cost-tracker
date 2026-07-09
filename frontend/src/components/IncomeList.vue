@@ -26,18 +26,20 @@
       </div>
 
       <div class="quick-filters">
-        <button
-          v-for="person in personFilters"
-          :key="person.value"
-          class="person-pill income-pill"
-          :class="{ active: selectedPerson === person.value }"
-          @click="
-            selectedPerson = person.value;
-            applyFilters();
-          "
-        >
-          {{ person.label }}
-        </button>
+        <div class="person-pills">
+          <button
+            v-for="person in personFilters"
+            :key="person.value"
+            class="person-pill income-pill"
+            :class="{ active: selectedPerson === person.value }"
+            @click="
+              selectedPerson = person.value;
+              applyFilters();
+            "
+          >
+            {{ person.label }}
+          </button>
+        </div>
         <Button label="Filteri" icon="pi pi-filter" outlined class="income-button" @click="filtersVisible = true" />
       </div>
     </div>
@@ -441,16 +443,16 @@ onMounted(() => {
 }
 
 .income-card {
-  background: linear-gradient(135deg, var(--income-color) 0%, var(--income-dark) 100%);
-  color: white;
-  box-shadow: 0 4px 12px var(--income-shadow);
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 .month-name {
   font-size: 0.75rem;
   font-weight: 600;
-  opacity: 0.9;
-  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.375rem;
   text-transform: capitalize;
 }
 
@@ -464,17 +466,19 @@ onMounted(() => {
 .amount-primary {
   font-size: 1.125rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--income-color);
 }
 
 .currency-label {
   font-size: 0.75rem;
   font-weight: 600;
-  opacity: 0.9;
+  color: var(--text-secondary);
 }
 
 .amount-secondary {
   font-size: 0.75rem;
-  opacity: 0.85;
+  color: var(--text-secondary);
   margin-top: 0.125rem;
 }
 
@@ -510,27 +514,26 @@ onMounted(() => {
 }
 
 .person-pill {
-  padding: 0.5rem 1rem;
-  border: 2px solid var(--border-color);
-  border-radius: 2rem;
-  background: white;
+  padding: 0.4rem 0.875rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
   color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 0.875rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
   font-family: inherit;
 }
 
 .person-pill.income-pill:hover {
-  border-color: var(--income-color);
   color: var(--income-color);
 }
 
 .person-pill.income-pill.active {
-  background: var(--income-color);
-  border-color: var(--income-color);
-  color: white;
+  background: var(--surface-card);
+  color: var(--income-color);
+  box-shadow: var(--shadow-card);
 }
 
 .income-button {
@@ -544,10 +547,11 @@ onMounted(() => {
 
 /* Data Table */
 .incomes-table {
-  background: white;
-  border-radius: 0.75rem;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .incomes-table :deep(.p-datatable-wrapper) {
@@ -559,11 +563,11 @@ onMounted(() => {
 }
 
 .incomes-table :deep(.row-income-svetla td:first-child) {
-  border-left: 4px solid #a855f7 !important;
+  border-left: 3px solid var(--user-svetla-color) !important;
 }
 
 .incomes-table :deep(.row-income-dejan td:first-child) {
-  border-left: 4px solid #10b981 !important;
+  border-left: 3px solid var(--user-dejan-color) !important;
 }
 
 .date-cell {
@@ -617,11 +621,13 @@ onMounted(() => {
 }
 
 .person-badge.person-svetla {
-  background: #a855f7;
+  background: var(--user-svetla-light);
+  color: var(--user-svetla-color);
 }
 
 .person-badge.person-dejan {
-  background: #10b981;
+  background: var(--user-dejan-light);
+  color: var(--user-dejan-color);
 }
 
 .action-buttons {
@@ -878,15 +884,12 @@ onMounted(() => {
 /* === Active (viewed) month summary card === */
 .summary-card {
   border-radius: var(--radius-md, 12px);
-  box-shadow: var(--shadow-card);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .summary-card.active {
-  outline: 3px solid rgba(255, 255, 255, 0.65);
-  outline-offset: -3px;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
+  border-color: var(--income-color);
+  background: var(--income-light);
 }
 
 /* === Mobile card list === */
@@ -897,15 +900,14 @@ onMounted(() => {
 .mobile-card {
   background: var(--surface-card);
   border: 1px solid var(--border-color);
-  border-left: 4px solid var(--income-color);
+  border-left: 3px solid var(--user-dejan-color);
   border-radius: var(--radius-md, 12px);
   padding: 0.875rem 1rem;
   margin-bottom: 0.75rem;
-  box-shadow: var(--shadow-card);
 }
 
 .mobile-card.card-svetla {
-  border-left-color: #a855f7;
+  border-left-color: var(--user-svetla-color);
 }
 
 .mobile-card-top {

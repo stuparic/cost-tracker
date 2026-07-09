@@ -10,6 +10,7 @@ import { HealthModule } from './health/health.module';
 import { RecurringModule } from './recurring/recurring.module';
 import { VoiceModule } from './voice/voice.module';
 import { StatementsModule } from './statements/statements.module';
+import { WebhookModule } from './webhook/webhook.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import firebaseConfig from './config/firebase.config';
 
@@ -27,7 +28,8 @@ import firebaseConfig from './config/firebase.config';
     HealthModule,
     RecurringModule,
     VoiceModule,
-    StatementsModule
+    StatementsModule,
+    WebhookModule
   ],
   controllers: [AppController],
   providers: [AppService]

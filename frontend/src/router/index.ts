@@ -5,7 +5,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 const routes = [
   {
     path: '/',
-    redirect: '/add'
+    name: 'Home',
+    component: () => import('@/components/HomeView.vue')
   },
   {
     path: '/add',

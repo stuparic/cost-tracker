@@ -214,7 +214,7 @@ async function handleSubmit() {
   padding: 0.5rem 0.875rem;
   border: 2px solid var(--border-color);
   border-radius: 2rem;
-  background: white;
+  background: var(--surface-card);
   color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.8125rem;

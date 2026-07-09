@@ -1,8 +1,8 @@
 import type { Currency } from '@/types/expense';
 
 export const USERS = [
-  { label: 'Svetla', value: 'Svetla', color: '#a855f7', colorHover: '#7c3aed', bgHover: '#faf5ff' },
-  { label: 'Dejan', value: 'Dejan', color: '#10b981', colorHover: '#059669', bgHover: '#ecfdf5' }
+  { label: 'Svetla', value: 'Svetla', color: '#7f77dd', colorHover: '#534ab7', bgHover: '#eeedfe' },
+  { label: 'Dejan', value: 'Dejan', color: '#1d9e75', colorHover: '#0f6e56', bgHover: '#e1f5ee' }
 ] as const;
 
 export type UserName = (typeof USERS)[number]['value'];

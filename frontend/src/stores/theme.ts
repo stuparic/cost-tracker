@@ -5,7 +5,8 @@ export type AccentColor = 'green' | 'purple' | 'blue';
 
 export const useThemeStore = defineStore('theme', () => {
   // Load from localStorage or use defaults
-  const currentAccent = ref<AccentColor>((localStorage.getItem('accent') as AccentColor) || 'green');
+  // v2 key: the redesign made purple the default; old 'accent' values predate it
+  const currentAccent = ref<AccentColor>((localStorage.getItem('accent-v2') as AccentColor) || 'purple');
   const isDarkMode = ref<boolean>(localStorage.getItem('darkMode') === 'true');
 
   // Apply accent to document root
@@ -25,7 +26,7 @@ export const useThemeStore = defineStore('theme', () => {
   // Set accent color
   function setAccent(accent: AccentColor) {
     currentAccent.value = accent;
-    localStorage.setItem('accent', accent);
+    localStorage.setItem('accent-v2', accent);
     applyAccent(accent);
   }
 
