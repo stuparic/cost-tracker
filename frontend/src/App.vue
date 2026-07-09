@@ -29,7 +29,7 @@
     <div class="app-container">
       <header class="app-header">
         <router-link to="/" class="brand">
-          <span class="brand-mark"><i class="pi pi-wallet"></i></span>
+          <img src="/icon.svg" alt="" class="brand-mark" />
           <span class="brand-name">Troškić</span>
         </router-link>
         <div class="header-actions">
@@ -304,16 +304,8 @@ body {
 .brand-mark {
   width: 34px;
   height: 34px;
-  border-radius: var(--radius-sm);
-  background: var(--primary-color);
-  color: var(--surface-card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.brand-mark i {
-  font-size: 1.05rem;
+  border-radius: 9px;
+  display: block;
 }
 
 .brand-name {

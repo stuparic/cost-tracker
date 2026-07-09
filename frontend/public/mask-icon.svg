@@ -1,22 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Monochrome coin stack for Safari pinned tab -->
+  <!-- Monochrome smiling sun-coin for Safari pinned tab -->
   <g fill="currentColor">
-    <!-- Bottom coin -->
-    <ellipse cx="256" cy="350" rx="110" ry="35"/>
-
-    <!-- Second coin -->
-    <ellipse cx="256" cy="300" rx="105" ry="33"/>
-
-    <!-- Third coin -->
-    <ellipse cx="256" cy="250" rx="100" ry="31"/>
-
-    <!-- Top coin -->
-    <ellipse cx="256" cy="200" rx="95" ry="29"/>
-
-    <!-- Main upright coin -->
-    <circle cx="251" cy="215" r="95"/>
-
-    <!-- Currency symbol -->
-    <text x="251" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="70" font-weight="bold" fill="#ffffff">$</text>
+    <path d="M256 40 a20 20 0 0 1 20 20 v36 a20 20 0 0 1 -40 0 V60 a20 20 0 0 1 20 -20z"/>
+    <path d="M97 97 a20 20 0 0 1 28 0 l26 26 a20 20 0 0 1 -28 28 l-26 -26 a20 20 0 0 1 0 -28z"/>
+    <path d="M415 97 a20 20 0 0 1 0 28 l-26 26 a20 20 0 0 1 -28 -28 l26 -26 a20 20 0 0 1 28 0z"/>
+    <path d="M40 256 a20 20 0 0 1 20 -20 h36 a20 20 0 0 1 0 40 H60 a20 20 0 0 1 -20 -20z"/>
+    <path d="M416 256 a20 20 0 0 1 20 -20 h36 a20 20 0 0 1 0 40 h-36 a20 20 0 0 1 -20 -20z"/>
+    <path d="M256 140 a160 160 0 1 1 0 320 a160 160 0 0 1 0 -320z
+             M208 261 a15 15 0 1 0 0 30 a15 15 0 0 0 0 -30z
+             M304 261 a15 15 0 1 0 0 30 a15 15 0 0 0 0 -30z
+             M196 322 a12 12 0 0 0 -8 21 q68 62 136 0 a12 12 0 0 0 -16 -18 q-52 46 -104 0 a12 12 0 0 0 -8 -3z"/>
   </g>
 </svg>
