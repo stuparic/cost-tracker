@@ -107,6 +107,13 @@ export class IncomesService {
     return this.incomesRepository.delete(id);
   }
 
+  /**
+   * Returns every income, unfiltered. Used for the full JSON backup.
+   */
+  async exportAll(): Promise<Income[]> {
+    return this.incomesRepository.findAllForExport({});
+  }
+
   async exportCsv(query: ExportIncomesDto): Promise<string> {
     const incomes = await this.incomesRepository.findAllForExport(query);
 

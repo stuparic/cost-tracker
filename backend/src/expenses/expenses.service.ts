@@ -123,6 +123,13 @@ export class ExpensesService {
     return this.expensesRepository.delete(id);
   }
 
+  /**
+   * Returns every expense, unfiltered. Used for the full JSON backup.
+   */
+  async exportAll(): Promise<Expense[]> {
+    return this.expensesRepository.findAllForExport({});
+  }
+
   async exportCsv(query: ExportExpensesDto): Promise<string> {
     const expenses = await this.expensesRepository.findAllForExport(query);
 

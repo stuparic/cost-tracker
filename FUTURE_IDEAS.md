@@ -218,17 +218,17 @@ Predložene ideje za unapređenje aplikacije Troškić za praćenje troškova do
 
 ### Export Podataka
 **Prioritet:** Srednji
-**Status:** ✅ Delimično implementirano (CSV, iz Bilans stranice)
+**Status:** ✅ Delimično implementirano (CSV i JSON backup, iz Bilans stranice)
 
 **Formati:**
 - ✅ CSV (za Excel/Google Sheets) — dugmići "Troškovi CSV" / "Prihodi CSV" na Bilans stranici, poštuju izabrani mesec i osobu
 - PDF izveštaji
-- JSON (backup)
+- ✅ JSON (backup) — dugme "Pun backup (JSON)" na Bilans stranici, preko `GET /backup/json`
 - Excel (.xlsx) sa formatiranjem
 
 **Opcije:**
 - ✅ Export filtriranog skupa (mesec + osoba, preko `GET /expenses/export/csv` i `/incomes/export/csv`)
-- Export svih podataka (bez filtera) na jedan klik
+- ✅ Export svih podataka (bez filtera) na jedan klik — `GET /backup/json` vraća sve troškove, prihode i budžete odjednom
 - Periodični automatski backup
 - Export sa grafikonima i analizom
 
@@ -479,5 +479,5 @@ Predložene ideje za unapređenje aplikacije Troškić za praćenje troškova do
 
 ---
 
-**Poslednja izmena:** 2026-01-13
+**Poslednja izmena:** 2026-07-10
 **Verzija:** 1.0

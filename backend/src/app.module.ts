@@ -12,6 +12,7 @@ import { VoiceModule } from './voice/voice.module';
 import { StatementsModule } from './statements/statements.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { BudgetsModule } from './budgets/budgets.module';
+import { BackupModule } from './backup/backup.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import firebaseConfig from './config/firebase.config';
 
@@ -31,7 +32,8 @@ import firebaseConfig from './config/firebase.config';
     VoiceModule,
     StatementsModule,
     WebhookModule,
-    BudgetsModule
+    BudgetsModule,
+    BackupModule
   ],
   controllers: [AppController],
   providers: [AppService]

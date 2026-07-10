@@ -28,6 +28,7 @@
       <div class="export-actions">
         <Button label="Troškovi CSV" icon="pi pi-download" text size="small" :loading="exportingExpenses" @click="exportExpenses" />
         <Button label="Prihodi CSV" icon="pi pi-download" text size="small" :loading="exportingIncomes" @click="exportIncomes" />
+        <Button label="Pun backup (JSON)" icon="pi pi-database" text size="small" :loading="exportingBackup" @click="exportBackup" />
       </div>
     </div>
 
@@ -112,6 +113,7 @@ import { useBalanceStore, type BalanceQueryParams } from '@/stores/balance';
 import { useBudgetsStore } from '@/stores/budgets';
 import { expenseApi } from '@/api/expenses';
 import { incomeApi } from '@/api/incomes';
+import { backupApi } from '@/api/backup';
 import { downloadBlob } from '@/utils/download';
 
 const { formatRSD, formatMonthYear } = useListFormatting();
@@ -120,6 +122,7 @@ const balanceStore = useBalanceStore();
 const budgetsStore = useBudgetsStore();
 const exportingExpenses = ref(false);
 const exportingIncomes = ref(false);
+const exportingBackup = ref(false);
 
 // Filters
 const currentMonth = ref(new Date());
@@ -282,6 +285,19 @@ async function exportIncomes() {
     showError('Izvoz prihoda nije uspeo.', error);
   } finally {
     exportingIncomes.value = false;
+  }
+}
+
+// Full, unfiltered JSON backup (all expenses, incomes and budgets)
+async function exportBackup() {
+  exportingBackup.value = true;
+  try {
+    const blob = await backupApi.exportJson();
+    downloadBlob(blob, `troskic-backup-${new Date().toISOString().slice(0, 10)}.json`);
+  } catch (error) {
+    showError('Backup nije uspeo.', error);
+  } finally {
+    exportingBackup.value = false;
   }
 }
 
