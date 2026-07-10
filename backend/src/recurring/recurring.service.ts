@@ -89,7 +89,8 @@ export class RecurringService {
       creationMethod: 'auto' as const
     };
 
-    return this.incomesService.create(createDto);
+    const ctx = occurrence.householdId ? { householdId: occurrence.householdId, uid: occurrence.createdByUid || '' } : undefined;
+    return this.incomesService.create(createDto, ctx);
   }
 
   private async createExpenseFromOccurrence(occurrence: RecurringOccurrence, purchaseDate: string) {
@@ -105,7 +106,8 @@ export class RecurringService {
       creationMethod: 'auto'
     };
 
-    return this.expensesService.create(createDto);
+    const ctx = occurrence.householdId ? { householdId: occurrence.householdId, uid: occurrence.createdByUid || '' } : undefined;
+    return this.expensesService.create(createDto, ctx);
   }
 
   private calculateNextDate(fromDate: string, frequency: string): string {

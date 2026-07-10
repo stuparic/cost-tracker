@@ -17,20 +17,20 @@ export class AutocompleteService {
     return this.firebaseService.getFirestore();
   }
 
-  getShops(search?: string): Promise<SuggestionItem[]> {
-    return this.getFieldSuggestions(data => data.shopName, search);
+  getShops(search?: string, householdId?: string): Promise<SuggestionItem[]> {
+    return this.getFieldSuggestions(data => data.shopName, search, householdId);
   }
 
-  getProducts(search?: string): Promise<SuggestionItem[]> {
-    return this.getFieldSuggestions(data => data.productDescription, search);
+  getProducts(search?: string, householdId?: string): Promise<SuggestionItem[]> {
+    return this.getFieldSuggestions(data => data.productDescription, search, householdId);
   }
 
-  getCategories(search?: string): Promise<SuggestionItem[]> {
-    return this.getFieldSuggestions(data => data.category, search);
+  getCategories(search?: string, householdId?: string): Promise<SuggestionItem[]> {
+    return this.getFieldSuggestions(data => data.category, search, householdId);
   }
 
-  getTags(search?: string): Promise<SuggestionItem[]> {
-    return this.getFieldSuggestions(data => (Array.isArray(data.tags) ? data.tags : []), search);
+  getTags(search?: string, householdId?: string): Promise<SuggestionItem[]> {
+    return this.getFieldSuggestions(data => (Array.isArray(data.tags) ? data.tags : []), search, householdId);
   }
 
   /**
@@ -40,9 +40,11 @@ export class AutocompleteService {
    */
   private async getFieldSuggestions(
     extract: (data: admin.firestore.DocumentData) => string | string[] | undefined,
-    search?: string
+    search?: string,
+    householdId?: string
   ): Promise<SuggestionItem[]> {
-    const snapshot = await this.firestore.collection(this.collectionName).get();
+    const base = this.firestore.collection(this.collectionName);
+    const snapshot = householdId ? await base.where('householdId', '==', householdId).get() : await base.get();
 
     const counts = new Map<string, number>();
     snapshot.docs.forEach(doc => {

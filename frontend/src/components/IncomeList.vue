@@ -237,6 +237,7 @@ import MobilePagination from './shared/MobilePagination.vue';
 import { useTransactionFormatting } from '@/composables/useTransactionFormatting';
 import { useMonthlySummaries } from '@/composables/useMonthlySummaries';
 import { useIncomesStore } from '@/stores/incomes';
+import { useAuthStore } from '@/stores/auth';
 import { incomeApi } from '@/api/incomes';
 import type { Income, IncomeType, QueryIncomesDto } from '@/types/income';
 import { incomeTypeLabels } from '@/types/income';
@@ -262,11 +263,14 @@ const editDialogVisible = ref(false);
 const selectedIncome = ref<Income | null>(null);
 
 // Person filters
-const personFilters = [
+const authStore = useAuthStore();
+const personFilters = computed(() => [
   { label: 'Sve', value: 'all' },
-  { label: 'Svetla', value: 'Svetla' },
-  { label: 'Dejan', value: 'Dejan' }
-];
+  ...(authStore.household?.members ?? []).map(member => {
+    const first = member.displayName.split(' ')[0] || member.displayName;
+    return { label: first, value: first };
+  })
+]);
 
 // Income type options for dropdown
 const incomeTypeOptions = [

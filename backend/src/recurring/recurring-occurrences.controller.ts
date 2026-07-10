@@ -4,6 +4,9 @@ import { RecurringOccurrencesRepository } from './recurring-occurrences.reposito
 import { RecurringService } from './recurring.service';
 import { CreateRecurringOccurrenceDto } from './dto/create-recurring-occurrence.dto';
 import { UpdateRecurringOccurrenceDto } from './dto/update-recurring-occurrence.dto';
+import { Public } from '../auth/public.decorator';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { requireHousehold, type AuthenticatedUser } from '../auth/firebase-auth.guard';
 
 @ApiTags('recurring-occurrences')
 @Controller('recurring-occurrences')
@@ -13,6 +16,7 @@ export class RecurringOccurrencesController {
     private recurringService: RecurringService
   ) {}
 
+  @Public()
   @Post('process-due')
   @ApiOperation({
     summary: 'Process all due recurring occurrences',
@@ -30,14 +34,14 @@ export class RecurringOccurrencesController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new recurring occurrence template' })
-  async create(@Body() dto: CreateRecurringOccurrenceDto) {
-    return this.repository.create(dto);
+  async create(@Body() dto: CreateRecurringOccurrenceDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.repository.create(dto, { householdId: requireHousehold(user), uid: user.uid });
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all recurring occurrences for a user' })
-  async findAll(@Query('userId') userId: string) {
-    return this.repository.findAll(userId);
+  async findAll(@Query('userId') userId: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.repository.findAll(userId, requireHousehold(user));
   }
 
   @Get(':id')

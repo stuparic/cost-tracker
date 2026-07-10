@@ -1,16 +1,22 @@
 import { createHash } from 'crypto';
-import { Injectable, Logger, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ExpensesService } from '../expenses/expenses.service';
-import { normalizeCreatedBy } from '../common/utils/normalize-created-by';
+import { ExpenseDraftsService } from '../expenses/expense-drafts.service';
+import { UsersRepository } from '../users/users.repository';
 import { NotificationParserService } from './notification-parser.service';
 import { PaymentNotificationDto } from './dto/payment-notification.dto';
-import type { Expense } from '../expenses/interfaces/expense.interface';
+import type { ExpenseDraft } from '../expenses/interfaces/expense-draft.interface';
+import type { UserProfile } from '../users/interfaces/user.interface';
 
 export interface WebhookResult {
   status: 'created' | 'duplicate';
-  expense?: Expense;
+  draft?: ExpenseDraft;
 }
+
+/** Legacy shared token from before per-user tokens existed; maps to the owner account. */
+const LEGACY_WEBHOOK_TOKEN = 'zuti-patak-broji-dinare-77';
+const LEGACY_OWNER_EMAIL = 'dejan.stuparic@heydata.eu';
 
 @Injectable()
 export class WebhookService {
@@ -18,11 +24,31 @@ export class WebhookService {
 
   constructor(
     private readonly expensesService: ExpensesService,
+    private readonly draftsService: ExpenseDraftsService,
+    private readonly usersRepository: UsersRepository,
     private readonly parser: NotificationParserService,
     private readonly config: ConfigService
   ) {}
 
-  async handlePaymentNotification(dto: PaymentNotificationDto): Promise<WebhookResult> {
+  /** Resolves the phone's shared-secret header to a household member. */
+  async resolveUser(token: string | undefined): Promise<UserProfile> {
+    if (!token) {
+      throw new UnauthorizedException('Missing webhook token');
+    }
+
+    const byToken = await this.usersRepository.findUserByWebhookToken(token);
+    if (byToken) return byToken;
+
+    const legacy = this.config.get<string>('WEBHOOK_TOKEN') || LEGACY_WEBHOOK_TOKEN;
+    if (token === legacy) {
+      const owner = await this.usersRepository.findUserByEmail(LEGACY_OWNER_EMAIL);
+      if (owner) return owner;
+    }
+
+    throw new UnauthorizedException('Invalid webhook token');
+  }
+
+  async handlePaymentNotification(user: UserProfile, dto: PaymentNotificationDto): Promise<WebhookResult> {
     const parsed = this.parser.parse(dto.text, dto.title);
 
     if (!parsed) {
@@ -39,15 +65,16 @@ export class WebhookService {
         .digest('hex')
         .slice(0, 20);
 
-    if (await this.expensesService.existsByBankRef(bankRef)) {
+    if ((await this.draftsService.existsByBankRef(bankRef)) || (await this.expensesService.existsByBankRef(bankRef, user.householdId))) {
       this.logger.log(`Skipping duplicate notification (${bankRef})`);
       return { status: 'duplicate' };
     }
 
-    const createdBy = normalizeCreatedBy(dto.createdBy || this.config.get<string>('WEBHOOK_DEFAULT_USER') || 'Dejan');
+    const createdBy = user.displayName.split(' ')[0] || user.displayName;
     const merchant = parsed.merchant ?? 'Nepoznato';
 
-    const expense = await this.expensesService.create({
+    // Notifications land as invisible drafts; the owner reviews them in the app
+    const draft = await this.draftsService.create({
       amount: parsed.amount,
       currency: parsed.currency,
       shopName: merchant,
@@ -56,11 +83,13 @@ export class WebhookService {
       tags: ['auto-notifikacija'],
       purchaseDate: new Date().toISOString(),
       createdBy,
+      createdByUid: user.uid,
+      householdId: user.householdId,
       bankRef,
       creationMethod: 'statement'
     });
 
-    this.logger.log(`Created expense from notification: ${merchant} ${parsed.amount} ${parsed.currency} (${createdBy})`);
-    return { status: 'created', expense };
+    this.logger.log(`Created expense draft from notification: ${merchant} ${parsed.amount} ${parsed.currency} (${createdBy})`);
+    return { status: 'created', draft };
   }
 }

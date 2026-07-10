@@ -20,7 +20,7 @@ export class RecurringOccurrencesRepository {
     return date.toISOString();
   }
 
-  async create(dto: CreateRecurringOccurrenceDto): Promise<RecurringOccurrence> {
+  async create(dto: CreateRecurringOccurrenceDto, ctx?: { householdId: string; uid: string }): Promise<RecurringOccurrence> {
     const docRef = this.firestore.collection(this.collectionName).doc();
 
     const occurrence: Omit<RecurringOccurrence, 'id'> = {
@@ -43,6 +43,9 @@ export class RecurringOccurrencesRepository {
       recurringAt: dto.recurringAt ?? new Date().toISOString(),
       recurringUntil: dto.recurringUntil ?? this.getDefaultRecurringUntil(),
       nextOccurrenceDate: dto.startDate,
+
+      householdId: ctx?.householdId,
+      createdByUid: ctx?.uid,
 
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -80,12 +83,12 @@ export class RecurringOccurrencesRepository {
       });
   }
 
-  async findAll(userId: string): Promise<RecurringOccurrence[]> {
-    const snapshot = await this.firestore
-      .collection(this.collectionName)
-      .where('createdBy', '==', userId)
-      .orderBy('createdAt', 'desc')
-      .get();
+  async findAll(userId: string, householdId?: string): Promise<RecurringOccurrence[]> {
+    let query = this.firestore.collection(this.collectionName).where('createdBy', '==', userId) as any;
+    if (householdId) {
+      query = query.where('householdId', '==', householdId);
+    }
+    const snapshot = await query.orderBy('createdAt', 'desc').get();
 
     return snapshot.docs.map(
       doc =>

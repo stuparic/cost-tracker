@@ -229,6 +229,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useExpensesStore } from '@/stores/expenses';
+import { useAuthStore } from '@/stores/auth';
 import { useToast } from 'primevue/usetoast';
 import { autocompleteApi } from '@/api/autocomplete';
 import { expenseApi } from '@/api/expenses';
@@ -272,12 +273,15 @@ const filters = reactive({
   category: ''
 });
 
-// Person filter options
-const personOptions = [
+// Person filter options come from the household members
+const authStore = useAuthStore();
+const personOptions = computed(() => [
   { label: 'Sve', value: '' },
-  { label: 'Svetla', value: 'Svetla' },
-  { label: 'Dejan', value: 'Dejan' }
-];
+  ...(authStore.household?.members ?? []).map(member => {
+    const first = member.displayName.split(' ')[0] || member.displayName;
+    return { label: first, value: first };
+  })
+]);
 
 // Autocomplete suggestions
 const shopSuggestions = ref<string[]>([]);

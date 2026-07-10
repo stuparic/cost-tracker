@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { ApiError } from '@/types/api';
+import { firebaseAuth } from '@/firebase';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -9,9 +10,13 @@ const apiClient = axios.create({
   }
 });
 
-// Request interceptor for logging (development only)
+// Attach the Firebase ID token to every request (refreshes automatically when stale)
 apiClient.interceptors.request.use(
-  config => {
+  async config => {
+    const user = firebaseAuth.currentUser;
+    if (user) {
+      config.headers.Authorization = `Bearer ${await user.getIdToken()}`;
+    }
     if (import.meta.env.VITE_ENABLE_LOGS === 'true') {
       console.log('API Request:', config.method?.toUpperCase(), config.url);
     }

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ExpensesService } from '../expenses/expenses.service';
 import { IncomesService } from '../incomes/incomes.service';
 import { BudgetsService } from '../budgets/budgets.service';
+import { HouseholdContext } from '../common/interfaces/household-context.interface';
 
 @Injectable()
 export class BackupService {
@@ -16,11 +17,11 @@ export class BackupService {
    * budget in the system. Intended as a one-click manual backup, not a
    * paginated API response.
    */
-  async buildFullBackup() {
+  async buildFullBackup(ctx: HouseholdContext) {
     const [expenses, incomes, budgets] = await Promise.all([
-      this.expensesService.exportAll(),
-      this.incomesService.exportAll(),
-      this.budgetsService.findAll()
+      this.expensesService.exportAll(ctx),
+      this.incomesService.exportAll(ctx),
+      this.budgetsService.findAll(ctx.householdId)
     ]);
 
     return {

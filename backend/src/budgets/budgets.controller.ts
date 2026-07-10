@@ -2,6 +2,8 @@ import { Controller, Get, Put, Body, Param, Delete, HttpCode, HttpStatus } from 
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { BudgetsService } from './budgets.service';
 import { UpsertBudgetDto } from './dto/upsert-budget.dto';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { requireHousehold, type AuthenticatedUser } from '../auth/firebase-auth.guard';
 
 @ApiTags('budgets')
 @Controller('budgets')
@@ -14,8 +16,8 @@ export class BudgetsController {
     description: 'Retrieves the monthly spending limit configured for each category'
   })
   @ApiResponse({ status: 200, description: 'List of category budgets' })
-  findAll() {
-    return this.budgetsService.findAll();
+  findAll(@CurrentUser() user: AuthenticatedUser) {
+    return this.budgetsService.findAll(requireHousehold(user));
   }
 
   @Put(':category')
@@ -26,8 +28,8 @@ export class BudgetsController {
   @ApiParam({ name: 'category', description: 'Expense category' })
   @ApiResponse({ status: 200, description: 'Budget successfully set' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
-  setLimit(@Param('category') category: string, @Body() upsertBudgetDto: UpsertBudgetDto) {
-    return this.budgetsService.setLimit(category, upsertBudgetDto.monthlyLimit);
+  setLimit(@Param('category') category: string, @Body() upsertBudgetDto: UpsertBudgetDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.budgetsService.setLimit(requireHousehold(user), category, upsertBudgetDto.monthlyLimit);
   }
 
   @Delete(':category')
@@ -39,7 +41,7 @@ export class BudgetsController {
   @ApiParam({ name: 'category', description: 'Expense category' })
   @ApiResponse({ status: 204, description: 'Budget successfully removed' })
   @ApiResponse({ status: 404, description: 'Budget not found' })
-  remove(@Param('category') category: string) {
-    return this.budgetsService.remove(category);
+  remove(@Param('category') category: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.budgetsService.remove(requireHousehold(user), category);
   }
 }

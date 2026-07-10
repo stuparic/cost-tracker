@@ -30,10 +30,13 @@ export class IncomesRepository {
     return this.mapDocToIncome(doc);
   }
 
-  async findAll(query: QueryIncomesDto): Promise<{ data: Income[]; total: number }> {
+  async findAll(query: QueryIncomesDto & { householdId?: string }): Promise<{ data: Income[]; total: number }> {
     let firestoreQuery = this.firestore.collection(this.collectionName);
 
     // Apply filters
+    if (query.householdId) {
+      firestoreQuery = firestoreQuery.where('householdId', '==', query.householdId) as any;
+    }
     if (query.incomeType) {
       firestoreQuery = firestoreQuery.where('incomeType', '==', query.incomeType) as any;
     }
@@ -71,8 +74,12 @@ export class IncomesRepository {
     return { data, total };
   }
 
-  async existsByBankRef(bankRef: string): Promise<boolean> {
-    const snapshot = await this.firestore.collection(this.collectionName).where('bankRef', '==', bankRef).limit(1).get();
+  async existsByBankRef(bankRef: string, householdId?: string): Promise<boolean> {
+    let query = this.firestore.collection(this.collectionName).where('bankRef', '==', bankRef) as any;
+    if (householdId) {
+      query = query.where('householdId', '==', householdId);
+    }
+    const snapshot = await query.limit(1).get();
     return !snapshot.empty;
   }
 
@@ -86,9 +93,13 @@ export class IncomesRepository {
     createdBy?: string;
     startDate?: string;
     endDate?: string;
+    householdId?: string;
   }): Promise<Income[]> {
     let firestoreQuery = this.firestore.collection(this.collectionName);
 
+    if (filters.householdId) {
+      firestoreQuery = firestoreQuery.where('householdId', '==', filters.householdId) as any;
+    }
     if (filters.incomeType) {
       firestoreQuery = firestoreQuery.where('incomeType', '==', filters.incomeType) as any;
     }
@@ -174,7 +185,9 @@ export class IncomesRepository {
       creationMethod: data.creationMethod,
       voiceTranscript: data.voiceTranscript,
       recurringOccurrenceId: data.recurringOccurrenceId,
-      bankRef: data.bankRef
+      bankRef: data.bankRef,
+      householdId: data.householdId,
+      createdByUid: data.createdByUid
     };
   }
 }

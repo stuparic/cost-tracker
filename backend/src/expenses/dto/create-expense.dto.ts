@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Allow, IsNumber, IsEnum, IsString, MinLength, IsArray, IsDateString, Min, IsOptional } from 'class-validator';
+import { Allow, IsBoolean, IsNumber, IsEnum, IsString, MinLength, IsArray, IsDateString, Min, IsOptional } from 'class-validator';
 
 // Base class with common fields
 export class BaseCreateExpenseDto {
@@ -80,6 +80,11 @@ export class BaseCreateExpenseDto {
 
 // Manual creation DTO - user enters data manually
 export class CreateExpenseManualDto extends BaseCreateExpenseDto {
+  @ApiProperty({ required: false, description: 'Private expenses hide details from other household members' })
+  @IsOptional()
+  @IsBoolean()
+  private?: boolean;
+
   // @Allow keeps the whitelist ValidationPipe (forbidNonWhitelisted) from
   // rejecting this self-initialized field as a non-whitelisted property
   @Allow()

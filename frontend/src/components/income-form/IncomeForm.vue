@@ -161,7 +161,7 @@ import Textarea from 'primevue/textarea';
 import DatePicker from 'primevue/datepicker';
 import Checkbox from 'primevue/checkbox';
 import { useIncomesStore } from '@/stores/incomes';
-import { useUserStore } from '@/stores/user';
+import { useCurrentMember } from '@/composables/useCurrentMember';
 import type { CreateIncomeDto, Currency, IncomeType } from '@/types/income';
 import { incomeTypeLabels } from '@/types/income';
 import { recurringFrequencyLabels, type RecurringFrequency, type CreateRecurringOccurrenceDto } from '@/types/recurring-occurrence';
@@ -169,23 +169,25 @@ import apiClient from '@/api/client';
 
 const toast = useToast();
 const incomesStore = useIncomesStore();
-const userStore = useUserStore();
+const { firstName } = useCurrentMember();
 
-// Personalized greeting based on selected user
+// Personalized greeting based on the signed-in member
 const greeting = computed(() => {
-  if (userStore.selectedUser === 'svetla') {
+  if (firstName.value.toLowerCase() === 'svetla') {
     return 'Šta si zaradila danas, Svetla?';
-  } else if (userStore.selectedUser === 'dejan') {
+  }
+  if (firstName.value.toLowerCase() === 'dejan') {
     return 'Šta si zaradio danas, Dejane?';
   }
-  return 'Brzi unos prihoda';
+  return `Brzi unos prihoda, ${firstName.value}`;
 });
 
-// Smart defaults based on user
+// Smart defaults based on the signed-in member
 const getDefaultSource = () => {
-  if (userStore.selectedUser === 'svetla') {
+  if (firstName.value.toLowerCase() === 'svetla') {
     return 'Dom zdravlja Titel';
-  } else if (userStore.selectedUser === 'dejan') {
+  }
+  if (firstName.value.toLowerCase() === 'dejan') {
     return 'Symphony';
   }
   return '';
@@ -257,7 +259,7 @@ async function handleSubmit() {
         startDate: form.startDate.toISOString(),
         recurringAt: form.recurringAt?.toISOString(),
         recurringUntil: form.recurringUntil?.toISOString(),
-        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan'
+        createdBy: firstName.value
       };
 
       await apiClient.post('/recurring-occurrences', occurrenceData);
@@ -276,7 +278,7 @@ async function handleSubmit() {
         source: form.source.trim(),
         incomeType: form.incomeType,
         dateReceived: dateReceived.value.toISOString(),
-        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan'
+        createdBy: firstName.value
       };
 
       // Add description if provided

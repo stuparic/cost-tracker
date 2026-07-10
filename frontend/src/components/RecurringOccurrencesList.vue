@@ -70,7 +70,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useUserStore } from '@/stores/user';
+import { useCurrentMember } from '@/composables/useCurrentMember';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import apiClient from '@/api/client';
@@ -81,7 +81,7 @@ import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import ConfirmDialog from 'primevue/confirmdialog';
 
-const userStore = useUserStore();
+const { firstName } = useCurrentMember();
 const toast = useToast();
 const confirm = useConfirm();
 const occurrences = ref<RecurringOccurrence[]>([]);
@@ -91,7 +91,7 @@ const deletingId = ref<string | null>(null);
 async function fetchOccurrences() {
   loading.value = true;
   try {
-    const userId = userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan';
+    const userId = firstName.value;
     const response = await apiClient.get(`/recurring-occurrences?userId=${userId}`);
     occurrences.value = response.data;
   } catch {

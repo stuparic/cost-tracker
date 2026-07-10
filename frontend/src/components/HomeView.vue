@@ -31,6 +31,12 @@
       </div>
     </section>
 
+    <router-link v-if="draftCount > 0" to="/drafts" class="drafts-banner">
+      <i class="pi pi-inbox"></i>
+      <span class="drafts-text">{{ draftCount }} {{ draftCount === 1 ? 'trošak čeka' : 'troška čeka' }} tvoju potvrdu</span>
+      <i class="pi pi-chevron-right"></i>
+    </router-link>
+
     <section class="recent-section">
       <div class="recent-header">
         <h2>Poslednje</h2>
@@ -62,14 +68,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useBalanceStore } from '@/stores/balance';
+import { draftsApi } from '@/api/drafts';
 import { useTransactionFormatting } from '@/composables/useTransactionFormatting';
 import { CATEGORY_LABELS, type ExpenseCategory } from '@/constants/categories';
 import { categoryColor, categoryIcon } from '@/constants/category-style';
 import { incomeTypeLabels } from '@/types/income';
 
 const balanceStore = useBalanceStore();
+const draftCount = ref(0);
 const { formatNumber, formatRelativeDate, formatMonthYear } = useTransactionFormatting();
 
 const now = new Date();
@@ -147,10 +155,16 @@ const recentItems = computed<RecentItem[]>(() => {
   return [...expenses, ...incomes].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
 });
 
-onMounted(() => {
+onMounted(async () => {
   const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
   balanceStore.fetchBalanceData({ startDate, endDate, limit: 1000 });
+
+  try {
+    draftCount.value = (await draftsApi.listMine()).length;
+  } catch {
+    draftCount.value = 0;
+  }
 });
 </script>
 
@@ -267,6 +281,24 @@ onMounted(() => {
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--hero-text);
+}
+
+.drafts-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--primary-light);
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.drafts-banner .drafts-text {
+  flex: 1;
 }
 
 .recent-section {

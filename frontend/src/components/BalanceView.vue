@@ -133,6 +133,7 @@ import IncomeBreakdownList from '@/components/shared/IncomeBreakdownList.vue';
 import { CATEGORY_LABELS, type ExpenseCategory } from '@/constants/categories';
 import { categoryColor } from '@/constants/category-style';
 import { useBalanceStore, type BalanceQueryParams } from '@/stores/balance';
+import { useAuthStore } from '@/stores/auth';
 import { useBudgetsStore } from '@/stores/budgets';
 import { expenseApi } from '@/api/expenses';
 import { incomeApi } from '@/api/incomes';
@@ -151,11 +152,14 @@ const exportingBackup = ref(false);
 const currentMonth = ref(new Date());
 const selectedPerson = ref('all');
 
-const personOptions = [
+const authStore = useAuthStore();
+const personOptions = computed(() => [
   { label: 'Svi', value: 'all' },
-  { label: 'Svetla', value: 'Svetla' },
-  { label: 'Dejan', value: 'Dejan' }
-];
+  ...(authStore.household?.members ?? []).map(member => {
+    const first = member.displayName.split(' ')[0] || member.displayName;
+    return { label: first, value: first };
+  })
+]);
 
 // Month navigation
 const currentMonthLabel = computed(() => formatMonthYear(currentMonth.value));

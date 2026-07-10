@@ -5,6 +5,12 @@ import { IncomesService } from './incomes.service';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
 import { QueryIncomesDto } from './dto/query-incomes.dto';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { requireHousehold, type AuthenticatedUser } from '../auth/firebase-auth.guard';
+
+function ctxOf(user: AuthenticatedUser) {
+  return { householdId: requireHousehold(user), uid: user.uid, displayName: user.displayName };
+}
 import { ExportIncomesDto } from './dto/export-incomes.dto';
 
 @ApiTags('incomes')
@@ -22,8 +28,8 @@ export class IncomesController {
     description: 'Income successfully created'
   })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
-  create(@Body() createIncomeDto: CreateIncomeDto) {
-    return this.incomesService.create(createIncomeDto);
+  create(@Body() createIncomeDto: CreateIncomeDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.incomesService.create(createIncomeDto, ctxOf(user));
   }
 
   @Get()
@@ -35,8 +41,8 @@ export class IncomesController {
     status: 200,
     description: 'List of incomes with pagination info'
   })
-  findAll(@Query() query: QueryIncomesDto) {
-    return this.incomesService.findAll(query);
+  findAll(@Query() query: QueryIncomesDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.incomesService.findAll(query, ctxOf(user));
   }
 
   @Get('export/csv')
@@ -45,8 +51,8 @@ export class IncomesController {
     description: 'Exports all incomes matching the given filters (no pagination) as a downloadable CSV file.'
   })
   @ApiResponse({ status: 200, description: 'CSV file' })
-  async exportCsv(@Query() query: ExportIncomesDto, @Res() res: Response) {
-    const csv = await this.incomesService.exportCsv(query);
+  async exportCsv(@Query() query: ExportIncomesDto, @Res() res: Response, @CurrentUser() user: AuthenticatedUser) {
+    const csv = await this.incomesService.exportCsv(query, ctxOf(user));
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="prihodi-${new Date().toISOString().slice(0, 10)}.csv"`);
     res.send(csv);
@@ -60,8 +66,8 @@ export class IncomesController {
   @ApiParam({ name: 'id', description: 'Income ID' })
   @ApiResponse({ status: 200, description: 'Income found' })
   @ApiResponse({ status: 404, description: 'Income not found' })
-  findOne(@Param('id') id: string) {
-    return this.incomesService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.incomesService.findOne(id, ctxOf(user));
   }
 
   @Patch(':id')
@@ -73,8 +79,8 @@ export class IncomesController {
   @ApiResponse({ status: 200, description: 'Income successfully updated' })
   @ApiResponse({ status: 404, description: 'Income not found' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
-  update(@Param('id') id: string, @Body() updateIncomeDto: UpdateIncomeDto) {
-    return this.incomesService.update(id, updateIncomeDto);
+  update(@Param('id') id: string, @Body() updateIncomeDto: UpdateIncomeDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.incomesService.update(id, updateIncomeDto, ctxOf(user));
   }
 
   @Delete(':id')
@@ -86,7 +92,7 @@ export class IncomesController {
   @ApiParam({ name: 'id', description: 'Income ID' })
   @ApiResponse({ status: 204, description: 'Income successfully deleted' })
   @ApiResponse({ status: 404, description: 'Income not found' })
-  remove(@Param('id') id: string) {
-    return this.incomesService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.incomesService.remove(id, ctxOf(user));
   }
 }

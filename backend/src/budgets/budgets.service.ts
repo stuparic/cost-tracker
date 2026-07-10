@@ -6,15 +6,15 @@ import { Budget } from './interfaces/budget.interface';
 export class BudgetsService {
   constructor(private budgetsRepository: BudgetsRepository) {}
 
-  async findAll(): Promise<Budget[]> {
-    return this.budgetsRepository.findAll();
+  async findAll(householdId: string): Promise<Budget[]> {
+    return this.budgetsRepository.findAll(householdId);
   }
 
-  async setLimit(category: string, monthlyLimit: number): Promise<Budget> {
-    return this.budgetsRepository.upsert(category, monthlyLimit);
+  async setLimit(householdId: string, category: string, monthlyLimit: number): Promise<Budget> {
+    return this.budgetsRepository.upsert(householdId, category, monthlyLimit);
   }
 
-  async remove(category: string): Promise<void> {
-    return this.budgetsRepository.delete(category);
+  async remove(householdId: string, category: string): Promise<void> {
+    return this.budgetsRepository.delete(householdId, category);
   }
 }

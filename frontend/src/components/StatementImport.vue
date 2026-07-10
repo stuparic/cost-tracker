@@ -184,16 +184,15 @@ import Select from 'primevue/select';
 import Tag from 'primevue/tag';
 import { statementApi } from '@/api/statements';
 import { useAppToast } from '@/composables/useAppToast';
-import { useUserStore } from '@/stores/user';
+import { useCurrentMember } from '@/composables/useCurrentMember';
 import { useBalanceStore } from '@/stores/balance';
 import { CATEGORY_LABELS, EXPENSE_CATEGORIES } from '@/constants/categories';
 import { incomeTypeLabels, type IncomeType } from '@/types/income';
-import { USERS } from '@/constants/app';
 import { LOCALE } from '@/constants/app';
 import type { ParseStatementResult, StatementTransaction } from '@/types/statement';
 
 const { showSuccess, showError } = useAppToast();
-const userStore = useUserStore();
+const { firstName } = useCurrentMember();
 const balanceStore = useBalanceStore();
 
 const fileInput = ref<HTMLInputElement>();
@@ -241,11 +240,7 @@ const selectedIncomeTotal = computed(() =>
   credits.value.filter(tx => selectedCreditRefs.value.includes(tx.ref)).reduce((sum, tx) => sum + tx.amount, 0)
 );
 
-/** The user store keeps lowercase ids; expenses store proper names */
-const createdBy = computed(() => {
-  const current = userStore.selectedUser;
-  return USERS.find(user => user.value.toLowerCase() === current)?.value ?? 'Dejan';
-});
+const createdBy = computed(() => firstName.value);
 
 function onZoneClick() {
   if (parsing.value || !fileInput.value) return;

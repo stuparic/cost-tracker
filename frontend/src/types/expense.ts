@@ -21,9 +21,12 @@ export interface Expense {
   recurringOccurrenceId?: string;
   creationMethod?: CreationMethod;
   voiceTranscript?: string;
+  createdByUid?: string;
+  private?: boolean;
 }
 
 export interface CreateExpenseDto {
+  private?: boolean;
   amount: number;
   currency: Currency;
   shopName: string;

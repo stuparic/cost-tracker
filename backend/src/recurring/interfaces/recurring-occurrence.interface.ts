@@ -25,6 +25,10 @@ export interface RecurringOccurrence {
   recurringUntil?: string;
   nextOccurrenceDate: string;
 
+  // Household scoping
+  householdId?: string;
+  createdByUid?: string;
+
   // Status
   isActive: boolean;
   createdAt: string;

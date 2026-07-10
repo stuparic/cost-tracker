@@ -17,4 +17,6 @@ export interface Income {
   voiceTranscript?: string;
   /** Bank transaction reference, set when imported from a statement (used for duplicate detection) */
   bankRef?: string;
+  householdId?: string;
+  createdByUid?: string;
 }

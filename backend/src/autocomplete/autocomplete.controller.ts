@@ -2,6 +2,8 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AutocompleteService } from './autocomplete.service';
 import { AutocompleteQueryDto } from './dto/autocomplete-query.dto';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { requireHousehold, type AuthenticatedUser } from '../auth/firebase-auth.guard';
 
 @ApiTags('autocomplete')
 @Controller('autocomplete')
@@ -25,8 +27,8 @@ export class AutocompleteController {
       }
     }
   })
-  async getShops(@Query() query: AutocompleteQueryDto) {
-    const suggestions = await this.autocompleteService.getShops(query.search);
+  async getShops(@Query() query: AutocompleteQueryDto, @CurrentUser() user: AuthenticatedUser) {
+    const suggestions = await this.autocompleteService.getShops(query.search, requireHousehold(user));
     return { suggestions };
   }
 
@@ -39,8 +41,8 @@ export class AutocompleteController {
     status: 200,
     description: 'List of product suggestions with usage count'
   })
-  async getProducts(@Query() query: AutocompleteQueryDto) {
-    const suggestions = await this.autocompleteService.getProducts(query.search);
+  async getProducts(@Query() query: AutocompleteQueryDto, @CurrentUser() user: AuthenticatedUser) {
+    const suggestions = await this.autocompleteService.getProducts(query.search, requireHousehold(user));
     return { suggestions };
   }
 
@@ -53,8 +55,8 @@ export class AutocompleteController {
     status: 200,
     description: 'List of category suggestions with usage count'
   })
-  async getCategories(@Query() query: AutocompleteQueryDto) {
-    const suggestions = await this.autocompleteService.getCategories(query.search);
+  async getCategories(@Query() query: AutocompleteQueryDto, @CurrentUser() user: AuthenticatedUser) {
+    const suggestions = await this.autocompleteService.getCategories(query.search, requireHousehold(user));
     return { suggestions };
   }
 
@@ -67,8 +69,8 @@ export class AutocompleteController {
     status: 200,
     description: 'List of tag suggestions with usage count'
   })
-  async getTags(@Query() query: AutocompleteQueryDto) {
-    const suggestions = await this.autocompleteService.getTags(query.search);
+  async getTags(@Query() query: AutocompleteQueryDto, @CurrentUser() user: AuthenticatedUser) {
+    const suggestions = await this.autocompleteService.getTags(query.search, requireHousehold(user));
     return { suggestions };
   }
 }

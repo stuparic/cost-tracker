@@ -173,6 +173,15 @@
         />
       </div>
 
+      <!-- Private toggle -->
+      <label v-if="!form.isRecurring" class="private-row">
+        <Checkbox v-model="form.private" :binary="true" input-id="privateExpense" />
+        <span class="private-label">
+          <i class="pi pi-lock"></i>
+          Privatan trošak — detalji vidljivi samo tebi, iznos ulazi u zajednički bilans
+        </span>
+      </label>
+
       <!-- Submit Button -->
       <Button label="Sačuvaj" type="submit" :loading="loading" :disabled="!isFormValid" class="submit-btn" size="large" />
     </form>
@@ -192,7 +201,7 @@ import Chips from 'primevue/chips';
 import DatePicker from 'primevue/datepicker';
 import Checkbox from 'primevue/checkbox';
 import { useExpensesStore } from '@/stores/expenses';
-import { useUserStore } from '@/stores/user';
+import { useCurrentMember } from '@/composables/useCurrentMember';
 import { autocompleteApi } from '@/api/autocomplete';
 import { inferCategory, getConfidenceIcon } from '@/utils/category-inference';
 import type { CreateExpenseDto, Currency } from '@/types/expense';
@@ -202,16 +211,17 @@ import apiClient from '@/api/client';
 
 const toast = useToast();
 const expensesStore = useExpensesStore();
-const userStore = useUserStore();
+const { firstName } = useCurrentMember();
 
-// Personalized greeting based on selected user
+// Personalized greeting based on the signed-in member
 const greeting = computed(() => {
-  if (userStore.selectedUser === 'svetla') {
+  if (firstName.value.toLowerCase() === 'svetla') {
     return 'Šta si kupila danas, Svetla?';
-  } else if (userStore.selectedUser === 'dejan') {
+  }
+  if (firstName.value.toLowerCase() === 'dejan') {
     return 'Šta si potrošio danas, Dejane?';
   }
-  return 'Brzi unos troška';
+  return `Brzi unos troška, ${firstName.value}`;
 });
 
 // Form state
@@ -224,6 +234,7 @@ const form = reactive({
   paymentMethod: 'Kartica',
   tags: [] as string[],
   isRecurring: false,
+  private: false,
   recurringFrequency: 'monthly' as RecurringFrequency,
   startDate: new Date(),
   recurringAt: null as Date | null,
@@ -357,7 +368,7 @@ async function handleSubmit() {
         startDate: form.startDate.toISOString(),
         recurringAt: form.recurringAt?.toISOString(),
         recurringUntil: form.recurringUntil?.toISOString(),
-        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan'
+        createdBy: firstName.value
       };
 
       await apiClient.post('/recurring-occurrences', occurrenceData);
@@ -375,7 +386,8 @@ async function handleSubmit() {
         currency: form.currency,
         shopName: form.shopName.trim(),
         purchaseDate: purchaseDate.value.toISOString(),
-        createdBy: userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan'
+        createdBy: firstName.value,
+        private: form.private || undefined
       };
 
       // Add optional fields only if provided
@@ -592,6 +604,26 @@ function resetForm() {
   color: var(--text-secondary);
   margin-left: auto;
   font-weight: 400;
+}
+
+.private-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0.25rem 0 1rem;
+  cursor: pointer;
+}
+
+.private-label {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.private-label i {
+  font-size: 0.75rem;
 }
 
 .submit-btn {

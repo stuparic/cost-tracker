@@ -7,6 +7,7 @@ import { CurrencyService } from '../currency/currency.service';
 import { StatementParserService } from './statement-parser.service';
 import { ImportStatementDto } from './dto/import-statement.dto';
 import { MatchedStatementTransaction, ParseStatementResult, StatementTransaction } from './interfaces/statement-transaction.interface';
+import { HouseholdContext } from '../common/interfaces/household-context.interface';
 
 /** Max difference for an amount to be considered the same transaction (RSD) */
 const AMOUNT_TOLERANCE_RSD = 1;
@@ -64,7 +65,7 @@ export class StatementsService {
    * Parses an uploaded statement PDF and annotates every transaction with
    * duplicate-detection info against already-recorded expenses/incomes.
    */
-  async parseAndMatch(buffer: Buffer): Promise<ParseStatementResult> {
+  async parseAndMatch(buffer: Buffer, ctx?: HouseholdContext): Promise<ParseStatementResult> {
     const parsed = await this.parser.parsePdf(buffer);
     if (parsed.length === 0) {
       return { success: false, error: 'No transactions found in the statement', transactions: [] };
@@ -76,8 +77,8 @@ export class StatementsService {
     const periodStart = dates[0];
     const periodEnd = dates[dates.length - 1];
 
-    const existing = await this.fetchExistingExpenses(periodStart, periodEnd);
-    const matched = await Promise.all(transactions.map(tx => this.matchTransaction(tx, existing)));
+    const existing = await this.fetchExistingExpenses(periodStart, periodEnd, ctx);
+    const matched = await Promise.all(transactions.map(tx => this.matchTransaction(tx, existing, ctx)));
 
     return { success: true, periodStart, periodEnd, transactions: matched };
   }
@@ -154,14 +155,14 @@ export class StatementsService {
   }
 
   /** Creates expenses/incomes for the reviewed transactions; idempotent per bankRef. */
-  async import(dto: ImportStatementDto): Promise<{ expensesImported: number; incomesImported: number; skipped: number }> {
+  async import(dto: ImportStatementDto, ctx?: HouseholdContext): Promise<{ expensesImported: number; incomesImported: number; skipped: number }> {
     let expensesImported = 0;
     let incomesImported = 0;
     let skipped = 0;
 
     for (const tx of dto.transactions) {
       if (tx.direction === 'credit') {
-        const alreadyImported = await this.incomesService.existsByBankRef(tx.ref);
+        const alreadyImported = await this.incomesService.existsByBankRef(tx.ref, ctx?.householdId);
         if (alreadyImported) {
           skipped++;
           continue;
@@ -177,12 +178,12 @@ export class StatementsService {
           createdBy: dto.createdBy,
           bankRef: tx.ref,
           creationMethod: 'statement'
-        });
+        }, ctx);
         incomesImported++;
         continue;
       }
 
-      const alreadyImported = await this.expensesService.existsByBankRef(tx.ref);
+      const alreadyImported = await this.expensesService.existsByBankRef(tx.ref, ctx?.householdId);
       if (alreadyImported) {
         skipped++;
         continue;
@@ -201,7 +202,7 @@ export class StatementsService {
         bankRef: tx.ref,
         creationMethod: 'statement'
       };
-      await this.expensesService.create(createDto);
+      await this.expensesService.create(createDto, ctx);
       expensesImported++;
     }
 
@@ -209,21 +210,24 @@ export class StatementsService {
     return { expensesImported, incomesImported, skipped };
   }
 
-  private async fetchExistingExpenses(periodStart: string, periodEnd: string): Promise<Expense[]> {
+  private async fetchExistingExpenses(periodStart: string, periodEnd: string, ctx?: HouseholdContext): Promise<Expense[]> {
     const start = new Date(new Date(periodStart).getTime() - DATE_TOLERANCE_DAYS * MS_PER_DAY);
     const end = new Date(new Date(periodEnd).getTime() + (DATE_TOLERANCE_DAYS + 1) * MS_PER_DAY);
 
-    const { data } = await this.expensesService.findAll({
-      startDate: start.toISOString(),
-      endDate: end.toISOString(),
-      limit: 1000
-    });
+    const { data } = await this.expensesService.findAll(
+      {
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+        limit: 1000
+      },
+      ctx
+    );
     return data;
   }
 
-  private async matchTransaction(tx: StatementTransaction, existing: Expense[]): Promise<MatchedStatementTransaction> {
+  private async matchTransaction(tx: StatementTransaction, existing: Expense[], ctx?: HouseholdContext): Promise<MatchedStatementTransaction> {
     if (tx.direction === 'credit') {
-      return this.matchCreditTransaction(tx);
+      return this.matchCreditTransaction(tx, ctx);
     }
 
     const refMatch = existing.find(expense => expense.bankRef === tx.ref);
@@ -260,8 +264,8 @@ export class StatementsService {
    * movement that should stay excluded from income, or a suggested new income with
    * a best-guess type the user can still override in the review screen.
    */
-  private async matchCreditTransaction(tx: StatementTransaction): Promise<MatchedStatementTransaction> {
-    const alreadyImported = await this.incomesService.existsByBankRef(tx.ref);
+  private async matchCreditTransaction(tx: StatementTransaction, ctx?: HouseholdContext): Promise<MatchedStatementTransaction> {
+    const alreadyImported = await this.incomesService.existsByBankRef(tx.ref, ctx?.householdId);
     if (alreadyImported) {
       return {
         ...tx,

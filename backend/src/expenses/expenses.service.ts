@@ -10,6 +10,8 @@ import { CategoryInferenceService } from '../category-inference/category-inferen
 import { Pagination } from '../common/interfaces/pagination.interface';
 import { normalizeCreatedBy } from '../common/utils/normalize-created-by';
 import { toCsv } from '../common/utils/csv.util';
+import { HouseholdContext } from '../common/interfaces/household-context.interface';
+import { ForbiddenException } from '@nestjs/common';
 
 @Injectable()
 export class ExpensesService {
@@ -19,7 +21,7 @@ export class ExpensesService {
     private categoryInferenceService: CategoryInferenceService
   ) {}
 
-  async create(createExpenseDto: CreateExpenseDto): Promise<Expense> {
+  async create(createExpenseDto: CreateExpenseDto & { private?: boolean }, ctx?: HouseholdContext): Promise<Expense> {
     const { eurAmount, rsdAmount, exchangeRate } = this.currencyService.convertAmount(createExpenseDto.amount, createExpenseDto.currency);
 
     // Apply defaults for optional fields
@@ -47,14 +49,17 @@ export class ExpensesService {
       creationMethod: createExpenseDto.creationMethod,
       voiceTranscript: 'voiceTranscript' in createExpenseDto ? createExpenseDto.voiceTranscript : undefined,
       recurringOccurrenceId: 'recurringOccurrenceId' in createExpenseDto ? createExpenseDto.recurringOccurrenceId : undefined,
-      bankRef: 'bankRef' in createExpenseDto ? createExpenseDto.bankRef : undefined
+      bankRef: 'bankRef' in createExpenseDto ? createExpenseDto.bankRef : undefined,
+      householdId: ctx?.householdId,
+      createdByUid: ctx?.uid,
+      private: createExpenseDto.private === true
     };
 
     return this.expensesRepository.create(expenseData);
   }
 
-  async findAll(query: QueryExpensesDto): Promise<{ data: Expense[]; pagination: Pagination }> {
-    const { data, total } = await this.expensesRepository.findAll(query);
+  async findAll(query: QueryExpensesDto, ctx?: HouseholdContext): Promise<{ data: Expense[]; pagination: Pagination }> {
+    const { data, total } = await this.expensesRepository.findAll({ ...query, householdId: ctx?.householdId });
 
     const pagination = {
       page: query.page || 1,
@@ -63,19 +68,42 @@ export class ExpensesService {
       totalPages: Math.ceil(total / (query.limit || 20))
     };
 
-    return { data, pagination };
+    return { data: data.map(expense => this.sanitize(expense, ctx)), pagination };
   }
 
-  async findOne(id: string): Promise<Expense> {
-    return this.expensesRepository.findById(id);
+  async findOne(id: string, ctx?: HouseholdContext): Promise<Expense> {
+    const expense = await this.expensesRepository.findById(id);
+    this.assertSameHousehold(expense, ctx);
+    return this.sanitize(expense, ctx);
   }
 
-  async existsByBankRef(bankRef: string): Promise<boolean> {
-    return this.expensesRepository.existsByBankRef(bankRef);
+  async existsByBankRef(bankRef: string, householdId?: string): Promise<boolean> {
+    return this.expensesRepository.existsByBankRef(bankRef, householdId);
   }
 
-  async update(id: string, updateExpenseDto: UpdateExpenseDto): Promise<Expense> {
+  /** Details of other members' private expenses are masked */
+  private sanitize(expense: Expense, ctx?: HouseholdContext): Expense {
+    if (expense.private && expense.createdByUid && ctx && expense.createdByUid !== ctx.uid) {
+      return {
+        ...expense,
+        shopName: 'Privatan trošak',
+        productDescription: '',
+        tags: [],
+        voiceTranscript: undefined
+      };
+    }
+    return expense;
+  }
+
+  private assertSameHousehold(expense: Expense, ctx?: HouseholdContext): void {
+    if (ctx && expense.householdId && expense.householdId !== ctx.householdId) {
+      throw new ForbiddenException('Ova stavka ne pripada tvom domaćinstvu');
+    }
+  }
+
+  async update(id: string, updateExpenseDto: UpdateExpenseDto & { private?: boolean }, ctx?: HouseholdContext): Promise<Expense> {
     const existingExpense = await this.expensesRepository.findById(id);
+    this.assertSameHousehold(existingExpense, ctx);
 
     const updateData: any = {};
 
@@ -115,23 +143,30 @@ export class ExpensesService {
     if (updateExpenseDto.createdBy !== undefined) {
       updateData.createdBy = updateExpenseDto.createdBy;
     }
+    if (updateExpenseDto.private !== undefined) {
+      updateData.private = updateExpenseDto.private === true;
+    }
 
     return this.expensesRepository.update(id, updateData);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, ctx?: HouseholdContext): Promise<void> {
+    const existing = await this.expensesRepository.findById(id);
+    this.assertSameHousehold(existing, ctx);
     return this.expensesRepository.delete(id);
   }
 
   /**
-   * Returns every expense, unfiltered. Used for the full JSON backup.
+   * Returns every household expense. Used for the full JSON backup.
    */
-  async exportAll(): Promise<Expense[]> {
-    return this.expensesRepository.findAllForExport({});
+  async exportAll(ctx?: HouseholdContext): Promise<Expense[]> {
+    const expenses = await this.expensesRepository.findAllForExport({ householdId: ctx?.householdId });
+    return expenses.map(expense => this.sanitize(expense, ctx));
   }
 
-  async exportCsv(query: ExportExpensesDto): Promise<string> {
-    const expenses = await this.expensesRepository.findAllForExport(query);
+  async exportCsv(query: ExportExpensesDto, ctx?: HouseholdContext): Promise<string> {
+    const raw = await this.expensesRepository.findAllForExport({ ...query, householdId: ctx?.householdId });
+    const expenses = raw.map(expense => this.sanitize(expense, ctx));
 
     return toCsv(expenses, [
       { header: 'Datum', value: e => e.purchaseDate?.slice(0, 10) },

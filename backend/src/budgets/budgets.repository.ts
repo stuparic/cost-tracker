@@ -13,13 +13,17 @@ export class BudgetsRepository {
     return this.firebaseService.getFirestore();
   }
 
-  async findAll(): Promise<Budget[]> {
-    const snapshot = await this.firestore.collection(this.collectionName).get();
+  private docId(householdId: string, category: string): string {
+    return `${householdId}_${category}`;
+  }
+
+  async findAll(householdId: string): Promise<Budget[]> {
+    const snapshot = await this.firestore.collection(this.collectionName).where('householdId', '==', householdId).get();
     return snapshot.docs.map(doc => this.mapDocToBudget(doc));
   }
 
-  async upsert(category: string, monthlyLimit: number): Promise<Budget> {
-    const docRef = this.firestore.collection(this.collectionName).doc(category);
+  async upsert(householdId: string, category: string, monthlyLimit: number): Promise<Budget> {
+    const docRef = this.firestore.collection(this.collectionName).doc(this.docId(householdId, category));
     const existing = await docRef.get();
 
     const now = admin.firestore.Timestamp.now();
@@ -27,15 +31,15 @@ export class BudgetsRepository {
     if (existing.exists) {
       await docRef.update({ monthlyLimit, updatedAt: now });
     } else {
-      await docRef.set({ category, monthlyLimit, createdAt: now, updatedAt: now });
+      await docRef.set({ category, householdId, monthlyLimit, createdAt: now, updatedAt: now });
     }
 
     const updated = await docRef.get();
     return this.mapDocToBudget(updated);
   }
 
-  async delete(category: string): Promise<void> {
-    const docRef = this.firestore.collection(this.collectionName).doc(category);
+  async delete(householdId: string, category: string): Promise<void> {
+    const docRef = this.firestore.collection(this.collectionName).doc(this.docId(householdId, category));
     const doc = await docRef.get();
 
     if (!doc.exists) {

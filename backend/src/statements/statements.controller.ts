@@ -3,6 +3,12 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { StatementsService } from './statements.service';
 import { ImportStatementDto } from './dto/import-statement.dto';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { requireHousehold, type AuthenticatedUser } from '../auth/firebase-auth.guard';
+
+function ctxOf(user: AuthenticatedUser) {
+  return { householdId: requireHousehold(user), uid: user.uid, displayName: user.displayName };
+}
 
 const MAX_STATEMENT_SIZE_BYTES = 15 * 1024 * 1024;
 
@@ -25,7 +31,7 @@ export class StatementsController {
       properties: { file: { type: 'string', format: 'binary' } }
     }
   })
-  async parse(@UploadedFile() file: Express.Multer.File) {
+  async parse(@UploadedFile() file: Express.Multer.File, @CurrentUser() user: AuthenticatedUser) {
     if (!file) {
       throw new BadRequestException('No file uploaded (expected multipart field "file")');
     }
@@ -34,7 +40,7 @@ export class StatementsController {
     }
 
     try {
-      return await this.statementsService.parseAndMatch(file.buffer);
+      return await this.statementsService.parseAndMatch(file.buffer, ctxOf(user));
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to parse the statement';
       throw new BadRequestException(message);
@@ -47,7 +53,7 @@ export class StatementsController {
     description:
       'Creates an expense for each debit and an income for each credit. Transactions whose bank reference was already imported are skipped.'
   })
-  async import(@Body() dto: ImportStatementDto) {
-    return this.statementsService.import(dto);
+  async import(@Body() dto: ImportStatementDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.statementsService.import(dto, ctxOf(user));
   }
 }

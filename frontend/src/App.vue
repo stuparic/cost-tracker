@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <Toast />
-    <UserSelectionDialog v-model:visible="showUserDialog" />
     <QuickInputDialog v-model:visible="quickInputVisible" />
 
     <Sidebar v-model:visible="sidebarVisible" position="right" class="theme-sidebar">
@@ -9,8 +8,47 @@
         <h2 class="sidebar-title">Podešavanja</h2>
       </template>
       <ThemeSelector />
+
+      <div v-if="authStore.household" class="sidebar-section">
+        <h3 class="sidebar-section-title">Domaćinstvo</h3>
+        <p class="household-name">{{ authStore.household.name }}</p>
+        <ul class="household-members">
+          <li v-for="member in authStore.household.members" :key="member.uid" class="household-member">
+            <img v-if="member.photoURL" :src="member.photoURL" alt="" class="member-avatar" referrerpolicy="no-referrer" />
+            <span v-else class="member-avatar member-avatar-fallback">{{ member.displayName.charAt(0) }}</span>
+            <span>{{ member.displayName }}</span>
+          </li>
+        </ul>
+        <div class="invite-row">
+          <span class="invite-label">Kod za poziv:</span>
+          <code class="invite-code">{{ authStore.household.inviteCode }}</code>
+          <button class="icon-btn small" aria-label="Kopiraj kod" @click="copyInvite">
+            <i :class="copied ? 'pi pi-check' : 'pi pi-copy'"></i>
+          </button>
+        </div>
+        <div class="join-row">
+          <input v-model="joinCode" class="join-input" placeholder="Unesi kod za pridruživanje" maxlength="8" />
+          <button class="join-btn" :disabled="joinCode.trim().length < 4 || joining" @click="joinHousehold">
+            {{ joining ? '…' : 'Pridruži se' }}
+          </button>
+        </div>
+        <p v-if="joinError" class="join-error">{{ joinError }}</p>
+
+        <div v-if="authStore.profile?.webhookToken" class="invite-row token-row">
+          <span class="invite-label">Token za notifikacije:</span>
+          <code class="invite-code">{{ authStore.profile.webhookToken }}</code>
+          <button class="icon-btn small" aria-label="Kopiraj token" @click="copyWebhookToken">
+            <i :class="tokenCopied ? 'pi pi-check' : 'pi pi-copy'"></i>
+          </button>
+        </div>
+      </div>
+
       <div class="sidebar-section">
         <h3 class="sidebar-section-title">Više</h3>
+        <router-link to="/drafts" class="sidebar-link" @click="sidebarVisible = false">
+          <i class="pi pi-inbox"></i>
+          <span>Na čekanju</span>
+        </router-link>
         <router-link to="/recurring" class="sidebar-link" @click="sidebarVisible = false">
           <i class="pi pi-replay"></i>
           <span>Ponavljajuće stavke</span>
@@ -19,28 +57,30 @@
           <i class="pi pi-file-import"></i>
           <span>Uvoz izvoda</span>
         </router-link>
-        <button class="sidebar-link" @click="switchUser(); sidebarVisible = false">
-          <i class="pi pi-users"></i>
-          <span>Promeni korisnika</span>
+        <button class="sidebar-link" @click="logout">
+          <i class="pi pi-sign-out"></i>
+          <span>Odjavi se</span>
         </button>
       </div>
     </Sidebar>
 
     <div class="app-container">
-      <header class="app-header">
+      <header v-if="!isLoginRoute" class="app-header">
         <router-link to="/" class="brand">
           <img src="/icon.svg" alt="" class="brand-mark" />
           <span class="brand-name">Troškić</span>
         </router-link>
         <div class="header-actions">
-          <button
-            v-if="userStore.selectedUser"
-            class="avatar-btn"
-            :title="userLabel"
-            aria-label="Promeni korisnika"
-            @click="switchUser"
-          >
-            {{ userInitial }}
+          <img
+            v-if="authStore.profile?.photoURL"
+            :src="authStore.profile.photoURL"
+            :title="authStore.profile.displayName"
+            alt="Profil"
+            class="avatar-img"
+            referrerpolicy="no-referrer"
+          />
+          <button v-else-if="authStore.profile" class="avatar-btn" :title="authStore.profile.displayName">
+            {{ authStore.profile.displayName.charAt(0) }}
           </button>
           <button class="icon-btn" aria-label="Podešavanja" @click="sidebarVisible = true">
             <i class="pi pi-cog"></i>
@@ -48,7 +88,7 @@
         </div>
       </header>
 
-      <nav class="main-nav">
+      <nav v-if="!isLoginRoute" class="main-nav">
         <router-link to="/" class="nav-item" :class="{ active: route.path === '/' }">
           <i class="pi pi-home"></i>
           <span>Početna</span>
@@ -85,34 +125,29 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import Toast from 'primevue/toast';
 import Sidebar from 'primevue/sidebar';
 import ThemeSelector from './components/ThemeSelector.vue';
-import UserSelectionDialog from './components/UserSelectionDialog.vue';
 import QuickInputDialog from './components/QuickInputDialog.vue';
 import { useThemeStore } from './stores/theme';
-import { useUserStore } from './stores/user';
+import { useAuthStore } from './stores/auth';
+import { meApi } from './api/me';
 
 const route = useRoute();
+const router = useRouter();
 const sidebarVisible = ref(false);
-const manualDialogVisible = ref(false);
 const quickInputVisible = ref(false);
+const joinCode = ref('');
+const joining = ref(false);
+const joinError = ref('');
+const copied = ref(false);
+const tokenCopied = ref(false);
 
 useThemeStore();
-const userStore = useUserStore();
+const authStore = useAuthStore();
 
-const showUserDialog = computed({
-  get: () => userStore.selectedUser === null || manualDialogVisible.value,
-  set: value => {
-    if (!value) {
-      manualDialogVisible.value = false;
-    }
-  }
-});
-
-const userLabel = computed(() => (userStore.selectedUser === 'svetla' ? 'Svetla' : 'Dejan'));
-const userInitial = computed(() => userLabel.value.charAt(0));
+const isLoginRoute = computed(() => route.path === '/login');
 
 const isIncomeRoute = computed(() => route.path.startsWith('/income'));
 const isListRoute = computed(() => route.path === '/list' || route.path === '/income/list');
@@ -124,8 +159,39 @@ const segment = computed(() => {
   return null;
 });
 
-function switchUser() {
-  manualDialogVisible.value = true;
+async function copyWebhookToken() {
+  if (!authStore.profile?.webhookToken) return;
+  await navigator.clipboard.writeText(authStore.profile.webhookToken);
+  tokenCopied.value = true;
+  setTimeout(() => (tokenCopied.value = false), 1500);
+}
+
+async function copyInvite() {
+  if (!authStore.household) return;
+  await navigator.clipboard.writeText(authStore.household.inviteCode);
+  copied.value = true;
+  setTimeout(() => (copied.value = false), 1500);
+}
+
+async function joinHousehold() {
+  joining.value = true;
+  joinError.value = '';
+  try {
+    const me = await meApi.joinHousehold(joinCode.value);
+    authStore.applyMe(me);
+    joinCode.value = '';
+  } catch (error: unknown) {
+    const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+    joinError.value = message || 'Pridruživanje nije uspelo';
+  } finally {
+    joining.value = false;
+  }
+}
+
+async function logout() {
+  sidebarVisible.value = false;
+  await authStore.signOutUser();
+  router.replace('/login');
 }
 </script>
 
@@ -358,6 +424,140 @@ body {
 
 .avatar-btn:hover {
   transform: scale(1.06);
+}
+
+.avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary-light);
+}
+
+/* ---------- Household section ---------- */
+.household-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem;
+}
+
+.household-members {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.household-member {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.member-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.member-avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+  color: var(--primary-color);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.invite-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.invite-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--primary-color);
+  background: var(--primary-light);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.icon-btn.small {
+  width: 28px;
+  height: 28px;
+}
+
+.icon-btn.small i {
+  font-size: 0.875rem;
+}
+
+.join-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.join-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+
+.join-btn {
+  padding: 0.5rem 0.875rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--primary-color);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+:root.dark-mode .join-btn {
+  color: #131316;
+}
+
+.join-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.token-row {
+  margin-top: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.token-row .invite-code {
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+.join-error {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--expense-color);
 }
 
 /* ---------- Main navigation ---------- */

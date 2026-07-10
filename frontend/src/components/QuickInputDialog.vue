@@ -85,8 +85,7 @@ import { ref, computed, watch, nextTick, onUnmounted } from 'vue';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import { useSpeechRecognition } from '@/composables/useSpeechRecognition';
-import { useUserStore } from '@/stores/user';
-import { USERS } from '@/constants/app';
+import { useCurrentMember } from '@/composables/useCurrentMember';
 import { useToast } from 'primevue/usetoast';
 import apiClient from '@/api/client';
 
@@ -94,7 +93,7 @@ import apiClient from '@/api/client';
 const visible = defineModel<boolean>('visible', { required: true });
 
 // User store & toast
-const userStore = useUserStore();
+const { firstName } = useCurrentMember();
 const toast = useToast();
 
 // Speech recognition
@@ -245,10 +244,9 @@ async function handleStopRecording() {
 async function handleSend() {
   if (!canSend.value) return;
 
-  // The user store keeps lowercase ids ('dejan'); records store proper names
-  const user = userStore.selectedUser && (USERS.find(u => u.value.toLowerCase() === userStore.selectedUser)?.value ?? null);
+  const user = firstName.value;
   if (!user) {
-    errorMessage.value = 'Nema izabranog korisnika';
+    errorMessage.value = 'Nema prijavljenog korisnika';
     setTimeout(() => {
       errorMessage.value = '';
     }, 3000);

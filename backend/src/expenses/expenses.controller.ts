@@ -6,6 +6,12 @@ import { CreateExpenseManualDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { QueryExpensesDto } from './dto/query-expenses.dto';
 import { ExportExpensesDto } from './dto/export-expenses.dto';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { requireHousehold, type AuthenticatedUser } from '../auth/firebase-auth.guard';
+
+function ctxOf(user: AuthenticatedUser) {
+  return { householdId: requireHousehold(user), uid: user.uid, displayName: user.displayName };
+}
 
 @ApiTags('expenses')
 @Controller('expenses')
@@ -22,8 +28,8 @@ export class ExpensesController {
     description: 'Expense successfully created'
   })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
-  create(@Body() createExpenseDto: CreateExpenseManualDto) {
-    return this.expensesService.create(createExpenseDto);
+  create(@Body() createExpenseDto: CreateExpenseManualDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.expensesService.create(createExpenseDto, ctxOf(user));
   }
 
   @Get()
@@ -35,8 +41,8 @@ export class ExpensesController {
     status: 200,
     description: 'List of expenses with pagination info'
   })
-  findAll(@Query() query: QueryExpensesDto) {
-    return this.expensesService.findAll(query);
+  findAll(@Query() query: QueryExpensesDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.expensesService.findAll(query, ctxOf(user));
   }
 
   @Get('export/csv')
@@ -45,8 +51,8 @@ export class ExpensesController {
     description: 'Exports all expenses matching the given filters (no pagination) as a downloadable CSV file.'
   })
   @ApiResponse({ status: 200, description: 'CSV file' })
-  async exportCsv(@Query() query: ExportExpensesDto, @Res() res: Response) {
-    const csv = await this.expensesService.exportCsv(query);
+  async exportCsv(@Query() query: ExportExpensesDto, @Res() res: Response, @CurrentUser() user: AuthenticatedUser) {
+    const csv = await this.expensesService.exportCsv(query, ctxOf(user));
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="troskovi-${new Date().toISOString().slice(0, 10)}.csv"`);
     res.send(csv);
@@ -60,8 +66,8 @@ export class ExpensesController {
   @ApiParam({ name: 'id', description: 'Expense ID' })
   @ApiResponse({ status: 200, description: 'Expense found' })
   @ApiResponse({ status: 404, description: 'Expense not found' })
-  findOne(@Param('id') id: string) {
-    return this.expensesService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.expensesService.findOne(id, ctxOf(user));
   }
 
   @Patch(':id')
@@ -73,8 +79,8 @@ export class ExpensesController {
   @ApiResponse({ status: 200, description: 'Expense successfully updated' })
   @ApiResponse({ status: 404, description: 'Expense not found' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
-  update(@Param('id') id: string, @Body() updateExpenseDto: UpdateExpenseDto) {
-    return this.expensesService.update(id, updateExpenseDto);
+  update(@Param('id') id: string, @Body() updateExpenseDto: UpdateExpenseDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.expensesService.update(id, updateExpenseDto, ctxOf(user));
   }
 
   @Delete(':id')
@@ -86,7 +92,7 @@ export class ExpensesController {
   @ApiParam({ name: 'id', description: 'Expense ID' })
   @ApiResponse({ status: 204, description: 'Expense successfully deleted' })
   @ApiResponse({ status: 404, description: 'Expense not found' })
-  remove(@Param('id') id: string) {
-    return this.expensesService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.expensesService.remove(id, ctxOf(user));
   }
 }

@@ -8,6 +8,8 @@ import { ExportIncomesDto } from './dto/export-incomes.dto';
 import { Income } from './interfaces/income.interface';
 import { Pagination } from '../common/interfaces/pagination.interface';
 import { normalizeCreatedBy } from '../common/utils/normalize-created-by';
+import { HouseholdContext } from '../common/interfaces/household-context.interface';
+import { ForbiddenException } from '@nestjs/common';
 import { toCsv } from '../common/utils/csv.util';
 
 @Injectable()
@@ -17,7 +19,7 @@ export class IncomesService {
     private incomesRepository: IncomesRepository
   ) {}
 
-  async create(createIncomeDto: CreateIncomeDto): Promise<Income> {
+  async create(createIncomeDto: CreateIncomeDto, ctx?: HouseholdContext): Promise<Income> {
     const { eurAmount, rsdAmount, exchangeRate } = this.currencyService.convertAmount(createIncomeDto.amount, createIncomeDto.currency);
 
     // Apply default description if not provided
@@ -43,12 +45,18 @@ export class IncomesService {
     return this.incomesRepository.create(incomeData);
   }
 
-  async existsByBankRef(bankRef: string): Promise<boolean> {
-    return this.incomesRepository.existsByBankRef(bankRef);
+  async existsByBankRef(bankRef: string, householdId?: string): Promise<boolean> {
+    return this.incomesRepository.existsByBankRef(bankRef, householdId);
   }
 
-  async findAll(query: QueryIncomesDto): Promise<{ data: Income[]; pagination: Pagination }> {
-    const { data, total } = await this.incomesRepository.findAll(query);
+  private assertSameHousehold(income: Income, ctx?: HouseholdContext): void {
+    if (ctx && income.householdId && income.householdId !== ctx.householdId) {
+      throw new ForbiddenException('Ova stavka ne pripada tvom domaćinstvu');
+    }
+  }
+
+  async findAll(query: QueryIncomesDto, ctx?: HouseholdContext): Promise<{ data: Income[]; pagination: Pagination }> {
+    const { data, total } = await this.incomesRepository.findAll({ ...query, householdId: ctx?.householdId });
 
     const pagination = {
       page: query.page || 1,
@@ -60,12 +68,15 @@ export class IncomesService {
     return { data, pagination };
   }
 
-  async findOne(id: string): Promise<Income> {
-    return this.incomesRepository.findById(id);
+  async findOne(id: string, ctx?: HouseholdContext): Promise<Income> {
+    const income = await this.incomesRepository.findById(id);
+    this.assertSameHousehold(income, ctx);
+    return income;
   }
 
-  async update(id: string, updateIncomeDto: UpdateIncomeDto): Promise<Income> {
+  async update(id: string, updateIncomeDto: UpdateIncomeDto, ctx?: HouseholdContext): Promise<Income> {
     const existingIncome = await this.incomesRepository.findById(id);
+    this.assertSameHousehold(existingIncome, ctx);
 
     const updateData: any = {};
 
@@ -103,19 +114,21 @@ export class IncomesService {
     return this.incomesRepository.update(id, updateData);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, ctx?: HouseholdContext): Promise<void> {
+    const existing = await this.incomesRepository.findById(id);
+    this.assertSameHousehold(existing, ctx);
     return this.incomesRepository.delete(id);
   }
 
   /**
    * Returns every income, unfiltered. Used for the full JSON backup.
    */
-  async exportAll(): Promise<Income[]> {
-    return this.incomesRepository.findAllForExport({});
+  async exportAll(ctx?: HouseholdContext): Promise<Income[]> {
+    return this.incomesRepository.findAllForExport({ householdId: ctx?.householdId });
   }
 
-  async exportCsv(query: ExportIncomesDto): Promise<string> {
-    const incomes = await this.incomesRepository.findAllForExport(query);
+  async exportCsv(query: ExportIncomesDto, ctx?: HouseholdContext): Promise<string> {
+    const incomes = await this.incomesRepository.findAllForExport({ ...query, householdId: ctx?.householdId });
 
     return toCsv(incomes, [
       { header: 'Datum', value: i => i.dateReceived?.slice(0, 10) },

@@ -1,7 +1,10 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { FirebaseAuthGuard } from './auth/firebase-auth.guard';
+import { UsersModule } from './users/users.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { IncomesModule } from './incomes/incomes.module';
@@ -33,10 +36,17 @@ import firebaseConfig from './config/firebase.config';
     StatementsModule,
     WebhookModule,
     BudgetsModule,
-    BackupModule
+    BackupModule,
+    UsersModule
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: FirebaseAuthGuard
+    }
+  ]
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
