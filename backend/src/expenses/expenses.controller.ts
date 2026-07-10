@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, HttpCode, HttpStatus } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseManualDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { QueryExpensesDto } from './dto/query-expenses.dto';
+import { ExportExpensesDto } from './dto/export-expenses.dto';
 
 @ApiTags('expenses')
 @Controller('expenses')
@@ -35,6 +37,19 @@ export class ExpensesController {
   })
   findAll(@Query() query: QueryExpensesDto) {
     return this.expensesService.findAll(query);
+  }
+
+  @Get('export/csv')
+  @ApiOperation({
+    summary: 'Export expenses as CSV',
+    description: 'Exports all expenses matching the given filters (no pagination) as a downloadable CSV file.'
+  })
+  @ApiResponse({ status: 200, description: 'CSV file' })
+  async exportCsv(@Query() query: ExportExpensesDto, @Res() res: Response) {
+    const csv = await this.expensesService.exportCsv(query);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="troskovi-${new Date().toISOString().slice(0, 10)}.csv"`);
+    res.send(csv);
   }
 
   @Get(':id')

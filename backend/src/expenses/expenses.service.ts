@@ -4,10 +4,12 @@ import { ExpensesRepository } from './expenses.repository';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { QueryExpensesDto } from './dto/query-expenses.dto';
+import { ExportExpensesDto } from './dto/export-expenses.dto';
 import { Expense } from './interfaces/expense.interface';
 import { CategoryInferenceService } from '../category-inference/category-inference.service';
 import { Pagination } from '../common/interfaces/pagination.interface';
 import { normalizeCreatedBy } from '../common/utils/normalize-created-by';
+import { toCsv } from '../common/utils/csv.util';
 
 @Injectable()
 export class ExpensesService {
@@ -119,5 +121,23 @@ export class ExpensesService {
 
   async remove(id: string): Promise<void> {
     return this.expensesRepository.delete(id);
+  }
+
+  async exportCsv(query: ExportExpensesDto): Promise<string> {
+    const expenses = await this.expensesRepository.findAllForExport(query);
+
+    return toCsv(expenses, [
+      { header: 'Datum', value: e => e.purchaseDate?.slice(0, 10) },
+      { header: 'Prodavnica', value: e => e.shopName },
+      { header: 'Opis', value: e => e.productDescription },
+      { header: 'Kategorija', value: e => e.category },
+      { header: 'Iznos', value: e => e.amount },
+      { header: 'Valuta', value: e => e.originalCurrency },
+      { header: 'Iznos (EUR)', value: e => e.eurAmount },
+      { header: 'Iznos (RSD)', value: e => e.rsdAmount },
+      { header: 'Način plaćanja', value: e => e.paymentMethod },
+      { header: 'Osoba', value: e => e.createdBy },
+      { header: 'Tagovi', value: e => e.tags?.join('; ') }
+    ]);
   }
 }

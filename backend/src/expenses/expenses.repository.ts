@@ -78,6 +78,41 @@ export class ExpensesRepository {
     return !snapshot.empty;
   }
 
+  /**
+   * Fetches every expense matching the given filters, without pagination.
+   * Used for exports — callers are responsible for keeping result sets reasonably sized.
+   */
+  async findAllForExport(filters: {
+    category?: string;
+    shopName?: string;
+    createdBy?: string;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<Expense[]> {
+    let firestoreQuery = this.firestore.collection(this.collectionName);
+
+    if (filters.category) {
+      firestoreQuery = firestoreQuery.where('category', '==', filters.category) as any;
+    }
+    if (filters.shopName) {
+      firestoreQuery = firestoreQuery.where('shopName', '==', filters.shopName) as any;
+    }
+    if (filters.createdBy) {
+      firestoreQuery = firestoreQuery.where('createdBy', '==', filters.createdBy) as any;
+    }
+    if (filters.startDate) {
+      firestoreQuery = firestoreQuery.where('purchaseDate', '>=', admin.firestore.Timestamp.fromDate(new Date(filters.startDate))) as any;
+    }
+    if (filters.endDate) {
+      firestoreQuery = firestoreQuery.where('purchaseDate', '<=', admin.firestore.Timestamp.fromDate(new Date(filters.endDate))) as any;
+    }
+
+    firestoreQuery = firestoreQuery.orderBy('purchaseDate', 'desc') as any;
+
+    const snapshot = await firestoreQuery.get();
+    return snapshot.docs.map(doc => this.mapDocToExpense(doc));
+  }
+
   async findById(id: string): Promise<Expense> {
     const doc = await this.firestore.collection(this.collectionName).doc(id).get();
 

@@ -23,6 +23,12 @@
           {{ option.label }}
         </button>
       </div>
+
+      <!-- Export Actions -->
+      <div class="export-actions">
+        <Button label="Troškovi CSV" icon="pi pi-download" text size="small" :loading="exportingExpenses" @click="exportExpenses" />
+        <Button label="Prihodi CSV" icon="pi pi-download" text size="small" :loading="exportingIncomes" @click="exportIncomes" />
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -98,15 +104,22 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import Button from 'primevue/button';
 import { useListFormatting } from '@/composables/useListFormatting';
+import { useAppToast } from '@/composables/useAppToast';
 import { USERS } from '@/constants/app';
 import DoughnutChart from '@/components/shared/DoughnutChart.vue';
 import BudgetProgressList from '@/components/shared/BudgetProgressList.vue';
 import { useBalanceStore, type BalanceQueryParams } from '@/stores/balance';
 import { useBudgetsStore } from '@/stores/budgets';
+import { expenseApi } from '@/api/expenses';
+import { incomeApi } from '@/api/incomes';
+import { downloadBlob } from '@/utils/download';
 
 const { formatRSD, formatMonthYear } = useListFormatting();
+const { showError } = useAppToast();
 const balanceStore = useBalanceStore();
 const budgetsStore = useBudgetsStore();
+const exportingExpenses = ref(false);
+const exportingIncomes = ref(false);
 
 // Filters
 const currentMonth = ref(new Date());
@@ -233,6 +246,45 @@ async function fetchData() {
   await balanceStore.fetchBalanceData(params);
 }
 
+// Export current filter selection as CSV
+async function exportExpenses() {
+  exportingExpenses.value = true;
+  try {
+    const params: Record<string, string> = {
+      startDate: dateRange.value.start.toISOString(),
+      endDate: dateRange.value.end.toISOString()
+    };
+    if (selectedPerson.value !== 'all') {
+      params.createdBy = selectedPerson.value;
+    }
+    const blob = await expenseApi.exportCsv(params);
+    downloadBlob(blob, `troskovi-${currentMonthLabel.value.replace(/\s+/g, '-')}.csv`);
+  } catch (error) {
+    showError('Izvoz troškova nije uspeo.', error);
+  } finally {
+    exportingExpenses.value = false;
+  }
+}
+
+async function exportIncomes() {
+  exportingIncomes.value = true;
+  try {
+    const params: Record<string, string> = {
+      startDate: dateRange.value.start.toISOString(),
+      endDate: dateRange.value.end.toISOString()
+    };
+    if (selectedPerson.value !== 'all') {
+      params.createdBy = selectedPerson.value;
+    }
+    const blob = await incomeApi.exportCsv(params);
+    downloadBlob(blob, `prihodi-${currentMonthLabel.value.replace(/\s+/g, '-')}.csv`);
+  } catch (error) {
+    showError('Izvoz prihoda nije uspeo.', error);
+  } finally {
+    exportingIncomes.value = false;
+  }
+}
+
 // Watch for filter changes
 watch([currentMonth, selectedPerson], () => {
   fetchData();
@@ -341,6 +393,16 @@ onMounted(() => {
   background: var(--surface-card);
   color: var(--primary-color);
   box-shadow: var(--shadow-card);
+}
+
+.export-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.export-actions :deep(.p-button) {
+  color: var(--text-secondary) !important;
+  font-size: 0.8125rem;
 }
 
 /* Loading & Empty States */
@@ -503,6 +565,10 @@ onMounted(() => {
 
   .person-pill {
     flex: 1;
+  }
+
+  .export-actions {
+    justify-content: center;
   }
 
   .metrics-grid {

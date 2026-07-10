@@ -39,5 +39,13 @@ export const expenseApi = {
    */
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/expenses/${id}`);
+  },
+
+  /**
+   * Export expenses matching the given filters as a CSV blob
+   */
+  exportCsv: async (params?: Omit<QueryExpensesDto, 'page' | 'limit' | 'sortBy' | 'sortOrder'>): Promise<Blob> => {
+    const response = await apiClient.get('/expenses/export/csv', { params, responseType: 'blob' });
+    return response.data;
   }
 };

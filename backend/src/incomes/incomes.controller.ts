@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, HttpCode, HttpStatus } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { IncomesService } from './incomes.service';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
 import { QueryIncomesDto } from './dto/query-incomes.dto';
+import { ExportIncomesDto } from './dto/export-incomes.dto';
 
 @ApiTags('incomes')
 @Controller('incomes')
@@ -35,6 +37,19 @@ export class IncomesController {
   })
   findAll(@Query() query: QueryIncomesDto) {
     return this.incomesService.findAll(query);
+  }
+
+  @Get('export/csv')
+  @ApiOperation({
+    summary: 'Export incomes as CSV',
+    description: 'Exports all incomes matching the given filters (no pagination) as a downloadable CSV file.'
+  })
+  @ApiResponse({ status: 200, description: 'CSV file' })
+  async exportCsv(@Query() query: ExportIncomesDto, @Res() res: Response) {
+    const csv = await this.incomesService.exportCsv(query);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="prihodi-${new Date().toISOString().slice(0, 10)}.csv"`);
+    res.send(csv);
   }
 
   @Get(':id')

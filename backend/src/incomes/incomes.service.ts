@@ -4,9 +4,11 @@ import { IncomesRepository } from './incomes.repository';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
 import { QueryIncomesDto } from './dto/query-incomes.dto';
+import { ExportIncomesDto } from './dto/export-incomes.dto';
 import { Income } from './interfaces/income.interface';
 import { Pagination } from '../common/interfaces/pagination.interface';
 import { normalizeCreatedBy } from '../common/utils/normalize-created-by';
+import { toCsv } from '../common/utils/csv.util';
 
 @Injectable()
 export class IncomesService {
@@ -103,5 +105,21 @@ export class IncomesService {
 
   async remove(id: string): Promise<void> {
     return this.incomesRepository.delete(id);
+  }
+
+  async exportCsv(query: ExportIncomesDto): Promise<string> {
+    const incomes = await this.incomesRepository.findAllForExport(query);
+
+    return toCsv(incomes, [
+      { header: 'Datum', value: i => i.dateReceived?.slice(0, 10) },
+      { header: 'Izvor', value: i => i.source },
+      { header: 'Opis', value: i => i.description },
+      { header: 'Tip', value: i => i.incomeType },
+      { header: 'Iznos', value: i => i.amount },
+      { header: 'Valuta', value: i => i.originalCurrency },
+      { header: 'Iznos (EUR)', value: i => i.eurAmount },
+      { header: 'Iznos (RSD)', value: i => i.rsdAmount },
+      { header: 'Osoba', value: i => i.createdBy }
+    ]);
   }
 }
