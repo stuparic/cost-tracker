@@ -481,3 +481,27 @@ Predložene ideje za unapređenje aplikacije Troškić za praćenje troškova do
 
 **Poslednja izmena:** 2026-07-10
 **Verzija:** 1.0
+
+---
+
+## 💡 Ideje — jul 2026 (sa Claude sesije)
+
+Redosled po odnosu vrednost/trud:
+
+### Brzi dobici
+1. **Detektor pretplata** (Rocket Money stil) — automatski prepoznaje ponavljajuće naplate
+   (Netflix, YouTube, Google *Travel Town mikrotransakcije...). Kartica "Pretplate: X RSD mesečno".
+2. **Trend kroz mesece** — linijski grafikon trošak/prihod/neto po mesecima na Bilansu,
+   poređenje sa 3-mesečnim prosekom.
+3. **Insight kartice na Početnoj** — "Restorani 40% iznad proseka", projekcija potrošnje
+   do kraja meseca po trenutnom tempu.
+
+### Srednji zalogaji
+4. **OCR računa** — slikaj račun, Gemini (već u stacku) izvuče iznos/prodavnicu/stavke.
+   Rešava nevidljivo trošenje gotovine (100k+ RSD podignuto u junu).
+5. **Praćenje keš novčanika** — ATM podizanja pune "novčanik", keš troškovi ga prazne.
+6. **Budžet alarmi** — PWA push na 80% / 100% budžeta kategorije (budžeti već postoje).
+
+### Krupnije
+7. **Ciljevi štednje** — cilj sa progres barom ("Letovanje 2027: 40%").
+8. **Godišnji izveštaj** — year-over-year, top prodavnice, najskuplji mesec.
