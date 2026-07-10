@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { ApiError } from '@/types/api';
-import { firebaseAuth } from '@/firebase';
+import { firebaseAuth, authReady } from '@/firebase';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -13,6 +13,10 @@ const apiClient = axios.create({
 // Attach the Firebase ID token to every request (refreshes automatically when stale)
 apiClient.interceptors.request.use(
   async config => {
+    // Wait for Firebase to finish restoring the persisted session before
+    // reading currentUser, otherwise the first requests after a page load
+    // race ahead of rehydration and go out without a token (backend 401).
+    await authReady;
     const user = firebaseAuth.currentUser;
     if (user) {
       config.headers.Authorization = `Bearer ${await user.getIdToken()}`;

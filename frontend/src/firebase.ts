@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth';
 
 // Public web config for the moneyflow-832f4 Firebase project
 // (same values Firebase Hosting serves at /__/firebase/init.json)
@@ -15,3 +15,17 @@ const firebaseConfig = {
 export const firebaseApp = initializeApp(firebaseConfig);
 export const firebaseAuth = getAuth(firebaseApp);
 export const googleProvider = new GoogleAuthProvider();
+
+/**
+ * Resolves once Firebase has finished restoring (or rejecting) the persisted
+ * session. Awaiting this before any authenticated API call guarantees
+ * `firebaseAuth.currentUser` is populated when it should be, so requests never
+ * go out header-less during the brief post-load rehydration window (which the
+ * backend rejects with 401 "Missing Authorization bearer token").
+ */
+export const authReady = new Promise<void>(resolve => {
+  const unsubscribe = onAuthStateChanged(firebaseAuth, () => {
+    unsubscribe();
+    resolve();
+  });
+});
