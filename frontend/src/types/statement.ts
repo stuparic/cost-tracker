@@ -1,6 +1,6 @@
 export type TransactionDirection = 'debit' | 'credit';
 
-export type TransactionMatchStatus = 'new' | 'duplicate' | 'already_imported';
+export type TransactionMatchStatus = 'new' | 'duplicate' | 'already_imported' | 'skipped';
 
 export interface StatementTransaction {
   ref: string;
@@ -9,6 +9,8 @@ export interface StatementTransaction {
   rawDescription: string;
   merchant: string;
   category?: string;
+  /** Suggested income type (credits only) */
+  incomeType?: string;
   /** Amount in RSD, always positive */
   amount: number;
   direction: TransactionDirection;
@@ -34,11 +36,14 @@ export interface ImportStatementPayload {
     merchant: string;
     rawDescription?: string;
     category?: string;
+    incomeType?: string;
     amount: number;
+    direction: TransactionDirection;
   }>;
 }
 
 export interface ImportStatementResult {
-  imported: number;
+  expensesImported: number;
+  incomesImported: number;
   skipped: number;
 }

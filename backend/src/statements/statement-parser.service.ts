@@ -68,7 +68,9 @@ export class StatementParserService {
           const transient = /503|UNAVAILABLE|429|RESOURCE_EXHAUSTED|overloaded/i.test(message);
           if (!transient) throw error;
           if (attempt === attempts) {
-            this.logger.warn(`Gemini model ${model} unavailable after ${attempts} attempts${model === primary ? ', switching to fallback' : ''}`);
+            this.logger.warn(
+              `Gemini model ${model} unavailable after ${attempts} attempts${model === primary ? ', switching to fallback' : ''}`
+            );
             break;
           }
           const delayMs = 2000 * attempt;

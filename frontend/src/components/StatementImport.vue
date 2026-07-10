@@ -92,10 +92,63 @@
         </Column>
       </DataTable>
 
-      <div v-if="credits.length > 0" class="credits-note">
-        <i class="pi pi-info-circle"></i>
-        {{ credits.length }} uplata (prilivi) je pronađeno u izvodu — uplate se ne uvoze kao troškovi.
-      </div>
+      <template v-if="credits.length > 0">
+        <h3 class="section-title">Prilivi (uplate)</h3>
+        <p class="page-subtitle">
+          Interni transferi, podizanje/uplata gotovine i prebacivanja sa sopstvenog računa su automatski isključeni - ostalo se
+          predlaže za uvoz kao prihod.
+        </p>
+        <DataTable :value="credits" data-key="ref" class="review-table credits-table" :rows="100">
+          <Column header-style="width: 3rem">
+            <template #header>
+              <Checkbox :model-value="allCreditsSelected" :binary="true" @update:model-value="toggleAllCredits" />
+            </template>
+            <template #body="{ data }">
+              <Checkbox v-model="selectedCreditRefs" :value="data.ref" :disabled="data.matchStatus === 'already_imported'" />
+            </template>
+          </Column>
+          <Column header="Datum">
+            <template #body="{ data }">{{ formatDate(data.date) }}</template>
+          </Column>
+          <Column header="Izvor">
+            <template #body="{ data }">
+              <div class="merchant-cell">
+                <span class="merchant-name">{{ data.merchant }}</span>
+                <span class="merchant-raw">{{ data.rawDescription }}</span>
+              </div>
+            </template>
+          </Column>
+          <Column header="Tip prihoda">
+            <template #body="{ data }">
+              <Select
+                v-model="data.incomeType"
+                :options="incomeTypeOptions"
+                option-label="label"
+                option-value="value"
+                class="category-select"
+                :disabled="data.matchStatus === 'already_imported'"
+              />
+            </template>
+          </Column>
+          <Column header="Iznos" header-style="text-align: right">
+            <template #body="{ data }">
+              <span class="amount">{{ formatAmount(data.amount) }} RSD</span>
+            </template>
+          </Column>
+          <Column header="Status">
+            <template #body="{ data }">
+              <Tag v-if="data.matchStatus === 'new'" severity="success" value="Novo" />
+              <Tag
+                v-else-if="data.matchStatus === 'skipped'"
+                v-tooltip.left="data.matchReason"
+                severity="secondary"
+                value="Preskočeno"
+              />
+              <Tag v-else v-tooltip.left="data.matchReason" severity="secondary" value="Već uvezeno" />
+            </template>
+          </Column>
+        </DataTable>
+      </template>
 
       <div class="import-footer">
         <template v-if="allImported">
@@ -104,13 +157,14 @@
         </template>
         <template v-else>
           <div class="import-summary">
-            Izabrano: <strong>{{ selectedRefs.length }}</strong> transakcija, ukupno
-            <strong>{{ formatAmount(selectedTotal) }} RSD</strong>
+            Izabrano: <strong>{{ selectedRefs.length + selectedCreditRefs.length }}</strong> transakcija
+            <span v-if="selectedRefs.length > 0">— troškovi: <strong>{{ formatAmount(selectedExpenseTotal) }} RSD</strong></span>
+            <span v-if="selectedCreditRefs.length > 0">— prihodi: <strong>{{ formatAmount(selectedIncomeTotal) }} RSD</strong></span>
           </div>
           <Button
-            :label="importing ? 'Uvozim…' : `Uvezi (${selectedRefs.length})`"
+            :label="importing ? 'Uvozim…' : `Uvezi (${selectedRefs.length + selectedCreditRefs.length})`"
             icon="pi pi-download"
-            :disabled="selectedRefs.length === 0 || importing"
+            :disabled="(selectedRefs.length === 0 && selectedCreditRefs.length === 0) || importing"
             :loading="importing"
             @click="importSelected"
           />
@@ -133,6 +187,7 @@ import { useAppToast } from '@/composables/useAppToast';
 import { useUserStore } from '@/stores/user';
 import { useBalanceStore } from '@/stores/balance';
 import { CATEGORY_LABELS, EXPENSE_CATEGORIES } from '@/constants/categories';
+import { incomeTypeLabels, type IncomeType } from '@/types/income';
 import { USERS } from '@/constants/app';
 import { LOCALE } from '@/constants/app';
 import type { ParseStatementResult, StatementTransaction } from '@/types/statement';
@@ -147,8 +202,10 @@ const parsing = ref(false);
 const importing = ref(false);
 const result = ref<ParseStatementResult | null>(null);
 const selectedRefs = ref<string[]>([]);
+const selectedCreditRefs = ref<string[]>([]);
 
 const categoryOptions = EXPENSE_CATEGORIES.map(value => ({ value, label: CATEGORY_LABELS[value] }));
+const incomeTypeOptions = (Object.keys(incomeTypeLabels) as IncomeType[]).map(value => ({ value, label: incomeTypeLabels[value] }));
 
 const debits = computed(() => result.value?.transactions.filter(tx => tx.direction === 'debit') ?? []);
 const credits = computed(() => result.value?.transactions.filter(tx => tx.direction === 'credit') ?? []);
@@ -165,11 +222,23 @@ const selectableRefs = computed(() =>
 const allSelected = computed(
   () => selectableRefs.value.length > 0 && selectedRefs.value.length === selectableRefs.value.length
 );
-const allImported = computed(
-  () => debits.value.length > 0 && debits.value.every(tx => tx.matchStatus === 'already_imported')
+const selectableCreditRefs = computed(() =>
+  credits.value.filter(tx => tx.matchStatus !== 'already_imported').map(tx => tx.ref)
 );
-const selectedTotal = computed(() =>
+const allCreditsSelected = computed(
+  () => selectableCreditRefs.value.length > 0 && selectedCreditRefs.value.length === selectableCreditRefs.value.length
+);
+const allImported = computed(
+  () =>
+    debits.value.length + credits.value.length > 0 &&
+    debits.value.every(tx => tx.matchStatus === 'already_imported') &&
+    credits.value.every(tx => tx.matchStatus === 'already_imported' || tx.matchStatus === 'skipped')
+);
+const selectedExpenseTotal = computed(() =>
   debits.value.filter(tx => selectedRefs.value.includes(tx.ref)).reduce((sum, tx) => sum + tx.amount, 0)
+);
+const selectedIncomeTotal = computed(() =>
+  credits.value.filter(tx => selectedCreditRefs.value.includes(tx.ref)).reduce((sum, tx) => sum + tx.amount, 0)
 );
 
 /** The user store keeps lowercase ids; expenses store proper names */
@@ -213,6 +282,10 @@ async function parseFile(file: File) {
     selectedRefs.value = parsed.transactions
       .filter(tx => tx.direction === 'debit' && tx.suggestImport)
       .map(tx => tx.ref);
+    // Pre-select credits the backend thinks are real income (not internal transfers/cash movements)
+    selectedCreditRefs.value = parsed.transactions
+      .filter(tx => tx.direction === 'credit' && tx.suggestImport)
+      .map(tx => tx.ref);
   } catch (error) {
     showError('Izvod nije moguće obraditi', error);
   } finally {
@@ -225,25 +298,45 @@ function toggleAll(checked: boolean) {
   selectedRefs.value = checked ? [...selectableRefs.value] : [];
 }
 
+function toggleAllCredits(checked: boolean) {
+  selectedCreditRefs.value = checked ? [...selectableCreditRefs.value] : [];
+}
+
 async function importSelected() {
   if (!result.value) return;
-  const chosen = debits.value.filter(tx => selectedRefs.value.includes(tx.ref));
+  const chosenExpenses = debits.value.filter(tx => selectedRefs.value.includes(tx.ref));
+  const chosenIncomes = credits.value.filter(tx => selectedCreditRefs.value.includes(tx.ref));
   importing.value = true;
   try {
-    const { imported, skipped } = await statementApi.import({
+    const { expensesImported, incomesImported, skipped } = await statementApi.import({
       createdBy: createdBy.value,
-      transactions: chosen.map(tx => ({
-        ref: tx.ref,
-        date: tx.date,
-        merchant: tx.merchant,
-        rawDescription: tx.rawDescription,
-        category: tx.category,
-        amount: tx.amount
-      }))
+      transactions: [
+        ...chosenExpenses.map(tx => ({
+          ref: tx.ref,
+          date: tx.date,
+          merchant: tx.merchant,
+          rawDescription: tx.rawDescription,
+          category: tx.category,
+          amount: tx.amount,
+          direction: 'debit' as const
+        })),
+        ...chosenIncomes.map(tx => ({
+          ref: tx.ref,
+          date: tx.date,
+          merchant: tx.merchant,
+          rawDescription: tx.rawDescription,
+          incomeType: tx.incomeType,
+          amount: tx.amount,
+          direction: 'credit' as const
+        }))
+      ]
     });
     balanceStore.invalidateCache();
-    showSuccess(`Uvezeno ${imported} troškova${skipped > 0 ? `, preskočeno ${skipped}` : ''}`);
-    markImported(chosen.map(tx => tx.ref));
+    const parts = [];
+    if (expensesImported > 0) parts.push(`${expensesImported} troškova`);
+    if (incomesImported > 0) parts.push(`${incomesImported} prihoda`);
+    showSuccess(`Uvezeno: ${parts.join(', ') || '0'}${skipped > 0 ? `, preskočeno ${skipped}` : ''}`);
+    markImported([...chosenExpenses, ...chosenIncomes].map(tx => tx.ref));
   } catch (error) {
     showError('Uvoz nije uspeo', error);
   } finally {
@@ -259,11 +352,13 @@ function markImported(refs: string[]) {
       : tx
   );
   selectedRefs.value = [];
+  selectedCreditRefs.value = [];
 }
 
 function reset() {
   result.value = null;
   selectedRefs.value = [];
+  selectedCreditRefs.value = [];
 }
 
 function formatDate(iso?: string): string {
@@ -290,6 +385,10 @@ function formatAmount(value: number): string {
 .page-subtitle {
   margin: 0 0 1.5rem;
   color: var(--text-secondary);
+}
+
+.section-title {
+  margin: 2rem 0 0.25rem;
 }
 
 .upload-zone {
@@ -393,15 +492,6 @@ function formatAmount(value: number): string {
 .amount {
   font-weight: 600;
   white-space: nowrap;
-}
-
-.credits-note {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
 }
 
 .import-footer {

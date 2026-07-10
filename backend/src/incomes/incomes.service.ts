@@ -34,10 +34,15 @@ export class IncomesService {
       createdBy: normalizeCreatedBy(createIncomeDto.createdBy),
       creationMethod: createIncomeDto.creationMethod || 'manual',
       voiceTranscript: createIncomeDto.voiceTranscript,
-      recurringOccurrenceId: createIncomeDto.recurringOccurrenceId
+      recurringOccurrenceId: createIncomeDto.recurringOccurrenceId,
+      bankRef: createIncomeDto.bankRef
     };
 
     return this.incomesRepository.create(incomeData);
+  }
+
+  async existsByBankRef(bankRef: string): Promise<boolean> {
+    return this.incomesRepository.existsByBankRef(bankRef);
   }
 
   async findAll(query: QueryIncomesDto): Promise<{ data: Income[]; pagination: Pagination }> {

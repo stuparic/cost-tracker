@@ -1,6 +1,6 @@
 export type TransactionDirection = 'debit' | 'credit';
 
-export type TransactionMatchStatus = 'new' | 'duplicate' | 'already_imported';
+export type TransactionMatchStatus = 'new' | 'duplicate' | 'already_imported' | 'skipped';
 
 /** A single transaction extracted from an uploaded bank statement */
 export interface StatementTransaction {
@@ -14,6 +14,8 @@ export interface StatementTransaction {
   merchant: string;
   /** Suggested expense category (debits only) */
   category?: string;
+  /** Suggested income type (credits only) */
+  incomeType?: string;
   /** Amount in RSD, always positive */
   amount: number;
   direction: TransactionDirection;

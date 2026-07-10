@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ExpensesService } from '../expenses/expenses.service';
 import { CreateExpenseStatementDto } from '../expenses/dto/create-expense.dto';
 import { Expense } from '../expenses/interfaces/expense.interface';
+import { IncomesService } from '../incomes/incomes.service';
 import { StatementParserService } from './statement-parser.service';
 import { ImportStatementDto } from './dto/import-statement.dto';
 import { MatchedStatementTransaction, ParseStatementResult, StatementTransaction } from './interfaces/statement-transaction.interface';
@@ -15,18 +16,39 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 /** Descriptions that move money around without being real household expenses */
 const NON_EXPENSE_PATTERNS = /(podizanje gotovine|interni transfer|prenos sredstava|menjacnica|exchange)/i;
 
+/**
+ * Credits (uplate) that just move the account holder's own money around and
+ * are never real income: internal transfers between own accounts (savings <-> current),
+ * cash deposits at an ATM, and transfers where the counterparty is the account holder
+ * themselves (e.g. moving money in from another bank).
+ */
+const NON_INCOME_CREDIT_PATTERNS = /(interni transfer|prenos sredstava|uplata gotovine|polog gotovine|sopstveni racun)/i;
+/** The account holder's own name - a credit "from" this name is a self-transfer, not income */
+const OWN_NAME_PATTERN = /dejan\s+stupari[cć]/i;
+
+const CASHBACK_PATTERN = /cashback/i;
+const INTEREST_PATTERN = /kamat/i;
+
+/**
+ * Known recurring counterparties with a fixed income type, learned from real
+ * statements reviewed with the user (see FUTURE_IDEAS discussion). Anything
+ * not matched here defaults to "Other" and can be re-typed in the review screen.
+ */
+const KNOWN_INCOME_SOURCES: Array<{ pattern: RegExp; incomeType: string }> = [{ pattern: /milo[sš]\s+orli[cć]/i, incomeType: 'Rent' }];
+
 @Injectable()
 export class StatementsService {
   private readonly logger = new Logger(StatementsService.name);
 
   constructor(
     private readonly parser: StatementParserService,
-    private readonly expensesService: ExpensesService
+    private readonly expensesService: ExpensesService,
+    private readonly incomesService: IncomesService
   ) {}
 
   /**
    * Parses an uploaded statement PDF and annotates every transaction with
-   * duplicate-detection info against already-recorded expenses.
+   * duplicate-detection info against already-recorded expenses/incomes.
    */
   async parseAndMatch(buffer: Buffer): Promise<ParseStatementResult> {
     const transactions = await this.parser.parsePdf(buffer);
@@ -39,17 +61,40 @@ export class StatementsService {
     const periodEnd = dates[dates.length - 1];
 
     const existing = await this.fetchExistingExpenses(periodStart, periodEnd);
-    const matched = transactions.map(tx => this.matchTransaction(tx, existing));
+    const matched = await Promise.all(transactions.map(tx => this.matchTransaction(tx, existing)));
 
     return { success: true, periodStart, periodEnd, transactions: matched };
   }
 
-  /** Creates expenses for the reviewed transactions; idempotent per bankRef. */
-  async import(dto: ImportStatementDto): Promise<{ imported: number; skipped: number }> {
-    let imported = 0;
+  /** Creates expenses/incomes for the reviewed transactions; idempotent per bankRef. */
+  async import(dto: ImportStatementDto): Promise<{ expensesImported: number; incomesImported: number; skipped: number }> {
+    let expensesImported = 0;
+    let incomesImported = 0;
     let skipped = 0;
 
     for (const tx of dto.transactions) {
+      if (tx.direction === 'credit') {
+        const alreadyImported = await this.incomesService.existsByBankRef(tx.ref);
+        if (alreadyImported) {
+          skipped++;
+          continue;
+        }
+
+        await this.incomesService.create({
+          amount: tx.amount,
+          currency: 'RSD',
+          source: tx.merchant,
+          description: tx.rawDescription || tx.merchant,
+          incomeType: tx.incomeType || 'Other',
+          dateReceived: `${tx.date}T12:00:00.000Z`,
+          createdBy: dto.createdBy,
+          bankRef: tx.ref,
+          creationMethod: 'statement'
+        });
+        incomesImported++;
+        continue;
+      }
+
       const alreadyImported = await this.expensesService.existsByBankRef(tx.ref);
       if (alreadyImported) {
         skipped++;
@@ -69,11 +114,11 @@ export class StatementsService {
         creationMethod: 'statement'
       };
       await this.expensesService.create(createDto);
-      imported++;
+      expensesImported++;
     }
 
-    this.logger.log(`Statement import finished: ${imported} imported, ${skipped} skipped`);
-    return { imported, skipped };
+    this.logger.log(`Statement import finished: ${expensesImported} expenses, ${incomesImported} incomes imported, ${skipped} skipped`);
+    return { expensesImported, incomesImported, skipped };
   }
 
   private async fetchExistingExpenses(periodStart: string, periodEnd: string): Promise<Expense[]> {
@@ -88,9 +133,9 @@ export class StatementsService {
     return data;
   }
 
-  private matchTransaction(tx: StatementTransaction, existing: Expense[]): MatchedStatementTransaction {
+  private async matchTransaction(tx: StatementTransaction, existing: Expense[]): Promise<MatchedStatementTransaction> {
     if (tx.direction === 'credit') {
-      return { ...tx, matchStatus: 'new', suggestImport: false };
+      return this.matchCreditTransaction(tx);
     }
 
     const refMatch = existing.find(expense => expense.bankRef === tx.ref);
@@ -119,6 +164,66 @@ export class StatementsService {
       ...tx,
       matchStatus: 'new',
       suggestImport: !NON_EXPENSE_PATTERNS.test(`${tx.merchant} ${tx.rawDescription}`)
+    };
+  }
+
+  /**
+   * Classifies a credit (uplata): already-imported (by bankRef), a self-transfer/cash
+   * movement that should stay excluded from income, or a suggested new income with
+   * a best-guess type the user can still override in the review screen.
+   */
+  private async matchCreditTransaction(tx: StatementTransaction): Promise<MatchedStatementTransaction> {
+    const alreadyImported = await this.incomesService.existsByBankRef(tx.ref);
+    if (alreadyImported) {
+      return {
+        ...tx,
+        matchStatus: 'already_imported',
+        matchReason: 'Ova uplata je već uvezena iz izvoda',
+        suggestImport: false
+      };
+    }
+
+    const text = `${tx.merchant} ${tx.rawDescription}`;
+
+    if (OWN_NAME_PATTERN.test(text)) {
+      return {
+        ...tx,
+        matchStatus: 'skipped',
+        matchReason: 'Prebacivanje sa sopstvenog računa - nije prihod',
+        suggestImport: false
+      };
+    }
+
+    if (NON_INCOME_CREDIT_PATTERNS.test(text)) {
+      return {
+        ...tx,
+        matchStatus: 'skipped',
+        matchReason: 'Interni transfer / podizanje-uplata gotovine - nije prihod',
+        suggestImport: false
+      };
+    }
+
+    let incomeType = 'Other';
+    if (CASHBACK_PATTERN.test(text)) {
+      incomeType = 'Other';
+    } else if (INTEREST_PATTERN.test(text)) {
+      incomeType = 'Investment';
+    } else {
+      const known = KNOWN_INCOME_SOURCES.find(({ pattern }) => pattern.test(text));
+      if (known) {
+        incomeType = known.incomeType;
+      } else if (/^[A-ZŠĐČĆŽ0-9 .,&-]{4,}$/.test(tx.merchant.trim())) {
+        // All-caps multi-word counterparty on a Serbian statement is almost always
+        // a registered company/employer paying in - default to salary/freelance income.
+        incomeType = 'Salary';
+      }
+    }
+
+    return {
+      ...tx,
+      incomeType,
+      matchStatus: 'new',
+      suggestImport: true
     };
   }
 

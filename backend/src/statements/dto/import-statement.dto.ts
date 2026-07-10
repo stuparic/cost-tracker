@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsDateString, IsNumber, IsOptional, IsString, Min, MinLength, ValidateNested } from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsNumber, IsOptional, IsString, Min, MinLength, ValidateNested } from 'class-validator';
 
 export class ImportTransactionDto {
   @ApiProperty({ example: '94735212551001', description: 'Bank transaction reference' })
@@ -22,15 +22,35 @@ export class ImportTransactionDto {
   @IsString()
   rawDescription?: string;
 
-  @ApiProperty({ example: 'Groceries', required: false })
+  @ApiProperty({ example: 'Groceries', required: false, description: 'Expense category (debits only)' })
   @IsOptional()
   @IsString()
   category?: string;
+
+  @ApiProperty({
+    example: 'Salary',
+    required: false,
+    enum: ['Salary', 'Freelance', 'Rent', 'Investment', 'Gift', 'Other'],
+    description: 'Income type (credits only)'
+  })
+  @IsOptional()
+  @IsEnum(['Salary', 'Freelance', 'Rent', 'Investment', 'Gift', 'Other'])
+  incomeType?: string;
 
   @ApiProperty({ example: 733.46, description: 'Amount in RSD' })
   @IsNumber()
   @Min(0.01)
   amount: number;
+
+  @ApiProperty({
+    example: 'debit',
+    enum: ['debit', 'credit'],
+    required: false,
+    description: 'Transaction direction. Defaults to "debit" (creates an expense); "credit" creates an income.'
+  })
+  @IsOptional()
+  @IsEnum(['debit', 'credit'])
+  direction?: 'debit' | 'credit';
 }
 
 export class ImportStatementDto {

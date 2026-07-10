@@ -19,7 +19,7 @@ export const statementApi = {
     return response.data;
   },
 
-  /** Import the reviewed transactions as expenses (idempotent per bank reference) */
+  /** Import the reviewed transactions as expenses/incomes (idempotent per bank reference) */
   import: async (payload: ImportStatementPayload): Promise<ImportStatementResult> => {
     const response = await apiClient.post<ImportStatementResult>('/statements/import', payload, {
       timeout: PARSE_TIMEOUT_MS

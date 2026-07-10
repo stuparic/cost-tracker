@@ -71,14 +71,15 @@ export class CreateIncomeDto {
   @ApiProperty({
     required: false,
     example: 'manual',
-    enum: ['manual', 'voice', 'auto'],
-    description: 'How this income was created. "auto" = recurring auto-created. Defaults to "manual" if not specified.'
+    enum: ['manual', 'voice', 'auto', 'statement'],
+    description:
+      'How this income was created. "auto" = recurring auto-created, "statement" = imported from a bank statement. Defaults to "manual" if not specified.'
   })
   @IsOptional()
-  @IsEnum(['manual', 'voice', 'auto'], {
-    message: 'Creation method must be one of: manual, voice, auto'
+  @IsEnum(['manual', 'voice', 'auto', 'statement'], {
+    message: 'Creation method must be one of: manual, voice, auto, statement'
   })
-  creationMethod?: 'manual' | 'voice' | 'auto';
+  creationMethod?: 'manual' | 'voice' | 'auto' | 'statement';
 
   @ApiProperty({
     required: false,
@@ -88,4 +89,13 @@ export class CreateIncomeDto {
   @IsOptional()
   @IsString()
   voiceTranscript?: string;
+
+  @ApiProperty({
+    required: false,
+    example: '94735212551001',
+    description: 'Bank transaction reference from the statement (used for duplicate detection). Set when imported from a statement.'
+  })
+  @IsOptional()
+  @IsString()
+  bankRef?: string;
 }

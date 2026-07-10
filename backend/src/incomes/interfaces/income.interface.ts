@@ -13,6 +13,8 @@ export interface Income {
   createdAt: string;
   updatedAt: string;
   recurringOccurrenceId?: string;
-  creationMethod?: 'manual' | 'voice' | 'auto';
+  creationMethod?: 'manual' | 'voice' | 'auto' | 'statement';
   voiceTranscript?: string;
+  /** Bank transaction reference, set when imported from a statement (used for duplicate detection) */
+  bankRef?: string;
 }

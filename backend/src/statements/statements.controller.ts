@@ -43,8 +43,9 @@ export class StatementsController {
 
   @Post('import')
   @ApiOperation({
-    summary: 'Import reviewed statement transactions as expenses',
-    description: 'Creates an expense per transaction. Transactions whose bank reference was already imported are skipped.'
+    summary: 'Import reviewed statement transactions as expenses/incomes',
+    description:
+      'Creates an expense for each debit and an income for each credit. Transactions whose bank reference was already imported are skipped.'
   })
   async import(@Body() dto: ImportStatementDto) {
     return this.statementsService.import(dto);
