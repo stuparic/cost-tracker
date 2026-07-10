@@ -66,6 +66,7 @@ import { computed, onMounted } from 'vue';
 import { useBalanceStore } from '@/stores/balance';
 import { useTransactionFormatting } from '@/composables/useTransactionFormatting';
 import { CATEGORY_LABELS, type ExpenseCategory } from '@/constants/categories';
+import { categoryColor, categoryIcon } from '@/constants/category-style';
 import { incomeTypeLabels } from '@/types/income';
 
 const balanceStore = useBalanceStore();
@@ -84,47 +85,8 @@ const incomeEur = computed(() => balanceStore.incomes.reduce((sum, i) => sum + i
 const expenseEur = computed(() => balanceStore.expenses.reduce((sum, e) => sum + e.eurAmount, 0));
 const netEur = computed(() => incomeEur.value - expenseEur.value);
 
-const CATEGORY_ICONS: Record<string, string> = {
-  Groceries: 'pi pi-shopping-cart',
-  Home: 'pi pi-home',
-  Transport: 'pi pi-car',
-  Health: 'pi pi-heart',
-  Electronics: 'pi pi-desktop',
-  Dining: 'pi pi-shopping-bag',
-  Clothing: 'pi pi-tag',
-  Entertainment: 'pi pi-ticket',
-  Utilities: 'pi pi-bolt',
-  CarLoan: 'pi pi-key',
-  HomeLoan: 'pi pi-building',
-  Travel: 'pi pi-globe',
-  Work: 'pi pi-briefcase',
-  Transfers: 'pi pi-send',
-  Charity: 'pi pi-heart-fill',
-  Other: 'pi pi-circle'
-};
-
-// Mid-tone colors readable on light and dark surfaces; bg = same hex at ~13% alpha
-const CATEGORY_COLORS: Record<string, string> = {
-  Groceries: '#0f9d6e',
-  Home: '#5b45d6',
-  Transport: '#2f6fe4',
-  Health: '#c23a6f',
-  Electronics: '#8a63d2',
-  Dining: '#d1743a',
-  Clothing: '#c2589c',
-  Entertainment: '#e0a72e',
-  Utilities: '#4a94d8',
-  CarLoan: '#185fa5',
-  HomeLoan: '#7a51c9',
-  Travel: '#1d9e75',
-  Work: '#5f5e5a',
-  Transfers: '#993c1d',
-  Charity: '#d4537e',
-  Other: '#6a6a82'
-};
-
 function categoryStyle(category: string) {
-  const c = CATEGORY_COLORS[category] ?? CATEGORY_COLORS.Other!;
+  const c = categoryColor(category);
   return { color: c, background: `${c}21` };
 }
 
@@ -165,7 +127,7 @@ const recentItems = computed<RecentItem[]>(() => {
     kind: 'expense',
     title: e.shopName,
     meta: `${CATEGORY_LABELS[e.category as ExpenseCategory] ?? e.category} · ${formatRelativeDate(e.purchaseDate)}`,
-    icon: CATEGORY_ICONS[e.category] ?? 'pi pi-circle',
+    icon: categoryIcon(e.category),
     category: e.category,
     rsdAmount: e.rsdAmount,
     date: e.purchaseDate

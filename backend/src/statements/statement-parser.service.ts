@@ -133,6 +133,8 @@ For each transaction extract:
   If the merchant clearly matches one of these known Serbian shops, use the EXACT spelling from this list:
   ${SERBIAN_SHOPS.join(', ')}
   Otherwise use the cleaned name (e.g. "Podizanje gotovine" for ATM withdrawals, "Interni transfer" for internal transfers).
+  NEVER output "Other", "Unknown" or an empty string as the merchant - always derive a short human-readable name
+  from the description (e.g. "Naplata trajnog naloga", "Nemanja Zlatic Pr Lynx", "Dejan S", "HAC putarina").
 - "amount": the transaction amount as a number. Serbian number format uses "." for thousands and "," for decimals ("33.437,00" = 33437.00). Always positive.
 - "direction": "debit" if the amount is in the Isplata (outgoing) column, "credit" if in the Uplata (incoming) column.
 - "category": for debits only, one of: ${EXPENSE_CATEGORIES.join(', ')}.

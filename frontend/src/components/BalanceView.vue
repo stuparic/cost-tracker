@@ -85,6 +85,12 @@
         </div>
       </div>
 
+      <!-- Category drill-down -->
+      <div class="chart-section">
+        <h3 class="chart-title">Detalji po kategorijama</h3>
+        <CategoryBreakdownList :expenses="balanceStore.expenses" />
+      </div>
+
       <!-- Category Budgets -->
       <div class="chart-section budget-section">
         <h3 class="chart-title">Budžet po kategorijama</h3>
@@ -109,6 +115,7 @@ import { useAppToast } from '@/composables/useAppToast';
 import { USERS } from '@/constants/app';
 import DoughnutChart from '@/components/shared/DoughnutChart.vue';
 import BudgetProgressList from '@/components/shared/BudgetProgressList.vue';
+import CategoryBreakdownList from '@/components/shared/CategoryBreakdownList.vue';
 import { useBalanceStore, type BalanceQueryParams } from '@/stores/balance';
 import { useBudgetsStore } from '@/stores/budgets';
 import { expenseApi } from '@/api/expenses';
