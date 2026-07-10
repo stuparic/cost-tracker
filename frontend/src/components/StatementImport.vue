@@ -11,7 +11,7 @@
       @dragover.prevent="dragging = true"
       @dragleave.prevent="dragging = false"
       @drop.prevent="onDrop"
-      @click="!parsing && fileInput?.click()"
+      @click="onZoneClick"
     >
       <input ref="fileInput" type="file" accept="application/pdf,.pdf" hidden @change="onFileChosen" />
       <template v-if="parsing">
@@ -38,7 +38,7 @@
           <span class="count-chip duplicate">{{ counts.duplicate }} duplikata</span>
           <span class="count-chip imported">{{ counts.alreadyImported }} već uvezeno</span>
         </div>
-        <Button label="Drugi fajl" icon="pi pi-refresh" text @click="reset" />
+        <Button label="Drugi fajl" icon="pi pi-refresh" outlined size="small" @click="reset" />
       </div>
 
       <DataTable :value="debits" data-key="ref" class="review-table" :rows="100">
@@ -98,17 +98,23 @@
       </div>
 
       <div class="import-footer">
-        <div class="import-summary">
-          Izabrano: <strong>{{ selectedRefs.length }}</strong> transakcija, ukupno
-          <strong>{{ formatAmount(selectedTotal) }} RSD</strong>
-        </div>
-        <Button
-          :label="importing ? 'Uvozim…' : `Uvezi (${selectedRefs.length})`"
-          icon="pi pi-download"
-          :disabled="selectedRefs.length === 0 || importing"
-          :loading="importing"
-          @click="importSelected"
-        />
+        <template v-if="allImported">
+          <div class="import-summary">Sve transakcije iz ovog izvoda su uvezene.</div>
+          <Button label="Uvezi novi izvod" icon="pi pi-file-import" @click="reset" />
+        </template>
+        <template v-else>
+          <div class="import-summary">
+            Izabrano: <strong>{{ selectedRefs.length }}</strong> transakcija, ukupno
+            <strong>{{ formatAmount(selectedTotal) }} RSD</strong>
+          </div>
+          <Button
+            :label="importing ? 'Uvozim…' : `Uvezi (${selectedRefs.length})`"
+            icon="pi pi-download"
+            :disabled="selectedRefs.length === 0 || importing"
+            :loading="importing"
+            @click="importSelected"
+          />
+        </template>
       </div>
     </template>
   </div>
@@ -159,6 +165,9 @@ const selectableRefs = computed(() =>
 const allSelected = computed(
   () => selectableRefs.value.length > 0 && selectedRefs.value.length === selectableRefs.value.length
 );
+const allImported = computed(
+  () => debits.value.length > 0 && debits.value.every(tx => tx.matchStatus === 'already_imported')
+);
 const selectedTotal = computed(() =>
   debits.value.filter(tx => selectedRefs.value.includes(tx.ref)).reduce((sum, tx) => sum + tx.amount, 0)
 );
@@ -168,6 +177,13 @@ const createdBy = computed(() => {
   const current = userStore.selectedUser;
   return USERS.find(user => user.value.toLowerCase() === current)?.value ?? 'Dejan';
 });
+
+function onZoneClick() {
+  if (parsing.value || !fileInput.value) return;
+  // Clear the value first so choosing the same file still fires @change
+  fileInput.value.value = '';
+  fileInput.value.click();
+}
 
 function onDrop(event: DragEvent) {
   dragging.value = false;
@@ -273,23 +289,23 @@ function formatAmount(value: number): string {
 
 .page-subtitle {
   margin: 0 0 1.5rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
 }
 
 .upload-zone {
-  border: 2px dashed var(--border-color, #d1d5db);
+  border: 2px dashed var(--border-color);
   border-radius: 16px;
   padding: 4rem 2rem;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.2s, background-color 0.2s;
-  background: var(--card-bg, #ffffff);
+  background: var(--surface-card);
 }
 
 .upload-zone:hover,
 .upload-zone.dragging {
-  border-color: var(--accent-color, #10b981);
-  background: var(--accent-bg, #ecfdf5);
+  border-color: var(--primary-color);
+  background: var(--primary-light);
 }
 
 .upload-zone.parsing {
@@ -298,7 +314,7 @@ function formatAmount(value: number): string {
 
 .upload-icon {
   font-size: 3rem;
-  color: var(--accent-color, #10b981);
+  color: var(--primary-color);
 }
 
 .upload-text {
@@ -308,7 +324,7 @@ function formatAmount(value: number): string {
 }
 
 .upload-hint {
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -341,18 +357,18 @@ function formatAmount(value: number): string {
 }
 
 .count-chip.new {
-  background: #ecfdf5;
-  color: #047857;
+  background: var(--income-light);
+  color: var(--income-color);
 }
 
 .count-chip.duplicate {
-  background: #fffbeb;
-  color: #b45309;
+  background: var(--expense-light);
+  color: var(--expense-color);
 }
 
 .count-chip.imported {
-  background: #f3f4f6;
-  color: #4b5563;
+  background: var(--surface-hover);
+  color: var(--text-secondary);
 }
 
 .merchant-cell {
@@ -366,7 +382,7 @@ function formatAmount(value: number): string {
 
 .merchant-raw {
   font-size: 0.78rem;
-  color: var(--text-secondary, #9ca3af);
+  color: var(--text-secondary);
 }
 
 .category-select {
@@ -384,7 +400,7 @@ function formatAmount(value: number): string {
   align-items: center;
   gap: 0.5rem;
   margin-top: 1rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -398,7 +414,7 @@ function formatAmount(value: number): string {
   margin-top: 1rem;
   padding: 1rem;
   border-radius: 12px;
-  background: var(--card-bg, #ffffff);
+  background: var(--surface-card);
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
 }
 
