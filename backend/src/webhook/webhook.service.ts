@@ -32,7 +32,12 @@ export class WebhookService {
 
     // Same notification within the same minute = duplicate (MacroDroid can fire twice)
     const minuteBucket = new Date().toISOString().slice(0, 16);
-    const bankRef = 'notif-' + createHash('sha1').update(`${dto.app ?? ''}|${dto.title ?? ''}|${dto.text}|${minuteBucket}`).digest('hex').slice(0, 20);
+    const bankRef =
+      'notif-' +
+      createHash('sha1')
+        .update(`${dto.app ?? ''}|${dto.title ?? ''}|${dto.text}|${minuteBucket}`)
+        .digest('hex')
+        .slice(0, 20);
 
     if (await this.expensesService.existsByBankRef(bankRef)) {
       this.logger.log(`Skipping duplicate notification (${bankRef})`);
