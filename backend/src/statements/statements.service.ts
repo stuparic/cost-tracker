@@ -3,6 +3,7 @@ import { ExpensesService } from '../expenses/expenses.service';
 import { CreateExpenseStatementDto } from '../expenses/dto/create-expense.dto';
 import { Expense } from '../expenses/interfaces/expense.interface';
 import { IncomesService } from '../incomes/incomes.service';
+import { CurrencyService } from '../currency/currency.service';
 import { StatementParserService } from './statement-parser.service';
 import { ImportStatementDto } from './dto/import-statement.dto';
 import { MatchedStatementTransaction, ParseStatementResult, StatementTransaction } from './interfaces/statement-transaction.interface';
@@ -30,6 +31,18 @@ const CASHBACK_PATTERN = /cashback/i;
 const INTEREST_PATTERN = /kamat/i;
 
 /**
+ * Loan classification rules (agreed with the user, July 2026):
+ * - Debits to OTP banka are the car loan installment.
+ * - Debits transferring money to the account holder's own account at another
+ *   bank ("Dejan S...") service the apartment loan, up to HOME_LOAN_CAP_EUR per
+ *   monthly statement. Whatever exceeds the cap within one statement is "Other";
+ *   a transaction crossing the cap is split into two rows at parse time.
+ */
+const CAR_LOAN_PATTERN = /otp\s*bank/i;
+const SELF_TRANSFER_DEBIT_PATTERN = /(^|\s)dejan\s+s(\b|tupari)/i;
+const HOME_LOAN_CAP_EUR = 780;
+
+/**
  * Known recurring counterparties with a fixed income type, learned from real
  * statements reviewed with the user (see FUTURE_IDEAS discussion). Anything
  * not matched here defaults to "Other" and can be re-typed in the review screen.
@@ -43,7 +56,8 @@ export class StatementsService {
   constructor(
     private readonly parser: StatementParserService,
     private readonly expensesService: ExpensesService,
-    private readonly incomesService: IncomesService
+    private readonly incomesService: IncomesService,
+    private readonly currencyService: CurrencyService
   ) {}
 
   /**
@@ -51,10 +65,12 @@ export class StatementsService {
    * duplicate-detection info against already-recorded expenses/incomes.
    */
   async parseAndMatch(buffer: Buffer): Promise<ParseStatementResult> {
-    const transactions = await this.parser.parsePdf(buffer);
-    if (transactions.length === 0) {
+    const parsed = await this.parser.parsePdf(buffer);
+    if (parsed.length === 0) {
       return { success: false, error: 'No transactions found in the statement', transactions: [] };
     }
+
+    const transactions = this.applyLoanRules(parsed);
 
     const dates = transactions.map(tx => tx.date).sort();
     const periodStart = dates[0];
@@ -64,6 +80,77 @@ export class StatementsService {
     const matched = await Promise.all(transactions.map(tx => this.matchTransaction(tx, existing)));
 
     return { success: true, periodStart, periodEnd, transactions: matched };
+  }
+
+  /**
+   * Applies the user's loan-classification rules to debit transactions before
+   * matching: OTP banka debits become the car-loan installment, self-transfers
+   * ("Dejan S...") count towards the apartment loan up to HOME_LOAN_CAP_EUR per
+   * statement. A transaction that crosses the cap is split into a HomeLoan part
+   * and an "Other" part (the split row gets a derived, stable bank ref so
+   * re-uploading the same statement stays idempotent).
+   */
+  private applyLoanRules(transactions: StatementTransaction[]): StatementTransaction[] {
+    const capRsd = this.currencyService.convertEurToRsd(HOME_LOAN_CAP_EUR);
+    let homeLoanUsedRsd = 0;
+
+    const result: StatementTransaction[] = [];
+
+    const chronological = [...transactions].sort((a, b) => a.date.localeCompare(b.date));
+    const order = new Map(chronological.map((tx, index) => [tx.ref, index]));
+    const sorted = [...transactions].sort((a, b) => (order.get(a.ref) ?? 0) - (order.get(b.ref) ?? 0));
+
+    for (const tx of sorted) {
+      if (tx.direction !== 'debit') {
+        result.push(tx);
+        continue;
+      }
+
+      const text = `${tx.merchant} ${tx.rawDescription}`;
+
+      if (CAR_LOAN_PATTERN.test(text)) {
+        result.push({ ...tx, category: 'CarLoan' });
+        continue;
+      }
+
+      if (!SELF_TRANSFER_DEBIT_PATTERN.test(text)) {
+        result.push(tx);
+        continue;
+      }
+
+      const remaining = capRsd - homeLoanUsedRsd;
+
+      if (remaining <= 0) {
+        result.push({ ...tx, category: 'Other' });
+        continue;
+      }
+
+      if (tx.amount <= remaining) {
+        homeLoanUsedRsd += tx.amount;
+        result.push({ ...tx, category: 'HomeLoan' });
+        continue;
+      }
+
+      // Crosses the cap: split into the HomeLoan remainder and an "Other" rest
+      homeLoanUsedRsd = capRsd;
+      const homeLoanPart = Math.round(remaining * 100) / 100;
+      const otherPart = Math.round((tx.amount - remaining) * 100) / 100;
+      result.push({
+        ...tx,
+        amount: homeLoanPart,
+        category: 'HomeLoan',
+        rawDescription: `${tx.rawDescription} (deo rate do ${HOME_LOAN_CAP_EUR} EUR)`
+      });
+      result.push({
+        ...tx,
+        ref: `${tx.ref}-preko`,
+        amount: otherPart,
+        category: 'Other',
+        rawDescription: `${tx.rawDescription} (iznad ${HOME_LOAN_CAP_EUR} EUR mesečno)`
+      });
+    }
+
+    return result;
   }
 
   /** Creates expenses/incomes for the reviewed transactions; idempotent per bankRef. */

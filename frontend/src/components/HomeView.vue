@@ -94,6 +94,8 @@ const CATEGORY_ICONS: Record<string, string> = {
   Clothing: 'pi pi-tag',
   Entertainment: 'pi pi-ticket',
   Utilities: 'pi pi-bolt',
+  CarLoan: 'pi pi-key',
+  HomeLoan: 'pi pi-building',
   Other: 'pi pi-circle'
 };
 
@@ -108,6 +110,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   Clothing: '#c2589c',
   Entertainment: '#e0a72e',
   Utilities: '#4a94d8',
+  CarLoan: '#185fa5',
+  HomeLoan: '#7a51c9',
   Other: '#6a6a82'
 };
 

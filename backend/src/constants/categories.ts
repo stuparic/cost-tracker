@@ -9,6 +9,8 @@ export const EXPENSE_CATEGORIES = [
   'Clothing',
   'Entertainment',
   'Utilities',
+  'CarLoan',
+  'HomeLoan',
   'Other'
 ] as const;
 
@@ -24,6 +26,8 @@ export const CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   Clothing: 'Odeća',
   Entertainment: 'Zabava',
   Utilities: 'Režije',
+  CarLoan: 'Kredit za auto',
+  HomeLoan: 'Kredit za stan',
   Other: 'Ostalo'
 };
 
