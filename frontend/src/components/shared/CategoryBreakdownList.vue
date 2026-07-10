@@ -24,7 +24,7 @@
             <span class="cb-item-title">{{ itemTitle(item) }}</span>
             <span class="cb-item-meta">
               {{ formatRelativeDate(item.purchaseDate) }} · {{ item.createdBy }}
-              <span v-if="(item.tags || []).includes('putovanje')" class="cb-tag">putovanje</span>
+              <span v-for="tag in item.tags || []" :key="tag" class="cb-tag">{{ tag }}</span>
             </span>
           </span>
           <span class="cb-item-amount">{{ formatNumber(item.rsdAmount, false) }}</span>

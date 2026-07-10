@@ -195,7 +195,7 @@ export class StatementsService {
         productDescription: tx.rawDescription || tx.merchant,
         category: tx.category,
         paymentMethod: 'Kartica',
-        tags: tx.travel ? ['putovanje'] : undefined,
+        tags: tx.travel ? ['putovanje', ...(tx.travelPlace ? [tx.travelPlace] : [])] : undefined,
         purchaseDate: `${tx.date}T12:00:00.000Z`,
         createdBy: dto.createdBy,
         bankRef: tx.ref,

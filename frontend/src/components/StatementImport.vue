@@ -319,7 +319,8 @@ async function importSelected() {
           category: tx.category,
           amount: tx.amount,
           direction: 'debit' as const,
-          travel: tx.travel
+          travel: tx.travel,
+          travelPlace: tx.travelPlace
         })),
         ...chosenIncomes.map(tx => ({
           ref: tx.ref,

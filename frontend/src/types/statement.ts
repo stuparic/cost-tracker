@@ -16,6 +16,8 @@ export interface StatementTransaction {
   direction: TransactionDirection;
   /** True when the transaction happened abroad / on a trip */
   travel?: boolean;
+  /** Trip location as "City, Country" */
+  travelPlace?: string;
   matchStatus: TransactionMatchStatus;
   matchedExpenseId?: string;
   matchReason?: string;
@@ -42,6 +44,7 @@ export interface ImportStatementPayload {
     amount: number;
     direction: TransactionDirection;
     travel?: boolean;
+    travelPlace?: string;
   }>;
 }
 

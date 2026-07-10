@@ -60,6 +60,11 @@ export class ImportTransactionDto {
   @IsOptional()
   @IsBoolean()
   travel?: boolean;
+
+  @ApiProperty({ example: 'Ljubljana, Slovenija', required: false, description: 'Trip location, stored as an extra tag' })
+  @IsOptional()
+  @IsString()
+  travelPlace?: string;
 }
 
 export class ImportStatementDto {

@@ -21,6 +21,8 @@ export interface StatementTransaction {
   direction: TransactionDirection;
   /** True when the transaction happened abroad / on a trip (adds the "putovanje" tag on import) */
   travel?: boolean;
+  /** Trip location as "City, Country" (country in Serbian), added as an extra tag on import */
+  travelPlace?: string;
 }
 
 /** Transaction enriched with duplicate-detection info */

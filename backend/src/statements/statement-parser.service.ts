@@ -109,7 +109,8 @@ export class StatementParserService {
       category: tx.direction === 'debit' ? tx.category || 'General' : undefined,
       amount: Math.round(tx.amount * 100) / 100,
       direction: tx.direction,
-      travel: tx.travel === true
+      travel: tx.travel === true,
+      travelPlace: tx.travel === true && typeof tx.travelPlace === 'string' ? tx.travelPlace.trim().slice(0, 60) : undefined
     };
   }
 
@@ -153,6 +154,9 @@ For each transaction extract:
   a "Kurs:" exchange-rate note with EUR/foreign currency, or a foreign merchant). Serbian cities (Novi Sad, Beograd...) = false.
   The category should still describe WHAT was bought (Groceries for a foreign supermarket, Transport for foreign fuel/tolls,
   Dining for restaurants); "travel" only marks the trip context. Pure accommodation/tourist costs keep category "Travel".
+- "travelPlace": only when "travel" is true - the location as "City, Country" with the country name in Serbian
+  (e.g. "Ljubljana, Slovenija", "Zagreb, Hrvatska", "Maribor, Slovenija"). Derive it from the city printed in the
+  transaction row. If only the country is known, use just the country ("Slovenija"). Omit when unknown.
 
 Rules:
 - Include ALL transactions: card payments, ATM withdrawals, transfers, QR payments, fees.
