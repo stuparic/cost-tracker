@@ -96,6 +96,10 @@ const CATEGORY_ICONS: Record<string, string> = {
   Utilities: 'pi pi-bolt',
   CarLoan: 'pi pi-key',
   HomeLoan: 'pi pi-building',
+  Travel: 'pi pi-globe',
+  Work: 'pi pi-briefcase',
+  Transfers: 'pi pi-send',
+  Charity: 'pi pi-heart-fill',
   Other: 'pi pi-circle'
 };
 
@@ -112,6 +116,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   Utilities: '#4a94d8',
   CarLoan: '#185fa5',
   HomeLoan: '#7a51c9',
+  Travel: '#1d9e75',
+  Work: '#5f5e5a',
+  Transfers: '#993c1d',
+  Charity: '#d4537e',
   Other: '#6a6a82'
 };
 

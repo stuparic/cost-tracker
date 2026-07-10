@@ -14,6 +14,8 @@ export interface StatementTransaction {
   /** Amount in RSD, always positive */
   amount: number;
   direction: TransactionDirection;
+  /** True when the transaction happened abroad / on a trip */
+  travel?: boolean;
   matchStatus: TransactionMatchStatus;
   matchedExpenseId?: string;
   matchReason?: string;
@@ -39,6 +41,7 @@ export interface ImportStatementPayload {
     incomeType?: string;
     amount: number;
     direction: TransactionDirection;
+    travel?: boolean;
   }>;
 }
 

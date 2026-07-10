@@ -108,7 +108,8 @@ export class StatementParserService {
       merchant: String(tx.merchant || tx.rawDescription || 'Other').trim(),
       category: tx.direction === 'debit' ? tx.category || 'General' : undefined,
       amount: Math.round(tx.amount * 100) / 100,
-      direction: tx.direction
+      direction: tx.direction,
+      travel: tx.travel === true
     };
   }
 
@@ -135,7 +136,21 @@ For each transaction extract:
 - "amount": the transaction amount as a number. Serbian number format uses "." for thousands and "," for decimals ("33.437,00" = 33437.00). Always positive.
 - "direction": "debit" if the amount is in the Isplata (outgoing) column, "credit" if in the Uplata (incoming) column.
 - "category": for debits only, one of: ${EXPENSE_CATEGORIES.join(', ')}.
-  ATM withdrawals ("Podizanje gotovine") = "Other". Internal transfers = "Other".
+  Category rules:
+  * Fuel stations and road tolls = "Transport": NIS, OMV, MOL, Petrol, Tifon, Lukoil, Coral, HAC (Croatian tolls),
+    "putarina", and pump terminals named like "NOVI SAD 1"/"NS 5478TX" (a city name + short number is almost always a fuel pump).
+  * "Naplata trajnog naloga" (standing orders) = "Utilities" (recurring household bills).
+  * Camps, hotels, hostels, apartments, booking platforms, tourist services = "Travel".
+  * Coworking spaces (e.g. "Lynx") = "Work".
+  * QR payments or transfers to PRIVATE INDIVIDUALS (a personal first name + surname or initial, e.g. "Ivica S",
+    "Petar Petrovic") = "Transfers". Note: names followed by "Pr"/"doo" are registered businesses, NOT private individuals.
+  * Donations to foundations, funds, humanitarian organizations (e.g. "Kancelarija dečijeg fonda", Crveni krst, UNICEF) = "Charity".
+  * Road vignettes and toll stickers (e.g. "vintrica" = vignette webshop) = "Transport".
+  * ATM withdrawals ("Podizanje gotovine") = "Other". Internal transfers = "Other".
+- "travel": boolean, true when the transaction clearly happened abroad or on a trip (foreign city like Ljubljana/Zagreb/Maribor,
+  a "Kurs:" exchange-rate note with EUR/foreign currency, or a foreign merchant). Serbian cities (Novi Sad, Beograd...) = false.
+  The category should still describe WHAT was bought (Groceries for a foreign supermarket, Transport for foreign fuel/tolls,
+  Dining for restaurants); "travel" only marks the trip context. Pure accommodation/tourist costs keep category "Travel".
 
 Rules:
 - Include ALL transactions: card payments, ATM withdrawals, transfers, QR payments, fees.

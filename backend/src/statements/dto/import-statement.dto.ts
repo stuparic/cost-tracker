@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsDateString, IsEnum, IsNumber, IsOptional, IsString, Min, MinLength, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsDateString, IsEnum, IsNumber, IsOptional, IsString, Min, MinLength, ValidateNested } from 'class-validator';
 
 export class ImportTransactionDto {
   @ApiProperty({ example: '94735212551001', description: 'Bank transaction reference' })
@@ -51,6 +51,15 @@ export class ImportTransactionDto {
   @IsOptional()
   @IsEnum(['debit', 'credit'])
   direction?: 'debit' | 'credit';
+
+  @ApiProperty({
+    example: true,
+    required: false,
+    description: 'True when the transaction happened on a trip/abroad; adds the "putovanje" tag to the created expense'
+  })
+  @IsOptional()
+  @IsBoolean()
+  travel?: boolean;
 }
 
 export class ImportStatementDto {

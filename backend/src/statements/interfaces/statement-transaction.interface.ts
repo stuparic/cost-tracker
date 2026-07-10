@@ -19,6 +19,8 @@ export interface StatementTransaction {
   /** Amount in RSD, always positive */
   amount: number;
   direction: TransactionDirection;
+  /** True when the transaction happened abroad / on a trip (adds the "putovanje" tag on import) */
+  travel?: boolean;
 }
 
 /** Transaction enriched with duplicate-detection info */
