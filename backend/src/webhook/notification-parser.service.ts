@@ -22,6 +22,9 @@ export class NotificationParserService {
   private readonly currencyAmountRe = /(RSD|EUR|€)\s*(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?|\d+(?:[.,]\d{1,2})?)/i;
 
   private readonly merchantPatterns: RegExp[] = [
+    // Yettel Bank card notification: "..., iznos: 750.00 RSD, 10.07.2026, SWEET&GREEN NOVI SAD. Trenutno raspolozivo: ..."
+    /\d{2}\.\d{2}\.\d{4},\s*(.{2,60}?)\.\s*Trenutno/i,
+    /\d{2}\.\d{2}\.\d{4},\s*([^.,\n]{2,60})/,
     /(?:mesto|lokacija|merchant)[:\s]+([^\n,;]{2,50})/i,
     // "702,00 RSD na NETFLIX.COM" / "5 € kod MAXI" (Yettel Bank and similar)
     /(?:RSD|EUR|€|din\.?)\s+(?:na|kod|u)\s+([^\n,;]{2,50})/i,
