@@ -43,12 +43,14 @@
       <!-- Main Balance Chart -->
       <div class="chart-section main-chart-section">
         <h3 class="chart-title">Ukupan bilans</h3>
+        <p class="chart-hint">Klikni na parče grafikona za detalje</p>
         <DoughnutChart
           :labels="['Prihodi', 'Troškovi']"
           :data="[totalIncome, totalExpense]"
           :colors="['#1d9e75', '#d85a30']"
           :center-text="formatBalance(netBalance)"
           :center-subtext="netBalance >= 0 ? 'Profit' : 'Deficit'"
+          @slice-click="onMainSlice"
         />
 
         <!-- Key Metrics -->
@@ -73,7 +75,14 @@
         <!-- Category Breakdown -->
         <div class="chart-section">
           <h3 class="chart-title">Troškovi po kategorijama</h3>
-          <DoughnutChart v-if="categoryLabels.length > 0" :labels="categoryLabels" :data="categoryData" :colors="categoryColors" />
+          <p class="chart-hint">Klikni na kategoriju za detalje</p>
+          <DoughnutChart
+            v-if="categoryLabels.length > 0"
+            :labels="categoryLabels"
+            :data="categoryData"
+            :colors="categoryColors"
+            @slice-click="onCategorySlice"
+          />
           <div v-else class="empty-chart">Nema podataka o kategorijama</div>
         </div>
 
@@ -85,10 +94,14 @@
         </div>
       </div>
 
-      <!-- Category drill-down -->
-      <div class="chart-section">
-        <h3 class="chart-title">Detalji po kategorijama</h3>
-        <CategoryBreakdownList :expenses="balanceStore.expenses" />
+      <!-- Drill-down panel: opens on doughnut slice click -->
+      <div v-if="detail" ref="detailPanel" class="chart-section detail-panel">
+        <div class="detail-header">
+          <h3 class="chart-title detail-title">{{ detail.kind === 'incomes' ? 'Detalji prihoda' : 'Detalji troškova' }}</h3>
+          <Button icon="pi pi-times" text rounded size="small" aria-label="Zatvori detalje" @click="detail = null" />
+        </div>
+        <IncomeBreakdownList v-if="detail.kind === 'incomes'" :incomes="balanceStore.incomes" />
+        <CategoryBreakdownList v-else :expenses="balanceStore.expenses" :initial-category="detail.category" />
       </div>
 
       <!-- Category Budgets -->
@@ -108,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, nextTick, onMounted, watch } from 'vue';
 import Button from 'primevue/button';
 import { useListFormatting } from '@/composables/useListFormatting';
 import { useAppToast } from '@/composables/useAppToast';
@@ -116,6 +129,9 @@ import { USERS } from '@/constants/app';
 import DoughnutChart from '@/components/shared/DoughnutChart.vue';
 import BudgetProgressList from '@/components/shared/BudgetProgressList.vue';
 import CategoryBreakdownList from '@/components/shared/CategoryBreakdownList.vue';
+import IncomeBreakdownList from '@/components/shared/IncomeBreakdownList.vue';
+import { CATEGORY_LABELS, type ExpenseCategory } from '@/constants/categories';
+import { categoryColor } from '@/constants/category-style';
 import { useBalanceStore, type BalanceQueryParams } from '@/stores/balance';
 import { useBudgetsStore } from '@/stores/budgets';
 import { expenseApi } from '@/api/expenses';
@@ -174,28 +190,37 @@ const hasData = computed(() => {
   return balanceStore.expenses.length > 0 || balanceStore.incomes.length > 0;
 });
 
-// Computed: Category breakdown
-const categoryData = computed(() => {
+// Computed: Category breakdown (keys are raw category ids, labels are Serbian)
+const categoryTotals = computed(() => {
   const categoryMap = new Map<string, number>();
   balanceStore.expenses.forEach(expense => {
-    const category = expense.category || 'Nekategorisano';
+    const category = expense.category || 'Other';
     categoryMap.set(category, (categoryMap.get(category) || 0) + expense.rsdAmount);
   });
-  return Array.from(categoryMap.values());
+  return Array.from(categoryMap.entries()).sort((a, b) => b[1] - a[1]);
 });
 
-const categoryLabels = computed(() => {
-  const categoryMap = new Map<string, number>();
-  balanceStore.expenses.forEach(expense => {
-    const category = expense.category || 'Nekategorisano';
-    categoryMap.set(category, (categoryMap.get(category) || 0) + expense.rsdAmount);
-  });
-  return Array.from(categoryMap.keys());
-});
+const categoryKeys = computed(() => categoryTotals.value.map(([key]) => key));
+const categoryData = computed(() => categoryTotals.value.map(([, total]) => total));
+const categoryLabels = computed(() => categoryKeys.value.map(key => CATEGORY_LABELS[key as ExpenseCategory] ?? key));
+const categoryColors = computed<string[]>(() => categoryKeys.value.map(key => categoryColor(key)));
 
-const categoryColors = computed<string[]>(() => {
-  const colors: string[] = ['#1d9e75', '#7f77dd', '#d85a30', '#378add', '#d4537e', '#ef9f27', '#5dcaa5', '#afa9ec', '#f0997b', '#888780'];
-  return categoryLabels.value.map((_, index) => colors[index % colors.length]!);
+// Drill-down panel state (opens on doughnut slice click)
+const detail = ref<{ kind: 'incomes' } | { kind: 'expenses'; category: string | null } | null>(null);
+const detailPanel = ref<HTMLElement | null>(null);
+
+function onMainSlice({ index }: { label: string; index: number }) {
+  detail.value = index === 0 ? { kind: 'incomes' } : { kind: 'expenses', category: null };
+}
+
+function onCategorySlice({ index }: { label: string; index: number }) {
+  detail.value = { kind: 'expenses', category: categoryKeys.value[index] ?? null };
+}
+
+watch(detail, async value => {
+  if (!value) return;
+  await nextTick();
+  detailPanel.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 // Computed: Person breakdown
@@ -310,6 +335,7 @@ async function exportBackup() {
 
 // Watch for filter changes
 watch([currentMonth, selectedPerson], () => {
+  detail.value = null;
   fetchData();
 });
 
@@ -485,6 +511,29 @@ onMounted(() => {
   color: var(--text-primary);
   margin-bottom: 1.25rem;
   text-align: center;
+}
+
+.chart-hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: -1rem 0 1rem;
+}
+
+.detail-panel {
+  scroll-margin-top: 120px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.detail-header .detail-title {
+  margin-bottom: 0;
+  text-align: left;
 }
 
 .empty-chart {

@@ -26,6 +26,8 @@ const props = withDefaults(defineProps<Props>(), {
   centerSubtext: ''
 });
 
+const emit = defineEmits<{ (e: 'slice-click', payload: { label: string; index: number }): void }>();
+
 // Custom plugin to draw text in the center of the doughnut chart.
 // Passed per chart instance (NOT registered globally) so each chart only
 // draws its own center text and theme colors are resolved at draw time.
@@ -75,6 +77,17 @@ const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: true,
   cutout: '70%',
+  onClick(_event: any, elements: any[]) {
+    const element = elements?.[0];
+    if (!element) return;
+    const index = element.index as number;
+    emit('slice-click', { label: props.labels[index] ?? '', index });
+  },
+  onHover(event: any, elements: any[]) {
+    if (event?.native?.target) {
+      event.native.target.style.cursor = elements?.length ? 'pointer' : 'default';
+    }
+  },
   plugins: {
     legend: {
       position: 'bottom',

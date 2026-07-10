@@ -35,17 +35,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { Expense } from '@/types/expense';
 import { CATEGORY_LABELS, type ExpenseCategory } from '@/constants/categories';
 import { categoryColor, categoryIcon } from '@/constants/category-style';
 import { useTransactionFormatting } from '@/composables/useTransactionFormatting';
 
-const props = defineProps<{ expenses: Expense[] }>();
+const props = defineProps<{ expenses: Expense[]; initialCategory?: string | null }>();
 
 const { formatNumber, formatRelativeDate } = useTransactionFormatting();
 
-const expanded = ref<string | null>(null);
+const expanded = ref<string | null>(props.initialCategory ?? null);
+
+watch(
+  () => props.initialCategory,
+  value => {
+    if (value) expanded.value = value;
+  }
+);
 
 function toggle(category: string) {
   expanded.value = expanded.value === category ? null : category;
