@@ -11,6 +11,7 @@ import { RecurringModule } from './recurring/recurring.module';
 import { VoiceModule } from './voice/voice.module';
 import { StatementsModule } from './statements/statements.module';
 import { WebhookModule } from './webhook/webhook.module';
+import { BudgetsModule } from './budgets/budgets.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import firebaseConfig from './config/firebase.config';
 
@@ -29,7 +30,8 @@ import firebaseConfig from './config/firebase.config';
     RecurringModule,
     VoiceModule,
     StatementsModule,
-    WebhookModule
+    WebhookModule,
+    BudgetsModule
   ],
   controllers: [AppController],
   providers: [AppService]

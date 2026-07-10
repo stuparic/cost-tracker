@@ -77,6 +77,12 @@
           <div v-else class="empty-chart">Nema podataka po osobi</div>
         </div>
       </div>
+
+      <!-- Category Budgets -->
+      <div class="chart-section budget-section">
+        <h3 class="chart-title">Budžet po kategorijama</h3>
+        <BudgetProgressList :spent-by-category="spentByCategoryMap" />
+      </div>
     </div>
 
     <!-- Empty State -->
@@ -94,10 +100,13 @@ import Button from 'primevue/button';
 import { useListFormatting } from '@/composables/useListFormatting';
 import { USERS } from '@/constants/app';
 import DoughnutChart from '@/components/shared/DoughnutChart.vue';
+import BudgetProgressList from '@/components/shared/BudgetProgressList.vue';
 import { useBalanceStore, type BalanceQueryParams } from '@/stores/balance';
+import { useBudgetsStore } from '@/stores/budgets';
 
 const { formatRSD, formatMonthYear } = useListFormatting();
 const balanceStore = useBalanceStore();
+const budgetsStore = useBudgetsStore();
 
 // Filters
 const currentMonth = ref(new Date());
@@ -183,6 +192,16 @@ const personLabels = computed(() => {
   return Array.from(personMap.keys());
 });
 
+// Computed: spend per raw category key, for budget progress bars
+const spentByCategoryMap = computed<Record<string, number>>(() => {
+  const map: Record<string, number> = {};
+  balanceStore.expenses.forEach(expense => {
+    const category = expense.category || 'Other';
+    map[category] = (map[category] || 0) + expense.rsdAmount;
+  });
+  return map;
+});
+
 const personColors = computed<string[]>(() => {
   return personLabels.value.map(name => {
     const user = USERS.find(u => u.value === name);
@@ -237,6 +256,10 @@ onMounted(() => {
   // Only fetch if preloaded data doesn't match current filters
   if (!paramsMatch && !balanceStore.loading) {
     fetchData();
+  }
+
+  if (!budgetsStore.loaded) {
+    budgetsStore.fetchBudgets();
   }
 });
 </script>
