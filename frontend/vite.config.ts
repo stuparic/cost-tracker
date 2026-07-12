@@ -41,6 +41,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Firebase Auth opens /__/auth/handler in a popup. Without this
+        // exclusion, Workbox serves index.html for that navigation and the
+        // popup renders the app's login page instead of Google's OAuth flow.
+        navigateFallbackDenylist: [/^\/__\/auth\//],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cost-tracker-utmayd66ga-ew\.a\.run\.app\/api\/v1\/.*/i,
