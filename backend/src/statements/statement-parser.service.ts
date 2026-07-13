@@ -7,6 +7,13 @@ import { SERBIAN_SHOPS } from '../constants/serbian-shops';
 import { StatementTransaction } from './interfaces/statement-transaction.interface';
 
 /**
+ * Upper bound for the JSON the model returns when parsing a statement. A dense
+ * monthly statement is ~170 transactions ≈ 10k tokens; 65536 leaves comfortable
+ * headroom so nothing gets truncated. Overridable via env for very large PDFs.
+ */
+const STATEMENT_MAX_OUTPUT_TOKENS = Number(process.env.GEMINI_STATEMENT_MAX_TOKENS) || 65536;
+
+/**
  * Extracts raw text from a bank statement PDF and uses Gemini to convert it
  * into a structured list of transactions.
  */
@@ -29,6 +36,18 @@ export class StatementParserService {
 
   private async parseStatementText(text: string): Promise<StatementTransaction[]> {
     const result = await this.generateWithRetry(this.buildPrompt(text));
+
+    // A long statement (many transactions) can produce a large JSON array. If the
+    // model hits its output-token ceiling the response comes back truncated, which
+    // then fails JSON.parse with a misleading "invalid response" error. Detect that
+    // case explicitly so the user gets an actionable message.
+    const finishReason = result.candidates?.[0]?.finishReason;
+    if (finishReason === 'MAX_TOKENS') {
+      this.logger.error(`Gemini truncated the statement response (finishReason=MAX_TOKENS)`);
+      throw new Error(
+        'Izvod ima previše transakcija da bi se obradio odjednom. Pokušaj sa izvodom za kraći period ili podeli PDF.'
+      );
+    }
 
     const cleaned = (result.text || '').replace(/```json\n?|\n?```/g, '').trim();
     let parsed: unknown;
@@ -61,7 +80,24 @@ export class StatementParserService {
       const attempts = model === primary ? 3 : 2;
       for (let attempt = 1; attempt <= attempts; attempt++) {
         try {
-          return await this.genAI.models.generateContent({ model, contents: prompt });
+          return await this.genAI.models.generateContent({
+            model,
+            contents: prompt,
+            config: {
+              // A full month of statements can be ~170 transactions ≈ 10k output
+              // tokens. Without an explicit ceiling the response truncates and the
+              // JSON fails to parse, so give it generous headroom.
+              maxOutputTokens: STATEMENT_MAX_OUTPUT_TOKENS,
+              // Deterministic extraction - we want the same rows every time.
+              temperature: 0,
+              // Force clean JSON so we don't depend on stripping ```json fences.
+              responseMimeType: 'application/json',
+              // gemini-flash-lite is a "thinking" model; thinking tokens are drawn
+              // from the same output budget and would otherwise starve the actual
+              // JSON on large statements. Disable it for this structured task.
+              thinkingConfig: { thinkingBudget: 0 }
+            }
+          });
         } catch (error) {
           lastError = error;
           const message = error instanceof Error ? error.message : String(error);
