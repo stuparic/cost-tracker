@@ -39,7 +39,12 @@ export class IncomesService {
       creationMethod: createIncomeDto.creationMethod || 'manual',
       voiceTranscript: createIncomeDto.voiceTranscript,
       recurringOccurrenceId: createIncomeDto.recurringOccurrenceId,
-      bankRef: createIncomeDto.bankRef
+      bankRef: createIncomeDto.bankRef,
+      // Tag the income with the owning household (and creator) exactly like
+      // ExpensesService does - findAll filters by householdId, so without this
+      // every created income is invisible to the listing query.
+      householdId: ctx?.householdId,
+      createdByUid: ctx?.uid
     };
 
     return this.incomesRepository.create(incomeData);
