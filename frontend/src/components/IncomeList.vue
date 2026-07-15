@@ -63,8 +63,9 @@
         <div
           v-for="income in incomesStore.incomes"
           :key="income.id"
-          class="mobile-card"
+          class="mobile-card clickable"
           :class="`card-${(income.createdBy || 'unknown').toLowerCase()}`"
+          @click="openDetail(income)"
         >
           <div class="mobile-card-top">
             <span class="mobile-card-source">{{ income.source }}</span>
@@ -79,8 +80,8 @@
             <span class="mobile-card-desc">{{ income.description || '-' }}</span>
             <div class="mobile-card-actions">
               <span class="person-badge" :class="`person-${income.createdBy?.toLowerCase()}`">{{ income.createdBy }}</span>
-              <Button icon="pi pi-pencil" text rounded size="small" aria-label="Izmeni" @click="editIncome(income)" />
-              <Button icon="pi pi-trash" text rounded severity="danger" size="small" aria-label="Obriši" @click="confirmDelete(income)" />
+              <Button icon="pi pi-pencil" text rounded size="small" aria-label="Izmeni" @click.stop="editIncome(income)" />
+              <Button icon="pi pi-trash" text rounded severity="danger" size="small" aria-label="Obriši" @click.stop="confirmDelete(income)" />
             </div>
           </div>
         </div>
@@ -96,10 +97,11 @@
     <DataTable
       :value="incomesStore.incomes"
       :loading="incomesStore.loading"
-      class="incomes-table"
+      class="incomes-table clickable-rows"
       striped-rows
       :row-class="getRowClass"
       responsive-layout="scroll"
+      @row-click="openDetail($event.data)"
     >
       <template #empty>
         <ListEmptyState
@@ -169,8 +171,8 @@
       <Column header="Akcije" style="min-width: 120px">
         <template #body="{ data }">
           <div class="action-buttons">
-            <Button icon="pi pi-pencil" text class="p-button-sm" @click="editIncome(data)" />
-            <Button icon="pi pi-trash" text severity="danger" class="p-button-sm" @click="confirmDelete(data)" />
+            <Button icon="pi pi-pencil" text class="p-button-sm" @click.stop="editIncome(data)" />
+            <Button icon="pi pi-trash" text severity="danger" class="p-button-sm" @click.stop="confirmDelete(data)" />
           </div>
         </template>
       </Column>
@@ -217,6 +219,14 @@
     <!-- Edit Income Dialog -->
     <EditIncomeDialog v-model:visible="editDialogVisible" :income="selectedIncome!" @success="onIncomeUpdated" />
 
+    <IncomeDetailDialog
+      v-if="incomeToView"
+      v-model:visible="detailDialogVisible"
+      :income="incomeToView"
+      @edit="handleDetailEdit"
+      @delete="handleDetailDelete"
+    />
+
     <!-- Delete Confirmation Dialog -->
     <ConfirmDialog></ConfirmDialog>
   </div>
@@ -236,6 +246,7 @@ import Select from 'primevue/select';
 import Tag from 'primevue/tag';
 import ConfirmDialog from 'primevue/confirmdialog';
 import EditIncomeDialog from './EditIncomeDialog.vue';
+import IncomeDetailDialog from './IncomeDetailDialog.vue';
 import ListEmptyState from './shared/ListEmptyState.vue';
 import SkeletonCards from './shared/SkeletonCards.vue';
 import MobilePagination from './shared/MobilePagination.vue';
@@ -266,6 +277,10 @@ const advancedFilters = reactive({
 // Edit dialog
 const editDialogVisible = ref(false);
 const selectedIncome = ref<Income | null>(null);
+
+// Detail dialog
+const detailDialogVisible = ref(false);
+const incomeToView = ref<Income | null>(null);
 
 // Person filters
 const authStore = useAuthStore();
@@ -375,6 +390,20 @@ function resetFilters() {
 // Pagination
 function onPageChange(event: PageState) {
   applyFilters(event.page + 1);
+}
+
+// Detail popup (read-only)
+function openDetail(income: Income) {
+  incomeToView.value = income;
+  detailDialogVisible.value = true;
+}
+function handleDetailEdit(income: Income) {
+  detailDialogVisible.value = false;
+  editIncome(income);
+}
+function handleDetailDelete(income: Income) {
+  detailDialogVisible.value = false;
+  confirmDelete(income);
 }
 
 // CRUD operations
@@ -909,6 +938,14 @@ onMounted(() => {
     -webkit-overflow-scrolling: touch;
   }
 }
+.clickable {
+  cursor: pointer;
+}
+
+.clickable-rows :deep(tbody tr) {
+  cursor: pointer;
+}
+
 /* === Active (viewed) month summary card === */
 .summary-card {
   border-radius: var(--radius-md, 12px);

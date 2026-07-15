@@ -5,6 +5,7 @@ import { Expense } from '../expenses/interfaces/expense.interface';
 import { IncomesService } from '../incomes/incomes.service';
 import { CurrencyService } from '../currency/currency.service';
 import { StatementParserService } from './statement-parser.service';
+import { CategoryLearningService } from '../category-inference/category-learning.service';
 import { ImportStatementDto } from './dto/import-statement.dto';
 import { MatchedStatementTransaction, ParseStatementResult, StatementTransaction } from './interfaces/statement-transaction.interface';
 import { HouseholdContext } from '../common/interfaces/household-context.interface';
@@ -58,7 +59,8 @@ export class StatementsService {
     private readonly parser: StatementParserService,
     private readonly expensesService: ExpensesService,
     private readonly incomesService: IncomesService,
-    private readonly currencyService: CurrencyService
+    private readonly currencyService: CurrencyService,
+    private readonly categoryLearningService: CategoryLearningService
   ) {}
 
   /**
@@ -71,7 +73,7 @@ export class StatementsService {
       return { success: false, error: 'No transactions found in the statement', transactions: [] };
     }
 
-    const transactions = this.applyLoanRules(parsed);
+    const transactions = await this.applyLearnedCategories(this.applyLoanRules(parsed), ctx);
 
     const dates = transactions.map(tx => tx.date).sort();
     const periodStart = dates[0];
@@ -110,7 +112,7 @@ export class StatementsService {
       const text = `${tx.merchant} ${tx.rawDescription}`;
 
       if (CAR_LOAN_PATTERN.test(text)) {
-        result.push({ ...tx, category: 'CarLoan' });
+        result.push({ ...tx, category: 'Loan' });
         continue;
       }
 
@@ -128,7 +130,7 @@ export class StatementsService {
 
       if (tx.amount <= remaining) {
         homeLoanUsedRsd += tx.amount;
-        result.push({ ...tx, category: 'HomeLoan' });
+        result.push({ ...tx, category: 'Loan' });
         continue;
       }
 
@@ -139,7 +141,7 @@ export class StatementsService {
       result.push({
         ...tx,
         amount: homeLoanPart,
-        category: 'HomeLoan',
+        category: 'Loan',
         rawDescription: `${tx.rawDescription} (deo rate do ${HOME_LOAN_CAP_EUR} EUR)`
       });
       result.push({
@@ -152,6 +154,27 @@ export class StatementsService {
     }
 
     return result;
+  }
+
+  /**
+   * Overrides debit categories with ones the user has previously taught us for
+   * the same merchant, and flags them so the review UI can show a "learned" badge.
+   * Loan-classified rows (Loan) are left untouched.
+   */
+  private async applyLearnedCategories(transactions: StatementTransaction[], ctx?: HouseholdContext): Promise<StatementTransaction[]> {
+    const learnedList = await this.categoryLearningService.getAll(ctx?.householdId);
+    if (learnedList.length === 0) return transactions;
+
+    const map = new Map(learnedList.map(l => [l.merchant, l.category]));
+
+    return transactions.map(tx => {
+      if (tx.direction !== 'debit' || tx.category === 'Loan') return tx;
+      const learned = map.get(this.categoryLearningService.normalize(tx.merchant));
+      if (learned && learned !== tx.category) {
+        return { ...tx, category: learned, categoryLearned: true };
+      }
+      return tx;
+    });
   }
 
   /** Creates expenses/incomes for the reviewed transactions; idempotent per bankRef. */
@@ -203,6 +226,8 @@ export class StatementsService {
         creationMethod: 'statement'
       };
       await this.expensesService.create(createDto, ctx);
+      // The category the user accepted on import is a signal worth learning.
+      await this.categoryLearningService.record(ctx?.householdId, tx.merchant, tx.category);
       expensesImported++;
     }
 

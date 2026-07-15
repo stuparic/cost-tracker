@@ -60,7 +60,7 @@ export function inferCategory(shopName: string): CategoryInference {
   // Electronics & Technology (Medium Confidence)
   if (/(gigatron|tehnomanija|comtrade|mediamarkt|tech)/i.test(shopLower)) {
     return {
-      category: 'Electronics',
+      category: 'Home',
       confidence: 'medium',
       isInferred: true
     };
@@ -78,7 +78,7 @@ export function inferCategory(shopName: string): CategoryInference {
   // Clothing & Fashion (Medium Confidence)
   if (/(zara|h&m|mango|new\s*yorker|fashion|clothes)/i.test(shopLower)) {
     return {
-      category: 'Clothing',
+      category: 'Home',
       confidence: 'medium',
       isInferred: true
     };

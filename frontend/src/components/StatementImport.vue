@@ -63,14 +63,19 @@
         </Column>
         <Column header="Kategorija">
           <template #body="{ data }">
-            <Select
-              v-model="data.category"
-              :options="categoryOptions"
-              option-label="label"
-              option-value="value"
-              class="category-select"
-              :disabled="data.matchStatus === 'already_imported'"
-            />
+            <div class="category-cell">
+              <Select
+                v-model="data.category"
+                :options="categoryOptions"
+                option-label="label"
+                option-value="value"
+                class="category-select"
+                :disabled="data.matchStatus === 'already_imported'"
+              />
+              <span v-if="data.categoryLearned" v-tooltip.top="'Kategorija naučena iz tvojih ranijih ispravki'" class="learned-badge">
+                <i class="pi pi-sparkles"></i> naučeno
+              </span>
+            </div>
           </template>
         </Column>
         <Column header="Iznos" header-style="text-align: right">
@@ -119,6 +124,7 @@
             <Tag v-else severity="secondary" value="Već uvezeno" />
           </div>
           <p v-if="data.matchReason && data.matchStatus !== 'new'" class="tx-card-reason">{{ data.matchReason }}</p>
+          <span v-if="data.categoryLearned" class="learned-badge"><i class="pi pi-sparkles"></i> kategorija naučena</span>
           <Select
             v-model="data.category"
             :options="categoryOptions"
@@ -560,6 +566,26 @@ function formatAmount(value: number): string {
 .category-select {
   width: 100%;
   max-width: 11rem;
+}
+
+.category-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.learned-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  background: var(--primary-light, rgba(99, 102, 241, 0.12));
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  white-space: nowrap;
 }
 
 .amount {

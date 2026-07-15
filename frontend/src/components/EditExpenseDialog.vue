@@ -49,13 +49,7 @@
       <!-- Category -->
       <div class="form-field">
         <label for="edit-category" class="field-label">Kategorija</label>
-        <AutoComplete
-          id="edit-category"
-          v-model="form.category"
-          :suggestions="categorySuggestions"
-          class="w-full"
-          @complete="searchCategories"
-        />
+        <CategorySelect v-model="form.category" placeholder="Izaberi kategoriju" />
       </div>
 
       <!-- Product Description -->
@@ -101,6 +95,7 @@ import Select from 'primevue/select';
 import Chips from 'primevue/chips';
 import DatePicker from 'primevue/datepicker';
 import CurrencyPills from '@/components/shared/CurrencyPills.vue';
+import CategorySelect from '@/components/shared/CategorySelect.vue';
 import { expenseApi } from '@/api/expenses';
 import { autocompleteApi } from '@/api/autocomplete';
 import { useAppToast } from '@/composables/useAppToast';
@@ -145,7 +140,6 @@ const paymentMethods = [...PAYMENT_METHODS];
 
 // Autocomplete
 const { suggestions: shopSuggestions, search: searchShops } = useAutocomplete(autocompleteApi.getShops);
-const { suggestions: categorySuggestions, search: searchCategories } = useAutocomplete(autocompleteApi.getCategories);
 
 // Watch for expense changes and populate form
 watch(

@@ -14,6 +14,8 @@ export interface StatementTransaction {
   merchant: string;
   /** Suggested expense category (debits only) */
   category?: string;
+  /** True when the category was auto-applied from a learned merchant->category mapping */
+  categoryLearned?: boolean;
   /** Suggested income type (credits only) */
   incomeType?: string;
   /** Amount in RSD, always positive */

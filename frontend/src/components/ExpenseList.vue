@@ -116,8 +116,9 @@
         <div
           v-for="expense in expensesStore.expenses"
           :key="expense.id"
-          class="mobile-card"
+          class="mobile-card clickable"
           :class="`card-${(expense.createdBy || 'unknown').toLowerCase()}`"
+          @click="openDetail(expense)"
         >
           <div class="mobile-card-top">
             <span class="mobile-card-shop">{{ expense.shopName }}</span>
@@ -125,15 +126,17 @@
           </div>
           <div class="mobile-card-mid">
             <span class="mobile-card-date">{{ formatDate(expense.purchaseDate) }}</span>
-            <span class="category-badge">{{ expense.category }}</span>
+            <span class="inline-category" @click.stop>
+              <CategorySelect :model-value="expense.category" @update:model-value="changeCategory(expense, $event)" />
+            </span>
             <span class="mobile-card-eur">{{ formatAmount(expense.eurAmount, true) }} EUR</span>
           </div>
           <div class="mobile-card-bottom">
             <span class="mobile-card-desc">{{ expense.productDescription }}</span>
             <div class="mobile-card-actions">
               <span class="person-badge" :class="(expense.createdBy || 'unknown').toLowerCase()">{{ expense.createdBy }}</span>
-              <Button icon="pi pi-pencil" severity="secondary" text rounded size="small" aria-label="Izmeni" @click="openEditDialog(expense)" />
-              <Button icon="pi pi-trash" severity="danger" text rounded size="small" aria-label="Obriši" @click="confirmDelete(expense)" />
+              <Button icon="pi pi-pencil" severity="secondary" text rounded size="small" aria-label="Izmeni" @click.stop="openEditDialog(expense)" />
+              <Button icon="pi pi-trash" severity="danger" text rounded size="small" aria-label="Obriši" @click.stop="confirmDelete(expense)" />
             </div>
           </div>
         </div>
@@ -156,10 +159,11 @@
         :lazy="true"
         paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
         current-page-report-template="Prikazano {first} do {last} od {totalRecords} troškova"
-        class="expenses-table"
+        class="expenses-table clickable-rows"
         striped-rows
         :row-class="getRowClass"
         @page="onPageChange"
+        @row-click="openDetail($event.data)"
       >
         <template #empty>
           <ListEmptyState :message="`Nema troškova za ${currentMonthLabel}`" cta-to="/add" cta-label="Dodaj trošak" />
@@ -182,9 +186,11 @@
           </template>
         </Column>
 
-        <Column field="category" header="Kategorija" :sortable="true" style="min-width: 120px">
+        <Column field="category" header="Kategorija" :sortable="true" style="min-width: 170px">
           <template #body="{ data }">
-            <span class="category-badge">{{ data.category }}</span>
+            <span class="inline-category" @click.stop>
+              <CategorySelect :model-value="data.category" @update:model-value="changeCategory(data, $event)" />
+            </span>
           </template>
         </Column>
 
@@ -209,13 +215,22 @@
         <Column header="Akcije" style="min-width: 100px">
           <template #body="{ data }">
             <div class="action-buttons">
-              <Button v-tooltip.top="'Izmeni'" icon="pi pi-pencil" severity="secondary" text rounded @click="openEditDialog(data)" />
-              <Button v-tooltip.top="'Obriši'" icon="pi pi-trash" severity="danger" text rounded @click="confirmDelete(data)" />
+              <Button v-tooltip.top="'Izmeni'" icon="pi pi-pencil" severity="secondary" text rounded @click.stop="openEditDialog(data)" />
+              <Button v-tooltip.top="'Obriši'" icon="pi pi-trash" severity="danger" text rounded @click.stop="confirmDelete(data)" />
             </div>
           </template>
         </Column>
       </DataTable>
     </div>
+
+    <!-- Detail Dialog (read-only) -->
+    <ExpenseDetailDialog
+      v-if="expenseToView"
+      v-model:visible="detailDialogVisible"
+      :expense="expenseToView"
+      @edit="handleDetailEdit"
+      @delete="handleDetailDelete"
+    />
 
     <!-- Edit Expense Dialog -->
     <EditExpenseDialog v-if="expenseToEdit" v-model:visible="editDialogVisible" :expense="expenseToEdit" @success="handleEditSuccess" />
@@ -248,6 +263,8 @@ import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
 import Sidebar from 'primevue/sidebar';
 import EditExpenseDialog from './EditExpenseDialog.vue';
+import ExpenseDetailDialog from './ExpenseDetailDialog.vue';
+import CategorySelect from './shared/CategorySelect.vue';
 import ListEmptyState from './shared/ListEmptyState.vue';
 import SkeletonCards from './shared/SkeletonCards.vue';
 import MobilePagination from './shared/MobilePagination.vue';
@@ -300,6 +317,9 @@ const deleting = ref(false);
 // Edit dialog
 const editDialogVisible = ref(false);
 const expenseToEdit = ref<Expense | null>(null);
+
+const detailDialogVisible = ref(false);
+const expenseToView = ref<Expense | null>(null);
 
 // Monthly summaries (shared with IncomeList via composable)
 const {
@@ -410,6 +430,32 @@ async function searchCategories(event: AutoCompleteCompleteEvent) {
   }
 }
 
+function openDetail(expense: Expense) {
+  expenseToView.value = expense;
+  detailDialogVisible.value = true;
+}
+
+function handleDetailEdit(expense: Expense) {
+  detailDialogVisible.value = false;
+  openEditDialog(expense);
+}
+
+function handleDetailDelete(expense: Expense) {
+  detailDialogVisible.value = false;
+  confirmDelete(expense);
+}
+
+/** Inline category change from a list row; persists and re-learns server-side. */
+async function changeCategory(expense: Expense, category: string) {
+  if (!category || category === expense.category) return;
+  try {
+    await expenseApi.update(expense.id, { category });
+    await fetchExpenses(expensesStore.pagination.page);
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Greška', detail: getApiErrorMessage(error, 'Nije moguće promeniti kategoriju'), life: 4000 });
+  }
+}
+
 function openEditDialog(expense: Expense) {
   expenseToEdit.value = expense;
   editDialogVisible.value = true;
@@ -509,6 +555,20 @@ onMounted(() => {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable-rows :deep(tbody tr) {
+  cursor: pointer;
+}
+
+.inline-category {
+  display: inline-flex;
+  max-width: 12rem;
+  width: 100%;
 }
 
 .summary-card {

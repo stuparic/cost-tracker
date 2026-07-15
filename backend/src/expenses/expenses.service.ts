@@ -7,6 +7,7 @@ import { QueryExpensesDto } from './dto/query-expenses.dto';
 import { ExportExpensesDto } from './dto/export-expenses.dto';
 import { Expense } from './interfaces/expense.interface';
 import { CategoryInferenceService } from '../category-inference/category-inference.service';
+import { CategoryLearningService } from '../category-inference/category-learning.service';
 import { Pagination } from '../common/interfaces/pagination.interface';
 import { normalizeCreatedBy } from '../common/utils/normalize-created-by';
 import { toCsv } from '../common/utils/csv.util';
@@ -18,7 +19,8 @@ export class ExpensesService {
   constructor(
     private currencyService: CurrencyService,
     private expensesRepository: ExpensesRepository,
-    private categoryInferenceService: CategoryInferenceService
+    private categoryInferenceService: CategoryInferenceService,
+    private categoryLearningService: CategoryLearningService
   ) {}
 
   async create(createExpenseDto: CreateExpenseDto & { private?: boolean }, ctx?: HouseholdContext): Promise<Expense> {
@@ -27,7 +29,13 @@ export class ExpensesService {
     // Apply defaults for optional fields
     const productDescription = createExpenseDto.productDescription || `Purchase at ${createExpenseDto.shopName}`;
 
-    const category = createExpenseDto.category || this.categoryInferenceService.inferCategory(createExpenseDto.shopName) || 'General';
+    // Prefer an explicit category, then one the user has taught us for this
+    // merchant, then the hard-coded rules, then a safe default.
+    const category =
+      createExpenseDto.category ||
+      (await this.categoryLearningService.lookup(ctx?.householdId, createExpenseDto.shopName)) ||
+      this.categoryInferenceService.inferCategory(createExpenseDto.shopName) ||
+      'General';
 
     const paymentMethod = createExpenseDto.paymentMethod || 'Card';
 
@@ -147,7 +155,16 @@ export class ExpensesService {
       updateData.private = updateExpenseDto.private === true;
     }
 
-    return this.expensesRepository.update(id, updateData);
+    const updated = await this.expensesRepository.update(id, updateData);
+
+    // Learn from an explicit category correction so future expenses/statements
+    // for this merchant get categorized automatically.
+    if (updateExpenseDto.category !== undefined) {
+      const merchant = updateData.shopName ?? existingExpense.shopName;
+      await this.categoryLearningService.record(ctx?.householdId, merchant, updateExpenseDto.category);
+    }
+
+    return updated;
   }
 
   async remove(id: string, ctx?: HouseholdContext): Promise<void> {

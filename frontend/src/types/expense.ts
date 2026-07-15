@@ -1,6 +1,6 @@
 export type Currency = 'EUR' | 'RSD';
 
-export type CreationMethod = 'manual' | 'voice' | 'auto';
+export type CreationMethod = 'manual' | 'voice' | 'auto' | 'statement';
 
 export interface Expense {
   id: string;
@@ -23,6 +23,7 @@ export interface Expense {
   voiceTranscript?: string;
   createdByUid?: string;
   private?: boolean;
+  bankRef?: string;
 }
 
 export interface CreateExpenseDto {

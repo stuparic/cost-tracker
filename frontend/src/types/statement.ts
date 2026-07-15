@@ -9,6 +9,8 @@ export interface StatementTransaction {
   rawDescription: string;
   merchant: string;
   category?: string;
+  /** True when category was auto-applied from a learned merchant->category mapping */
+  categoryLearned?: boolean;
   /** Suggested income type (credits only) */
   incomeType?: string;
   /** Amount in RSD, always positive */
