@@ -92,6 +92,44 @@
         </Column>
       </DataTable>
 
+      <!-- Mobile: same debits as stacked cards -->
+      <div class="tx-cards">
+        <label class="tx-select-all">
+          <Checkbox :model-value="allSelected" :binary="true" @update:model-value="toggleAll" />
+          <span>Izaberi sve</span>
+        </label>
+        <div
+          v-for="data in debits"
+          :key="data.ref"
+          class="tx-card"
+          :class="{ 'is-imported': data.matchStatus === 'already_imported' }"
+        >
+          <div class="tx-card-top">
+            <Checkbox v-model="selectedRefs" :value="data.ref" :disabled="data.matchStatus === 'already_imported'" />
+            <div class="merchant-cell">
+              <span class="merchant-name">{{ data.merchant }}</span>
+              <span class="merchant-raw">{{ data.rawDescription }}</span>
+            </div>
+            <span class="amount">{{ formatAmount(data.amount) }} RSD</span>
+          </div>
+          <div class="tx-card-meta">
+            <span class="tx-card-date"><i class="pi pi-calendar"></i> {{ formatDate(data.date) }}</span>
+            <Tag v-if="data.matchStatus === 'new'" severity="success" value="Novo" />
+            <Tag v-else-if="data.matchStatus === 'duplicate'" severity="warn" value="Duplikat" />
+            <Tag v-else severity="secondary" value="Već uvezeno" />
+          </div>
+          <p v-if="data.matchReason && data.matchStatus !== 'new'" class="tx-card-reason">{{ data.matchReason }}</p>
+          <Select
+            v-model="data.category"
+            :options="categoryOptions"
+            option-label="label"
+            option-value="value"
+            class="category-select tx-card-select"
+            :disabled="data.matchStatus === 'already_imported'"
+          />
+        </div>
+      </div>
+
       <template v-if="credits.length > 0">
         <h3 class="section-title">Prilivi (uplate)</h3>
         <p class="page-subtitle">
@@ -148,6 +186,44 @@
             </template>
           </Column>
         </DataTable>
+
+        <!-- Mobile: same credits as stacked cards -->
+        <div class="tx-cards">
+          <label class="tx-select-all">
+            <Checkbox :model-value="allCreditsSelected" :binary="true" @update:model-value="toggleAllCredits" />
+            <span>Izaberi sve</span>
+          </label>
+          <div
+            v-for="data in credits"
+            :key="data.ref"
+            class="tx-card"
+            :class="{ 'is-imported': data.matchStatus === 'already_imported' }"
+          >
+            <div class="tx-card-top">
+              <Checkbox v-model="selectedCreditRefs" :value="data.ref" :disabled="data.matchStatus === 'already_imported'" />
+              <div class="merchant-cell">
+                <span class="merchant-name">{{ data.merchant }}</span>
+                <span class="merchant-raw">{{ data.rawDescription }}</span>
+              </div>
+              <span class="amount">{{ formatAmount(data.amount) }} RSD</span>
+            </div>
+            <div class="tx-card-meta">
+              <span class="tx-card-date"><i class="pi pi-calendar"></i> {{ formatDate(data.date) }}</span>
+              <Tag v-if="data.matchStatus === 'new'" severity="success" value="Novo" />
+              <Tag v-else-if="data.matchStatus === 'skipped'" severity="secondary" value="Preskočeno" />
+              <Tag v-else severity="secondary" value="Već uvezeno" />
+            </div>
+            <p v-if="data.matchReason && data.matchStatus !== 'new'" class="tx-card-reason">{{ data.matchReason }}</p>
+            <Select
+              v-model="data.incomeType"
+              :options="incomeTypeOptions"
+              option-label="label"
+              option-value="value"
+              class="category-select tx-card-select"
+              :disabled="data.matchStatus === 'already_imported'"
+            />
+          </div>
+        </div>
       </template>
 
       <div class="import-footer">
@@ -505,6 +581,79 @@ function formatAmount(value: number): string {
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
 }
 
+/* Mobile card list - hidden on desktop where the table is used instead */
+.tx-cards {
+  display: none;
+}
+
+.tx-select-all {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.25rem 0.25rem 0.5rem;
+  color: var(--text-secondary);
+}
+
+.tx-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--surface-card);
+}
+
+.tx-card.is-imported {
+  opacity: 0.6;
+}
+
+.tx-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.tx-card-top .merchant-cell {
+  flex: 1;
+  min-width: 0;
+}
+
+.tx-card-top .merchant-name {
+  word-break: break-word;
+}
+
+.tx-card-top .amount {
+  text-align: right;
+}
+
+.tx-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.tx-card-date {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.tx-card-reason {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.tx-card-select {
+  max-width: none;
+}
+
 @media (max-width: 640px) {
   .upload-zone {
     padding: 2.5rem 1rem;
@@ -514,6 +663,19 @@ function formatAmount(value: number): string {
     flex-direction: column;
     align-items: stretch;
     text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Swap the cramped table for stacked cards on phones */
+  .review-table {
+    display: none;
+  }
+
+  .tx-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 }
 </style>

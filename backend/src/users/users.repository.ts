@@ -123,6 +123,10 @@ export class UsersRepository {
       email: data.email,
       photoURL: data.photoURL,
       householdId: data.householdId,
+      // Must be mapped: getOrCreateMe regenerates the token whenever it sees a
+      // missing one, so omitting it here caused a brand-new webhookToken on every
+      // /me call (breaking the MacroDroid webhook every time the app loaded).
+      webhookToken: data.webhookToken,
       createdAt: data.createdAt?.toDate?.()?.toISOString?.() ?? data.createdAt
     };
   }

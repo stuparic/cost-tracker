@@ -8,7 +8,12 @@
         v-for="summary in monthlySummaries"
         :key="summary.month"
         class="summary-card"
+        role="button"
+        tabindex="0"
         :class="{ loading: loadingSummaries, active: summary.month === viewedMonthKey }"
+        @click="goToMonth(summary.month)"
+        @keydown.enter="goToMonth(summary.month)"
+        @keydown.space.prevent="goToMonth(summary.month)"
       >
         <div class="summary-month">{{ summary.monthName }}</div>
         <div class="summary-amount-row">
@@ -367,6 +372,13 @@ function navigateMonth(direction: number) {
   currentMonth.value = newMonth;
 }
 
+/** Jumps straight to a month tapped in the summary cards. Key format: "YYYY-M". */
+function goToMonth(monthKeyValue: string) {
+  const [year, month] = monthKeyValue.split('-').map(Number);
+  if (!year || !month) return;
+  currentMonth.value = new Date(year, month - 1, 1);
+}
+
 function clearAdvancedFilters() {
   filters.shopName = '';
   filters.category = '';
@@ -506,6 +518,16 @@ onMounted(() => {
   padding: 1rem 1.25rem;
   border-radius: var(--radius-md);
   transition: all 0.15s;
+  cursor: pointer;
+}
+
+.summary-card:hover {
+  border-color: var(--primary-color);
+}
+
+.summary-card:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .summary-card.loading {

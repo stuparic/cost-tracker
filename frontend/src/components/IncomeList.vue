@@ -6,7 +6,12 @@
         v-for="month in monthlySummaries"
         :key="month.month"
         class="summary-card income-card"
+        role="button"
+        tabindex="0"
         :class="{ active: month.month === viewedMonthKey }"
+        @click="goToMonth(month.month)"
+        @keydown.enter="goToMonth(month.month)"
+        @keydown.space.prevent="goToMonth(month.month)"
       >
         <div class="month-name">{{ month.monthName }}</div>
         <div class="amount-row">
@@ -304,6 +309,14 @@ function nextMonth() {
   applyFilters();
 }
 
+/** Jumps straight to a month tapped in the summary cards. Key format: "YYYY-M". */
+function goToMonth(monthKeyValue: string) {
+  const [year, month] = monthKeyValue.split('-').map(Number);
+  if (!year || !month) return;
+  currentMonth.value = new Date(year, month - 1, 1);
+  applyFilters();
+}
+
 // Filters
 function applyFilters(page = 1) {
   const startDate = new Date(currentMonth.value.getFullYear(), currentMonth.value.getMonth(), 1);
@@ -444,12 +457,23 @@ onMounted(() => {
   padding: 1rem;
   border-radius: 1rem;
   text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s;
 }
 
 .income-card {
   background: var(--surface-card);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
+}
+
+.income-card:hover {
+  border-color: var(--primary-color);
+}
+
+.income-card:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .month-name {

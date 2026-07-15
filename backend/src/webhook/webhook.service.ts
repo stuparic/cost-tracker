@@ -31,7 +31,10 @@ export class WebhookService {
   ) {}
 
   /** Resolves the phone's shared-secret header to a household member. */
-  async resolveUser(token: string | undefined): Promise<UserProfile> {
+  async resolveUser(rawToken: string | undefined): Promise<UserProfile> {
+    // MacroDroid (and other HTTP clients) can append a trailing newline/space to
+    // header values, which breaks the exact-match lookup. Normalize before use.
+    const token = rawToken?.trim();
     if (!token) {
       throw new UnauthorizedException('Missing webhook token');
     }
@@ -45,6 +48,10 @@ export class WebhookService {
       if (owner) return owner;
     }
 
+    // Log a masked fingerprint so a persistent 401 tells us what actually arrived
+    // (length + first/last chars) without dumping the secret in full.
+    const masked = token.length <= 4 ? '****' : `${token.slice(0, 3)}…${token.slice(-2)}`;
+    this.logger.warn(`Webhook token not recognized: len=${token.length}, value=${masked}`);
     throw new UnauthorizedException('Invalid webhook token');
   }
 
