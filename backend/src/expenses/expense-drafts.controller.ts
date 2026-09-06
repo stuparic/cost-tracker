@@ -1,6 +1,7 @@
-import { Controller, Delete, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExpenseDraftsService } from './expense-drafts.service';
+import { UpdateExpenseDraftDto } from './dto/update-expense-draft.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthenticatedUser } from '../auth/firebase-auth.guard';
 
@@ -14,6 +15,12 @@ export class ExpenseDraftsController {
   @ApiOperation({ summary: 'List MY pending expense drafts (other members never see them)' })
   findMine(@CurrentUser() user: AuthenticatedUser) {
     return this.draftsService.findMine(user.uid);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Edit a pending draft (category/amount) before confirming it' })
+  update(@Param('id') id: string, @Body() dto: UpdateExpenseDraftDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.draftsService.update(id, user.uid, dto);
   }
 
   @Post(':id/confirm')

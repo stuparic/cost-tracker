@@ -5,9 +5,10 @@ export class CategoryInferenceService {
   private readonly shopPatterns: Record<string, RegExp> = {
     Groceries: /(maxi|lidl|mercator|idea|tempo|aman|dis|persu|mikro market|market)/i,
     Home: /(ikea|jysk|emezeta|pepco|hidroponika|gigatron|tehnomanija|comtrade|mediamarkt|tech|tahnologija|zara|h&m|mango|new\s*yorker|fashion|clothes|odeca)/i,
-    Transport: /(nis|petrol|mol|lukoil|omv|tifon|coral|hac |putarina|toll|vinjeta|vintrica|vignette|parking|taxi|bolt|car|avia|pumpa|gorivo)/i,
+    Transport:
+      /(nis|petrol|mol|lukoil|omv|tifon|coral|hac |putarina|toll|vinjeta|vintrica|vignette|parking|taxi|bolt|car|avia|pumpa|gorivo)/i,
     Health: /(apoteka|pharmacy|lilly|benu|zegin|jankovic)/i,
-    Dining: /(restoran|restaurant|cafe|kafana|pizza|burger|mcdon|hrana)/i,
+    Dining: /(restoran|restaurant|cafe|kafana|pizza|burger|mcdon|hrana|bioskop|cinema|cineplexx|cinestar|arena cineplex|pozorist|koncert)/i,
     Travel: /(kamp|camp|hotel|hostel|apartman|booking|airbnb)/i,
     Work: /(coworking|lynx)/i,
     Utilities: /(trajnog naloga|trajni nalog)/i,

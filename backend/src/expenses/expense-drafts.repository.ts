@@ -33,7 +33,9 @@ export class ExpenseDraftsRepository {
   /** Only the owner's drafts - privacy is the whole point of this collection */
   async findAllByUid(uid: string): Promise<ExpenseDraft[]> {
     const snapshot = await this.firestore.collection(this.collectionName).where('createdByUid', '==', uid).get();
-    return snapshot.docs.map(doc => this.mapDoc(doc)).sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
+    return snapshot.docs
+      .map(doc => this.mapDoc(doc))
+      .sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
   }
 
   async findById(id: string): Promise<ExpenseDraft> {
@@ -42,6 +44,18 @@ export class ExpenseDraftsRepository {
       throw new NotFoundException(`Draft with id ${id} not found`);
     }
     return this.mapDoc(doc);
+  }
+
+  /** Partial update of a draft's editable fields (category, amount). */
+  async update(id: string, data: { category?: string; amount?: number }): Promise<ExpenseDraft> {
+    const docRef = this.firestore.collection(this.collectionName).doc(id);
+    const updateData: Record<string, unknown> = {};
+    if (data.category !== undefined) updateData.category = data.category;
+    if (data.amount !== undefined) updateData.amount = data.amount;
+    if (Object.keys(updateData).length > 0) {
+      await docRef.update(updateData);
+    }
+    return this.findById(id);
   }
 
   async delete(id: string): Promise<void> {

@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { ExpensesService } from './expenses.service';
+import { CategoryLearningService } from '../category-inference/category-learning.service';
 import { ExpenseDraftsRepository } from './expense-drafts.repository';
 import { ExpenseDraft } from './interfaces/expense-draft.interface';
 import { Expense } from './interfaces/expense.interface';
@@ -11,7 +12,8 @@ export class ExpenseDraftsService {
 
   constructor(
     private readonly draftsRepository: ExpenseDraftsRepository,
-    private readonly expensesService: ExpensesService
+    private readonly expensesService: ExpensesService,
+    private readonly categoryLearningService: CategoryLearningService
   ) {}
 
   async create(data: Omit<ExpenseDraft, 'id' | 'createdAt'>): Promise<ExpenseDraft> {
@@ -32,6 +34,20 @@ export class ExpenseDraftsService {
       throw new ForbiddenException('Ovaj draft ne pripada tebi');
     }
     return draft;
+  }
+
+  /** Updates a draft's category/amount before confirmation; owner-only. */
+  async update(id: string, uid: string, data: { category?: string; amount?: number }): Promise<ExpenseDraft> {
+    const draft = await this.getOwnedDraft(id, uid);
+
+    const updated = await this.draftsRepository.update(id, data);
+
+    // A category set on a draft is an explicit correction - learn from it.
+    if (data.category !== undefined && data.category !== draft.category) {
+      await this.categoryLearningService.record(draft.householdId, draft.shopName, data.category);
+    }
+
+    return updated;
   }
 
   /** Promotes a draft into a real expense and removes the draft. */

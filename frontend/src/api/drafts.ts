@@ -24,6 +24,12 @@ export const draftsApi = {
     return response.data;
   },
 
+  /** Edits a pending draft (category/amount) before confirming it */
+  update: async (id: string, data: { category?: string; amount?: number }): Promise<ExpenseDraft> => {
+    const response = await apiClient.patch<ExpenseDraft>(`/expense-drafts/${id}`, data);
+    return response.data;
+  },
+
   /** Confirms a single draft; it becomes a real expense */
   confirm: async (id: string): Promise<Expense> => {
     const response = await apiClient.post<Expense>(`/expense-drafts/${id}/confirm`);

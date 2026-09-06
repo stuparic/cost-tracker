@@ -28,9 +28,31 @@
         </span>
         <span class="draft-body">
           <span class="draft-title">{{ draft.shopName }}</span>
-          <span class="draft-meta">{{ formatRelativeDate(draft.purchaseDate) }} · {{ categoryLabel(draft.category) }}</span>
+          <span class="draft-meta">{{ formatRelativeDate(draft.purchaseDate) }}</span>
+          <span class="draft-category" @click.stop>
+            <CategorySelect
+              :model-value="draft.category || 'Other'"
+              @update:model-value="changeCategory(draft, $event)"
+            />
+          </span>
         </span>
-        <span class="draft-amount">{{ formatNumber(draft.amount, false) }} {{ draft.currency }}</span>
+        <span class="draft-amount-wrap" @click.stop>
+          <template v-if="editingAmountId === draft.id">
+            <InputNumber
+              v-model="amountEdit"
+              :min-fraction-digits="0"
+              :max-fraction-digits="2"
+              class="draft-amount-input"
+              autofocus
+              @keydown.enter="saveAmount(draft)"
+            />
+            <Button icon="pi pi-check" text rounded size="small" aria-label="Sačuvaj iznos" @click="saveAmount(draft)" />
+          </template>
+          <button v-else class="draft-amount editable" title="Izmeni iznos" @click="startAmountEdit(draft)">
+            {{ formatNumber(draft.amount, false) }} {{ draft.currency }}
+            <i class="pi pi-pencil draft-amount-pencil"></i>
+          </button>
+        </span>
         <span class="draft-actions">
           <Button
             v-tooltip.top="'Potvrdi'"
@@ -59,10 +81,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import Button from 'primevue/button';
+import InputNumber from 'primevue/inputnumber';
+import CategorySelect from '@/components/shared/CategorySelect.vue';
 import { draftsApi, type ExpenseDraft } from '@/api/drafts';
 import { useAppToast } from '@/composables/useAppToast';
 import { useBalanceStore } from '@/stores/balance';
-import { CATEGORY_LABELS, type ExpenseCategory } from '@/constants/categories';
 import { categoryColor, categoryIcon } from '@/constants/category-style';
 import { useTransactionFormatting } from '@/composables/useTransactionFormatting';
 
@@ -74,10 +97,6 @@ const drafts = ref<ExpenseDraft[]>([]);
 const loading = ref(true);
 const busyId = ref<string | null>(null);
 const confirmingAll = ref(false);
-
-function categoryLabel(category?: string): string {
-  return CATEGORY_LABELS[category as ExpenseCategory] ?? category ?? 'Ostalo';
-}
 
 function iconStyle(category: string) {
   const color = categoryColor(category);
@@ -92,6 +111,41 @@ async function refresh() {
     showError('Ne mogu da učitam troškove na čekanju', error);
   } finally {
     loading.value = false;
+  }
+}
+
+// Inline editing (category + amount) before confirmation
+const editingAmountId = ref<string | null>(null);
+const amountEdit = ref<number | null>(null);
+
+async function changeCategory(draft: ExpenseDraft, category: string) {
+  if (!category || category === draft.category) return;
+  const previous = draft.category;
+  draft.category = category; // optimistic
+  try {
+    await draftsApi.update(draft.id, { category });
+  } catch (error) {
+    draft.category = previous;
+    showError('Promena kategorije nije uspela', error);
+  }
+}
+
+function startAmountEdit(draft: ExpenseDraft) {
+  editingAmountId.value = draft.id;
+  amountEdit.value = draft.amount;
+}
+
+async function saveAmount(draft: ExpenseDraft) {
+  const value = amountEdit.value;
+  editingAmountId.value = null;
+  if (value == null || value <= 0 || value === draft.amount) return;
+  const previous = draft.amount;
+  draft.amount = value; // optimistic
+  try {
+    await draftsApi.update(draft.id, { amount: value });
+  } catch (error) {
+    draft.amount = previous;
+    showError('Promena iznosa nije uspela', error);
   }
 }
 
@@ -232,11 +286,55 @@ onMounted(refresh);
   color: var(--text-secondary);
 }
 
+.draft-category {
+  margin-top: 0.35rem;
+  max-width: 13rem;
+}
+
+.draft-category :deep(.p-select) {
+  font-size: 0.8rem;
+}
+
+.draft-amount-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .draft-amount {
   font-size: 0.9375rem;
   font-weight: 700;
   color: var(--expense-color);
   white-space: nowrap;
+}
+
+.draft-amount.editable {
+  background: none;
+  border: none;
+  padding: 0.15rem 0.3rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.draft-amount.editable:hover {
+  background: var(--surface-hover);
+}
+
+.draft-amount-pencil {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  margin-left: 0.25rem;
+}
+
+.draft-amount-input {
+  width: 7rem;
+}
+
+.draft-amount-input :deep(input) {
+  width: 7rem;
+  font-weight: 700;
+  text-align: right;
 }
 
 .draft-actions {
