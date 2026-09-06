@@ -6,6 +6,7 @@ import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
 import Tooltip from 'primevue/tooltip';
 import router from './router';
+import { startIdleWatch } from './auth/session-timeout';
 
 import App from './App.vue';
 import './style.css';
@@ -41,3 +42,9 @@ app.use(ConfirmationService);
 app.directive('tooltip', Tooltip);
 
 app.mount('#app');
+
+// A tab left open past the idle limit is signed out where it stands, instead of
+// sitting on someone's data until the next navigation.
+startIdleWatch(() => {
+  void router.replace('/login');
+});

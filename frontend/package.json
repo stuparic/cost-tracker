@@ -11,7 +11,8 @@
     "lint": "eslint \"{src,public}/**/*.{ts,vue}\" --fix",
     "format": "prettier --write \"src/**/*.{ts,vue,css,scss}\"",
     "deploy": "npm run build:prod && firebase deploy --only hosting",
-    "deploy:preview": "npm run build:prod && firebase hosting:channel:deploy preview"
+    "deploy:preview": "npm run build:prod && firebase hosting:channel:deploy preview",
+    "test:idle": "tsc src/auth/idle-policy.ts --outDir .tmp-idle --module ES2020 --moduleResolution bundler --target ES2020 --lib ES2020,DOM --strict && node scripts/check-idle-policy.mjs"
   },
   "dependencies": {
     "@primevue/themes": "^4.5.4",

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { ApiError } from '@/types/api';
 import { firebaseAuth, authReady } from '@/firebase';
+import { signOutIfIdle, touchActivity } from '@/auth/session-timeout';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -17,9 +18,19 @@ apiClient.interceptors.request.use(
     // reading currentUser, otherwise the first requests after a page load
     // race ahead of rehydration and go out without a token (backend 401).
     await authReady;
+
+    // Enforce the idle limit here too, not just on a timer: otherwise a request
+    // firing in the same moment the session goes stale would refresh the token
+    // and keep a dead session alive indefinitely.
+    if (await signOutIfIdle()) {
+      throw new Error('Sesija je istekla - prijavi se ponovo');
+    }
+
     const user = firebaseAuth.currentUser;
     if (user) {
       config.headers.Authorization = `Bearer ${await user.getIdToken()}`;
+      // This call *is* the activity that keeps the session alive.
+      touchActivity();
     }
     if (import.meta.env.VITE_ENABLE_LOGS === 'true') {
       console.log('API Request:', config.method?.toUpperCase(), config.url);

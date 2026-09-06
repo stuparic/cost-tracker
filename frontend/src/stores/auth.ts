@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut, type User } from 'firebase/auth';
 import { firebaseAuth, googleProvider } from '@/firebase';
 import { meApi, type MeResponse } from '@/api/me';
+import { clearActivity } from '@/auth/session-timeout';
 
 /**
  * Google sign-in state + the backend profile/household bootstrap.
@@ -28,6 +29,11 @@ export const useAuthStore = defineStore('auth', () => {
   onAuthStateChanged(firebaseAuth, async user => {
     firebaseUser.value = user;
     if (user) {
+      // Deliberately does NOT stamp activity here: this fires on every app
+      // start when Firebase restores the session, so stamping would reset the
+      // idle clock on each reload and the session would never expire. The
+      // clock is owned by the request interceptor - the `/me` call below is
+      // itself the first authenticated request.
       await loadProfile();
     } else {
       me.value = null;
@@ -67,6 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function signOutUser() {
+    clearActivity();
     await signOut(firebaseAuth);
     me.value = null;
   }

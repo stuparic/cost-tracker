@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Privremeni izlaz za `npm run test:idle`
+.tmp-idle

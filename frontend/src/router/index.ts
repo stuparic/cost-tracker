@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { signOutIfIdle } from '@/auth/session-timeout';
 
 // Routes are lazy-loaded so each view (and heavy deps like chart.js)
 // lands in its own chunk instead of one large bundle.
@@ -65,6 +66,12 @@ const router = createRouter({
 router.beforeEach(async to => {
   const authStore = useAuthStore();
   await authStore.ready;
+
+  // Checked after `ready` so the decision sees the restored session: a day
+  // without authenticated requests means signing in again.
+  if (await signOutIfIdle()) {
+    return '/login';
+  }
 
   if (!authStore.isAuthenticated && to.path !== '/login') {
     return '/login';
