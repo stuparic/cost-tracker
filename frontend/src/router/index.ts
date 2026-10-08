@@ -51,6 +51,11 @@ const routes = [
     component: () => import('@/components/RecurringOccurrencesList.vue')
   },
   {
+    path: '/reports',
+    name: 'Reports',
+    component: () => import('@/components/ReportsView.vue')
+  },
+  {
     path: '/import',
     name: 'StatementImport',
     component: () => import('@/components/StatementImport.vue')

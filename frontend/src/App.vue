@@ -105,6 +105,10 @@
           <i class="pi pi-chart-pie"></i>
           <span>Bilans</span>
         </router-link>
+        <router-link to="/reports" class="nav-item" :class="{ active: route.path === '/reports' }">
+          <i class="pi pi-file-check"></i>
+          <span>Izveštaj</span>
+        </router-link>
         <button class="nav-item" @click="quickInputVisible = true">
           <i class="pi pi-microphone"></i>
           <span>Glasovno</span>

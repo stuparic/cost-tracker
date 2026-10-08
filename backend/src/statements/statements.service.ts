@@ -9,6 +9,13 @@ import { CategoryLearningService } from '../category-inference/category-learning
 import { ImportStatementDto } from './dto/import-statement.dto';
 import { MatchedStatementTransaction, ParseStatementResult, StatementTransaction } from './interfaces/statement-transaction.interface';
 import { HouseholdContext } from '../common/interfaces/household-context.interface';
+import {
+  CAR_LOAN_PATTERN,
+  HOME_LOAN_CAP_EUR,
+  KNOWN_INCOME_SOURCES,
+  OWN_NAME_PATTERN,
+  SELF_TRANSFER_DEBIT_PATTERN
+} from '../constants/household-rules';
 
 /** Max difference for an amount to be considered the same transaction (RSD) */
 const AMOUNT_TOLERANCE_RSD = 1;
@@ -26,30 +33,8 @@ const NON_EXPENSE_PATTERNS = /(podizanje gotovine|interni transfer|prenos sredst
  * themselves (e.g. moving money in from another bank).
  */
 const NON_INCOME_CREDIT_PATTERNS = /(interni transfer|prenos sredstava|uplata gotovine|polog gotovine|sopstveni racun)/i;
-/** The account holder's own name - a credit "from" this name is a self-transfer, not income */
-const OWN_NAME_PATTERN = /dejan\s+stupari[cć]/i;
-
 const CASHBACK_PATTERN = /cashback/i;
 const INTEREST_PATTERN = /kamat/i;
-
-/**
- * Loan classification rules (agreed with the user, July 2026):
- * - Debits to OTP banka are the car loan installment.
- * - Debits transferring money to the account holder's own account at another
- *   bank ("Dejan S...") service the apartment loan, up to HOME_LOAN_CAP_EUR per
- *   monthly statement. Whatever exceeds the cap within one statement is "Other";
- *   a transaction crossing the cap is split into two rows at parse time.
- */
-const CAR_LOAN_PATTERN = /otp\s*bank/i;
-const SELF_TRANSFER_DEBIT_PATTERN = /(^|\s)dejan\s+s(\b|tupari)/i;
-const HOME_LOAN_CAP_EUR = 780;
-
-/**
- * Known recurring counterparties with a fixed income type, learned from real
- * statements reviewed with the user (see FUTURE_IDEAS discussion). Anything
- * not matched here defaults to "Other" and can be re-typed in the review screen.
- */
-const KNOWN_INCOME_SOURCES: Array<{ pattern: RegExp; incomeType: string }> = [{ pattern: /milo[sš]\s+orli[cć]/i, incomeType: 'Rent' }];
 
 @Injectable()
 export class StatementsService {
