@@ -1,7 +1,16 @@
 import { CategoryOverrides, ParsedStatement, StatementAccount } from './interfaces/statement-archive.interface';
-import { AccountLine, CategoryLine, GroupLine, IncomeLine, MonthReport, MonthSummary, YearOverview } from './interfaces/report.interface';
+import {
+  AccountLine,
+  CategoryLine,
+  GroupLine,
+  IncomeLine,
+  MonthReport,
+  MonthSummary,
+  UncategorizedMerchant,
+  YearOverview
+} from './interfaces/report.interface';
 import { GROUP_LABELS, INCOME_CATEGORIES, isSpendingCategory, SPENDING_CATEGORIES, SpendingGroup } from './report-categories';
-import { classifyStatement, ClassifiedTransaction } from './transaction-classifier';
+import { classifyStatement, ClassifiedTransaction, PAYMENT_ORDER } from './transaction-classifier';
 import { buildMonthInsights, buildYearInsights, topMerchants } from './insights';
 
 /** Everything derived from one monthly statement */
@@ -220,6 +229,38 @@ export function buildYearOverview(year: number, allMonths: MonthData[], today: D
       cashDeposits: sum(inYear.map(month => month.summary.cashDeposits))
     },
     categories: categoryLines(totals, counts, category => (inYear.length > 0 ? round((totals.get(category) ?? 0) / inYear.length) : null)),
+    uncategorized: uncategorizedMerchants(inYear),
     insights: buildYearInsights(year, inYear, months)
   };
+}
+
+/** Merchants still in "Ostalo" (not put there by the user), biggest first */
+export function uncategorizedMerchants(months: MonthData[]): UncategorizedMerchant[] {
+  const byMerchant = new Map<string, UncategorizedMerchant>();
+  const latestDate = new Map<string, string>();
+  for (const month of months) {
+    for (const tx of month.transactions) {
+      if (tx.flow !== 'expense' || tx.category !== 'Other' || tx.overridden) continue;
+      const entry = byMerchant.get(tx.merchantKey) ?? {
+        merchantKey: tx.merchantKey,
+        merchant: tx.merchant,
+        amount: 0,
+        count: 0,
+        periods: [],
+        description: tx.description,
+        transactionId: tx.id,
+        perTransaction: PAYMENT_ORDER.test(tx.description)
+      };
+      entry.amount = round(entry.amount + tx.amountRsd);
+      entry.count++;
+      if (!entry.periods.includes(month.statement.period)) entry.periods.push(month.statement.period);
+      if (tx.bookingDate >= (latestDate.get(tx.merchantKey) ?? '')) {
+        entry.description = tx.description;
+        entry.transactionId = tx.id;
+        latestDate.set(tx.merchantKey, tx.bookingDate);
+      }
+      byMerchant.set(tx.merchantKey, entry);
+    }
+  }
+  return [...byMerchant.values()].filter(entry => entry.amount > 0).sort((a, b) => b.amount - a.amount);
 }

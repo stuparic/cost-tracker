@@ -37,34 +37,37 @@ export interface ClassifiedTransaction {
 /** Ordered: the first matching rule wins */
 const SPENDING_RULES: Array<[SpendingCategory, RegExp]> = [
   ['BankFees', /provizij|naknad|porez - |porez na kamat|[cč]lanarin|odr[zž]avanj[ea] ra[cč]una/i],
-  ['Taxes', /bud[žz]et|poresk|\btaks[ae]\b|kazn[ae]/i],
-  ['Utilities', /trajn(og|i) nalog|infostan|elektrodistribuc|\beps\b|vodovod|toplan|\bsbb\b|\bmts\b|telenor|a1 srbija/i],
+  ['Taxes', /bud[žz]et|poresk|\btaks[ae]\b|kazn[ae]|op[sš]tina/i],
+  ['Utilities', /trajn(og|i) nalog|infostan|\binformatika\b|elektrodistribuc|\beps\b|vodovod|toplan|\bsbb\b|\bmts\b|telenor|a1 srbija/i],
   ['Insurance', /osiguranj|generali|ddor|\bdunav\b|wiener|triglav|uniqa|grawe|allianz/i],
   [
     'Subscriptions',
     /netflix|youtube|spotify|deezer|claude\.ai|openai|chatgpt|theverge|\bhbo\b|disney|apple\.com|icloud|google one|google storage|microsoft|adobe|dropbox|patreon|substack|github|notion|1password|duolingo|amazon prime|arena sport|eon tv/i
   ],
-  ['Games', /^google \*|google play|steam|playstation|xbox|nintendo|supercell|app store/i],
+  ['Games', /^google \*|google play|steam|playstation|xbox|nintendo|supercell|app store|battle\.net|blizzard|epic games|game centar/i],
   ['Charity', /\bfond(a)?\b|de[cč]ijeg fo|unicef|crveni krst|humanitar|donacij|dobrotvor/i],
   ['Work', /\blynx\b|cowork/i],
-  ['Travel', /\bkamp\b|camp|hotel|hostel|booking\.com|airbnb|apartman|aerodrom|airport|ryanair|wizz|air serbia|flixbus/i],
+  ['Travel', /\bkamp\b|camp|hotel|etno naselj|hostel|booking\.com|airbnb|apartman|aerodrom|airport|ryanair|wizz|air serbia|flixbus/i],
   [
     'Transport',
-    /coral|\bomv\b|\bnis\b|petrol|\bmol\b|mol[a-z]*croatia|tifon|lukoil|gazprom|radun avia|knez petrol|parking|taxi|\d+tx\b|putarin|vinjet|vintrica|\bhac\b|novi sad \d|mtl auto|auto servis|vulkaniz|tehni[cč]ki pregled|bus plus/i
+    /coral|\bomv\b|\bnis\b|petrol|\bmol\b|mol[a-z]*croatia|tifon|lukoil|gazprom|radun avia|knez petrol|\bshell\b|\bbp\b|parking|gara[zž]a|taxi|taksi|\d+tx\b|putarin|vinjet|vintrica|\bhac\b|novi sad \d|mtl auto|auto ?servis|auto ?rad|vulkaniz|tehni[cč]ki pregled|bus plus|\bj?gsp\b|srbija ?voz/i
   ],
   ['Health', /apotek|pharm|\bbenu\b|lilly|dom zdravlja|bolnic|laborator|beo-lab|ordinacij|stomatolog|zubar|optik|medigroup|poliklinik/i],
   [
     'Groceries',
-    /lidl|maxi|\bidea\b|tempo|univerexport|mikro ?market|mercator|metro|\baman\b|\bdis\b|\broda\b|gomex|\bvero\b|spar|aldi|samopostre|market|baker|pekar|mesar|^(googlepay )?mp\d+/i
+    /lidl|maxi|\bidea\b|tempo|univerexport|mikro ?market|mercator|metro|\baman\b|\bdis\b|\broda\b|gomex|\bvero\b|spar|aldi|auchan|samopostre|market|baker|pekar|mesar|^(googlepay )?mp\d+/i
   ],
   [
     'Dining',
-    /restoran|restaurant|\bpub\b|caff?e|kafan|kavarn|pizz|napoletan|trattori|burger|kebab|shawarma|sushi|thai|glovo|wolt|donesi|bistro|gastro|grill|ugostitelj|^(googlepay )?ur |sladoled|slasti[cč]arn|slascicarn|snack|kitajska/i
+    /restoran|restaurant|\bpub\b|caff?e|kafan|kavarn|pizz|napoletan|trattori|burger|kebab|shawarma|sushi|thai|glovo|wolt|donesi|bistro|gastro|grill|ugostitelj|^(googlepay )?ur |sladoled|slasti[cč]arn|slascicarn|snack|kitajska|[cć]evap|picerij|\bdiner\b|burrito|gyros|giros|\bkfc\b|brunch|bir[cč]uz|kafeterij/i
   ],
-  ['Fun', /cinestar|cineplexx|bioskop|skakaonica|aquapark|akvapark|teretan|fitness|\bgym\b|pozori|koncert|eventim/i],
+  [
+    'Fun',
+    /cinestar|cineplexx|bioskop|skakaonica|igraonic|zoolo[sš]k|aquapark|akvapark|wellness|teretan|fitness|\bgym\b|pozori|koncert|eventim/i
+  ],
   [
     'Shopping',
-    /ikea|zara|h&m|decathlon|\bdm\b|converse|fashion|jysk|pepco|gigatron|tehnomanija|okov|hidroponika|suvenir|stampa sistem|bike|emmezeta|lesnina|new yorker|sport vision|intersport|amazon|aliexpress|temu|shein/i
+    /ikea|zara|h&m|decathlon|\bdm\b|converse|fashion|jysk|pepco|gigatron|tehnomanija|okov|hidroponika|suvenir|stampa sistem|bike|emmezeta|lesnina|new yorker|sport vision|intersport|sports\b|army shop|c ?& ?a\b|\bkids\b|pet centar|pet shop|hudson news|kurir|amazon|aliexpress|temu|shein/i
   ]
 ];
 
@@ -82,7 +85,9 @@ const NOT_TRAVEL: ReadonlySet<string> = new Set([
 
 /** "Ivica s", "Petar P." - a private person, not a business */
 const PRIVATE_PERSON = /^[A-ZČĆŽŠĐ][a-zčćžšđ]+ [A-Za-zČĆŽŠĐčćžšđ]\.?$/;
-const REFUND = /po nalogu gra[dđ]ana|povra[cć]aj|storno|reklamacij/i;
+const REFUND = /povra[cć]aj|storno|reklamacij/i;
+/** A citizen payment order; a credit of one is only a refund when it returns a debit of the same amount */
+export const PAYMENT_ORDER = /po nalogu gra[dđ]ana/i;
 
 /** Serbian banks print a company payer in capitals ("ACME DOO, BEOGRAD"); a large payment from one is the salary */
 const COMPANY_PAYER = /^[A-ZŠĐČĆŽ0-9 .&-]{4,}$/;
@@ -150,7 +155,11 @@ function isForeign(tx: ArchivedTransaction): boolean {
   return /Kurs:/i.test(tx.description) || (tx.originalCurrency !== null && tx.originalCurrency !== tx.currency);
 }
 
-function classifyCredit(tx: ArchivedTransaction, amountRsd: number): { flow: TransactionFlow; category: string | null; refund?: boolean } {
+function classifyCredit(
+  tx: ArchivedTransaction,
+  amountRsd: number,
+  returnsDebit: boolean
+): { flow: TransactionFlow; category: string | null; refund?: boolean } {
   const text = tx.description;
   if (/^Interni transfer/i.test(text)) return { flow: 'internal', category: null };
   if (/^Uplata gotovine/i.test(text)) return { flow: 'cash_deposit', category: 'CashDeposit' };
@@ -161,8 +170,9 @@ function classifyCredit(tx: ArchivedTransaction, amountRsd: number): { flow: Tra
   const known = KNOWN_INCOME_SOURCES.find(({ pattern }) => pattern.test(text));
   if (known && known.incomeType in INCOME_CATEGORIES) return { flow: 'income', category: known.incomeType };
 
-  // Money coming back from a shop or a cancelled payment order reduces spending
-  if (REFUND.test(text)) return { flow: 'expense', category: 'Other', refund: true };
+  // Money coming back from a shop or a returned payment order reduces spending
+  if (REFUND.test(text) || (PAYMENT_ORDER.test(text) && returnsDebit)) return { flow: 'expense', category: 'Other', refund: true };
+  if (PAYMENT_ORDER.test(text)) return { flow: 'income', category: 'OtherIncome' };
   if (COMPANY_PAYER.test(text.split(',')[0].trim()) && amountRsd >= SALARY_MIN_RSD) return { flow: 'income', category: 'Salary' };
   const spending = spendingRule(text);
   if (spending) return { flow: 'expense', category: spending, refund: true };
@@ -198,6 +208,22 @@ export function classifyStatement(statement: ParsedStatement, overrides: Categor
   const rows = [...statement.transactions].sort((a, b) => a.bookingDate.localeCompare(b.bookingDate) || a.rowNo - b.rowNo);
   const result: ClassifiedTransaction[] = [];
 
+  // Payment orders that bounced come back as a credit of the same amount
+  const orderDebits = new Map<string, number>();
+  for (const tx of rows) {
+    if (tx.debit > 0 && PAYMENT_ORDER.test(tx.description)) {
+      const key = `${tx.currency}:${tx.debit}`;
+      orderDebits.set(key, (orderDebits.get(key) ?? 0) + 1);
+    }
+  }
+  const takeOrderDebit = (tx: ArchivedTransaction): boolean => {
+    const key = `${tx.currency}:${tx.credit}`;
+    const left = orderDebits.get(key) ?? 0;
+    if (!PAYMENT_ORDER.test(tx.description) || left === 0) return false;
+    orderDebits.set(key, left - 1);
+    return true;
+  };
+
   for (const tx of rows) {
     const direction: 'debit' | 'credit' = tx.debit > 0 ? 'debit' : 'credit';
     const amount = direction === 'debit' ? tx.debit : tx.credit;
@@ -228,7 +254,7 @@ export function classifyStatement(statement: ParsedStatement, overrides: Categor
     }
 
     if (direction === 'credit') {
-      const { flow, category, refund } = classifyCredit(tx, amountRsd);
+      const { flow, category, refund } = classifyCredit(tx, amountRsd, takeOrderDebit(tx));
       result.push({ ...base, amountRsd: refund ? -amountRsd : amountRsd, flow, category, overridden: false });
       continue;
     }

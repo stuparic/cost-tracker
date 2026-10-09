@@ -128,6 +128,16 @@
         <ReportInsightList :insights="overview.insights" :limit="5" />
       </section>
 
+      <section v-if="overview.uncategorized.length > 0" ref="uncategorizedCard" class="card">
+        <h3 class="card-title">Razvrstaj Ostalo</h3>
+        <p class="card-hint">
+          {{ formatNumber(uncategorizedTotal, false) }} din kod {{ overview.uncategorized.length }}
+          {{ plural(overview.uncategorized.length, 'trgovca', 'trgovca', 'trgovaca') }} koje Troškić ne prepoznaje. Izbor kategorije važi za
+          sve mesece i buduće izvode.
+        </p>
+        <ReportUncategorized :items="overview.uncategorized" @saved="loadOverview" @open-month="openMonthOther" />
+      </section>
+
       <section class="card">
         <h3 class="card-title">Kuda idu pare u {{ year }}.</h3>
         <p class="card-hint">Ukupno u uvezenim mesecima i mesečni prosek.</p>
@@ -195,6 +205,15 @@
             <h3 class="card-title">{{ reportCategoryLabel(selectedCategory) }}</h3>
             <Button icon="pi pi-times" text rounded size="small" aria-label="Zatvori" @click="selectedCategory = null" />
           </div>
+          <Button
+            v-if="selectedCategory === 'Other'"
+            label="Svi trgovci iz Ostalo, za celu godinu"
+            icon="pi pi-list-check"
+            text
+            size="small"
+            class="all-other-btn"
+            @click="openUncategorized"
+          />
           <ReportTransactionList :transactions="categoryTransactions" @edit="editing = $event" />
         </section>
 
@@ -290,6 +309,7 @@ import ReportInsightList from './reports/ReportInsightList.vue';
 import ReportTransactionList from './reports/ReportTransactionList.vue';
 import ReportYearChart from './reports/ReportYearChart.vue';
 import ReportCategoryDialog from './reports/ReportCategoryDialog.vue';
+import ReportUncategorized from './reports/ReportUncategorized.vue';
 import { reportsApi } from '@/api/reports';
 import type { MonthReport, ReportTransaction, YearOverview } from '@/types/report';
 import { MONTH_NAMES } from '@/constants/app';
@@ -330,6 +350,9 @@ const editing = ref<ReportTransaction | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 const detailPanel = ref<HTMLElement | null>(null);
 const monthChips = ref<HTMLElement | null>(null);
+const uncategorizedCard = ref<HTMLElement | null>(null);
+
+const uncategorizedTotal = computed(() => overview.value?.uncategorized.reduce((sum, item) => sum + item.amount, 0) ?? 0);
 
 const importedMonths = computed(() => overview.value?.months.filter(month => month.status === 'imported') ?? []);
 
@@ -410,6 +433,21 @@ async function toggleCategory(category: string): Promise<void> {
     await nextTick();
     detailPanel.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+}
+
+/** From a month's "Ostalo" list to the year-wide list of merchants */
+async function openUncategorized(): Promise<void> {
+  selectYear();
+  await nextTick();
+  uncategorizedCard.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/** Payment orders don't name the payee: open that month's "Ostalo" rows to categorize them one by one */
+async function openMonthOther(period: string): Promise<void> {
+  await selectMonth(period);
+  selectedCategory.value = 'Other';
+  await nextTick();
+  detailPanel.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function onFilesChosen(event: Event): Promise<void> {
@@ -650,6 +688,10 @@ onMounted(async () => {
 
 .section-title {
   margin-bottom: 0.5rem;
+}
+
+.all-other-btn {
+  margin: -0.25rem 0 0.25rem -0.75rem;
 }
 
 .card-hint {

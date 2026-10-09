@@ -35,7 +35,7 @@
 
       <fieldset class="scope">
         <legend class="field-label">Primeni na</legend>
-        <label class="scope-option">
+        <label v-if="!perTransaction" class="scope-option">
           <input v-model="scope" type="radio" value="merchant" />
           <span>
             Sve stavke trgovca <strong>{{ transaction.merchant }}</strong>
@@ -44,7 +44,10 @@
         </label>
         <label class="scope-option">
           <input v-model="scope" type="radio" value="transaction" />
-          <span>Samo ovu stavku</span>
+          <span>
+            Samo ovu stavku
+            <small v-if="perTransaction">opis ne kaže kome je plaćeno, pa se ovakve stavke razvrstavaju jedna po jedna</small>
+          </span>
         </label>
       </fieldset>
 
@@ -71,7 +74,7 @@ import Dialog from 'primevue/dialog';
 import Select from 'primevue/select';
 import Button from 'primevue/button';
 import type { ReportTransaction } from '@/types/report';
-import { INCOME_CATEGORY_OPTIONS, SPENDING_CATEGORY_OPTIONS, TRANSFER_OPTION } from '@/constants/report-categories';
+import { categoryOptionGroups, TRANSFER_OPTION } from '@/constants/report-categories';
 import { reportsApi } from '@/api/reports';
 import { useAppToast } from '@/composables/useAppToast';
 import { useTransactionFormatting } from '@/composables/useTransactionFormatting';
@@ -86,26 +89,21 @@ const category = ref<string | null>(null);
 const scope = ref<'merchant' | 'transaction'>('merchant');
 const saving = ref<'save' | 'reset' | null>(null);
 
+/** Payment orders all share one description, so a "merchant" rule would sweep up unrelated payments */
+const PAYMENT_ORDER = /po nalogu gra[dđ]ana/i;
+const perTransaction = computed(() => PAYMENT_ORDER.test(props.transaction?.description ?? ''));
+
 watch(
   () => props.transaction,
   tx => {
     if (!tx) return;
     category.value = tx.flow === 'transfer_out' || tx.flow === 'transfer_in' ? TRANSFER_OPTION.value : tx.category;
-    scope.value = 'merchant';
+    scope.value = PAYMENT_ORDER.test(tx.description) ? 'transaction' : 'merchant';
   },
   { immediate: true }
 );
 
-// Money out can only be spending (or a transfer), money in can also be income
-const options = computed(() => {
-  const groups = [
-    { label: 'Fiksni troškovi', items: SPENDING_CATEGORY_OPTIONS.filter(o => o.group === 'fixed') },
-    { label: 'Promenljivi troškovi', items: SPENDING_CATEGORY_OPTIONS.filter(o => o.group !== 'fixed') },
-    { label: 'Ostalo', items: [TRANSFER_OPTION] }
-  ];
-  if (props.transaction?.direction === 'credit') groups.unshift({ label: 'Prilivi', items: INCOME_CATEGORY_OPTIONS });
-  return groups;
-});
+const options = computed(() => categoryOptionGroups(props.transaction?.direction ?? 'debit'));
 
 async function save(value: string | null): Promise<void> {
   const tx = props.transaction;
