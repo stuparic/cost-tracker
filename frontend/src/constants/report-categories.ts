@@ -51,6 +51,22 @@ export const TRANSFER_OPTION: ReportCategoryOption = {
 
 const ALL_OPTIONS = [...SPENDING_CATEGORY_OPTIONS, ...INCOME_CATEGORY_OPTIONS, TRANSFER_OPTION];
 
+export interface ReportCategoryGroup {
+  label: string;
+  items: ReportCategoryOption[];
+}
+
+/** Grouped choices for a correction: money out can only be spending (or a transfer), money in can also be income */
+export function categoryOptionGroups(direction: 'debit' | 'credit'): ReportCategoryGroup[] {
+  const groups = [
+    { label: 'Fiksni troškovi', items: SPENDING_CATEGORY_OPTIONS.filter(option => option.group === 'fixed') },
+    { label: 'Promenljivi troškovi', items: SPENDING_CATEGORY_OPTIONS.filter(option => option.group !== 'fixed') },
+    { label: 'Ostalo', items: [TRANSFER_OPTION] }
+  ];
+  if (direction === 'credit') groups.unshift({ label: 'Prilivi', items: INCOME_CATEGORY_OPTIONS });
+  return groups;
+}
+
 export function reportCategoryLabel(category: string | null): string {
   if (!category) return 'Interno';
   return ALL_OPTIONS.find(option => option.value === category)?.label ?? category;

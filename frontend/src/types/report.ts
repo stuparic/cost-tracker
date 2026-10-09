@@ -129,6 +129,19 @@ export interface YearMonth {
   summary: MonthSummary | null;
 }
 
+/** A merchant still in "Ostalo" across the year's months */
+export interface UncategorizedMerchant {
+  merchantKey: string;
+  merchant: string;
+  amount: number;
+  count: number;
+  periods: string[];
+  description: string;
+  transactionId: string;
+  /** Payee not named (payment order) - categorize row by row in the month */
+  perTransaction: boolean;
+}
+
 export interface YearOverview {
   year: number;
   months: YearMonth[];
@@ -146,6 +159,7 @@ export interface YearOverview {
     cashDeposits: number;
   };
   categories: CategoryLine[];
+  uncategorized: UncategorizedMerchant[];
   insights: Insight[];
 }
 

@@ -123,6 +123,29 @@ describe('classifyStatement', () => {
     expect(rows.every(tx => tx.flow === 'expense')).toBe(true);
   });
 
+  it('counts a payment-order credit as income unless it returns a debit of the same amount', () => {
+    const rows = classify([
+      { description: 'Transakcije po nalogu građana', debit: 120000 },
+      { description: 'Transakcije po nalogu građana', credit: 110000 }
+    ]);
+    expect(rows.map(tx => [tx.flow, tx.category, tx.amountRsd])).toEqual([
+      ['expense', 'Other', 120000],
+      ['income', 'OtherIncome', 110000]
+    ]);
+  });
+
+  it('recognizes chains and generic merchant words', () => {
+    const rows = classify([
+      { description: 'GooglePay SHELL 101, BUDAPEST', debit: 4900 },
+      { description: 'GooglePay CEVAPDZINICA 1, BEOGRAD', debit: 1200 },
+      { description: 'GooglePay IGRAONICA ZEKA, BEOGRAD', debit: 700 },
+      { description: 'GooglePay GSP BEOGRAD, BEOGRAD', debit: 590 },
+      { description: 'GooglePay C & A Moda 1, BEOGRAD', debit: 4800 },
+      { description: 'Opstina Zemun', debit: 11000 }
+    ]);
+    expect(rows.map(tx => tx.category)).toEqual(['Transport', 'Dining', 'Fun', 'Transport', 'Shopping', 'Taxes']);
+  });
+
   it('applies merchant and transaction corrections, the row correction winning', () => {
     const rows = classify(
       [
@@ -208,6 +231,29 @@ describe('year overview', () => {
     expect(overview.missingPeriods).toEqual(['2026-02', '2026-03', '2026-05']);
     expect(overview.latestPeriod).toBe('2026-04');
     expect(overview.insights[0].id).toBe('missing-statements');
+  });
+});
+
+describe('uncategorized merchants', () => {
+  it('lists merchants still in "Ostalo" across months, biggest first, without user-chosen ones', () => {
+    const rows = (period: string) =>
+      statement(period, [
+        { description: 'GooglePay ABC DOO, BEOGRAD', debit: 1000 },
+        { description: 'GooglePay XY-100, Beograd', debit: 3000 },
+        { description: 'GooglePay LOREM, BEOGRAD', debit: 9000 }
+      ]);
+    const overrides: CategoryOverrides = { merchants: { lorem: 'Other' }, transactions: {} };
+    const overview = buildYearOverview(
+      2026,
+      ['2026-05', '2026-06'].map(period => buildMonthData(rows(period), overrides, EUR_RATE)),
+      new Date('2026-10-01')
+    );
+    expect(overview.uncategorized.map(entry => [entry.merchant, entry.amount, entry.count, entry.periods])).toEqual([
+      ['XY-100', 6000, 2, ['2026-05', '2026-06']],
+      ['Abc Doo', 2000, 2, ['2026-05', '2026-06']]
+    ]);
+    expect(overview.uncategorized[0].transactionId.startsWith('2026-06')).toBe(true);
+    expect(overview.uncategorized.every(entry => !entry.perTransaction)).toBe(true);
   });
 });
 

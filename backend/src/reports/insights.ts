@@ -426,7 +426,8 @@ function uncategorizedInsight(month: MonthData): Insight | null {
     severity: 'low',
     title: `${rsd(amount)} je u kategoriji „Ostalo“`,
     body: `To je ${pct(amount / variable)} promenljivih troškova za koje Troškić ne zna šta su.`,
-    action: 'Dodirni stavku u listi transakcija i izaberi kategoriju — trgovac se pamti za sve mesece, pa su i predlozi tačniji.',
+    action:
+      'U pregledu „Cela godina“ otvori „Razvrstaj Ostalo“ i izaberi kategoriju za svakog trgovca — važi za sve mesece, pa su i predlozi tačniji.',
     items: merchantItems(other, 4)
   };
 }

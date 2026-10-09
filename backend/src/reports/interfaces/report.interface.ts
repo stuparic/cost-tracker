@@ -112,6 +112,22 @@ export interface YearMonth {
   summary: MonthSummary | null;
 }
 
+/** A merchant whose spending still lands in "Ostalo" - shown so it can be categorized once for every month */
+export interface UncategorizedMerchant {
+  merchantKey: string;
+  merchant: string;
+  /** RSD over the year's imported months */
+  amount: number;
+  count: number;
+  periods: string[];
+  /** Raw statement description of the latest row, to help recognize the merchant */
+  description: string;
+  /** Latest row id (sent along with a merchant correction) */
+  transactionId: string;
+  /** The description does not name the payee (e.g. a payment order), so rows must be categorized one by one */
+  perTransaction: boolean;
+}
+
 export interface YearOverview {
   year: number;
   months: YearMonth[];
@@ -129,5 +145,6 @@ export interface YearOverview {
     cashDeposits: number;
   };
   categories: CategoryLine[];
+  uncategorized: UncategorizedMerchant[];
   insights: Insight[];
 }
