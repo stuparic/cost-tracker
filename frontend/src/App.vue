@@ -97,17 +97,17 @@
           <i class="pi pi-list"></i>
           <span>Lista</span>
         </router-link>
-        <router-link to="/add" class="nav-fab" aria-label="Dodaj stavku">
-          <i class="pi pi-plus"></i>
-          <span class="fab-label">Dodaj</span>
+        <router-link to="/reports" class="nav-fab" :class="{ active: route.path === '/reports' }" aria-label="Izveštaj">
+          <i class="pi pi-file-check"></i>
+          <span class="fab-label">Izveštaj</span>
         </router-link>
         <router-link to="/balance" class="nav-item" :class="{ active: route.path === '/balance' }">
           <i class="pi pi-chart-pie"></i>
           <span>Bilans</span>
         </router-link>
-        <router-link to="/reports" class="nav-item" :class="{ active: route.path === '/reports' }">
-          <i class="pi pi-file-check"></i>
-          <span>Izveštaj</span>
+        <router-link to="/add" class="nav-item" :class="{ active: isAddRoute }">
+          <i class="pi pi-plus"></i>
+          <span>Dodaj</span>
         </router-link>
         <button class="nav-item" @click="quickInputVisible = true">
           <i class="pi pi-microphone"></i>
@@ -620,6 +620,12 @@ body {
 
 .nav-fab:hover {
   transform: scale(1.05);
+}
+
+.nav-fab.active {
+  box-shadow:
+    0 0 0 3px var(--primary-light),
+    0 4px 14px var(--primary-shadow);
 }
 
 .nav-fab i {
